@@ -1,0 +1,46 @@
+{
+    "id": "section-1",
+    "type": "Section",
+    "layout": "grid",
+    "props": {
+      "columns": 3,
+      "gap": 10
+    },
+    "children": [
+      {
+        "id": "block-1",
+        "type": "Block",
+        "props": {
+          "colStart": 1,
+          "rowStart": 1,
+          "colSpan": 1,
+          "rowSpan": 1
+        },
+        "children": {
+          "id": "text-1",
+          "type": "TextBlock",
+          "props": {
+            "text": "This is a text block"
+          }
+        }
+      },
+      {
+        "id": "block-2",
+        "type": "Block",
+        "props": {
+          "colStart": 2,
+          "rowStart": 1,
+          "colSpan": 1,
+          "rowSpan": 1
+        },
+        "children": {
+          "id": "image-1",
+          "type": "Image",
+          "props": {
+            "src": "./src/assets/test-images/bball1.jpg",
+            "alt": "Placeholder image"
+          }
+        }
+      }
+    ]
+  }
