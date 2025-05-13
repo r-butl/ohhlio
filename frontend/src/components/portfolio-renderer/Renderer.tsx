@@ -102,7 +102,7 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
 
   render() {
     return (
-      <div style={{ width: "100%", height: "100%", minHeight: "500px", maxWidth: "1600px", margin: "0 auto" }}>
+      <div style={{ width: "100%", height: "100%", minHeight: "500px", maxWidth: "1600px", margin: "0 auto"}}>
         <ResponsiveReactGridLayout
           className={this.props.className}
           layouts={this.state.layouts}
