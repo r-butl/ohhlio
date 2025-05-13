@@ -113,7 +113,7 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
           isResizable={this.props.isResizable}
           onLayoutChange={this.onLayoutChange}
           onBreakpointChange={this.onBreakpointChange}
-          margin={[30, 30]}
+          margin={[20, 20]}
           containerPadding={[10, 10]}
           compactType="vertical"
           preventCollision={false}
