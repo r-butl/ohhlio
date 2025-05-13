@@ -3,6 +3,7 @@ import { WidthProvider, Responsive } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./Renderer.css";
+import TextEditor from "../text-editor/TextEditor";
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
@@ -28,6 +29,8 @@ interface RendererProps {
 interface RendererState {
   layouts: { [key: string]: LayoutItem[] };
   currentBreakpoint: string;
+  textEditorsEditing: { [key: string]: boolean };  // Add this line
+  activeEditorId: string | null;
 }
 
 export default class Renderer extends React.PureComponent<RendererProps, RendererState> {
@@ -45,7 +48,9 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
     super(props);
     this.state = {
       layouts: this.generateLayouts(),
-      currentBreakpoint: 'lg'
+      currentBreakpoint: 'lg',
+      textEditorsEditing: {},
+      activeEditorId: null
     };
   }
 
@@ -70,10 +75,26 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
     return this.state.currentBreakpoint;
   };
 
-  generateDOM() {
+  private generateDOM() {
+
     return [...Array(this.props.items)].map((_, i) => (
       <div key={i} className="grid-item">
-        <span className="text">Item {i + 1}</span>
+        <TextEditor 
+          isEditable={!this.state.activeEditorId || this.state.activeEditorId === String(i)}
+          initialText={`Item ${i + 1}`}
+          isEditing={this.state.textEditorsEditing[String(i)] || false}
+          onEditingChange={(isEditing) => {
+            this.setState((prevState) => {
+              this.setState((prevState) => ({
+                textEditorsEditing: {
+                  ...prevState.textEditorsEditing,
+                  [String(i)]: isEditing
+                },
+                activeEditorId: isEditing ? String(i) : null
+              }))
+            });
+          }}
+        />
       </div>
     ));
   }
@@ -101,16 +122,18 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
   }
 
   render() {
+    const isAnyEditorActive = this.state.activeEditorId !== null;
     return (
       <div style={{ width: "100%", height: "100%", minHeight: "500px", maxWidth: "1600px", margin: "0 auto"}}>
+
         <ResponsiveReactGridLayout
           className={this.props.className}
           layouts={this.state.layouts}
           breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
           cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
           rowHeight={this.props.rowHeight}
-          isDraggable={this.props.isDraggable}
-          isResizable={this.props.isResizable}
+          isDraggable={this.props.isDraggable && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
+          isResizable={this.props.isResizable && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
           onLayoutChange={this.onLayoutChange}
           onBreakpointChange={this.onBreakpointChange}
           margin={[20, 20]}
