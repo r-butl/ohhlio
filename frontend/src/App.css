@@ -79,7 +79,7 @@
 
 .renderer-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 800px;
   min-width: 449px;
   height: calc(100vh - 100px);
   min-height: 600px;
