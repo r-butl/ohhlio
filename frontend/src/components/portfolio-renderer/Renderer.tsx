@@ -12,6 +12,7 @@ interface LayoutItem {
   w: number;
   h: number;
   i: string;
+  aspectRatio?: number;
 }
 
 interface RendererProps {
@@ -21,15 +22,14 @@ interface RendererProps {
   items?: number;
   rowHeight?: number;
   onLayoutChange?: (layout: LayoutItem[]) => void;
+  columnCount?: number;
 }
 
 interface RendererState {
   layouts: { [key: string]: LayoutItem[] };
+  currentBreakpoint: string;
 }
 
-/**
- * This example illustrates how to let grid items lay themselves out with a bootstrap-style specification.
- */
 export default class Renderer extends React.PureComponent<RendererProps, RendererState> {
   static defaultProps: RendererProps = {
     className: "layout",
@@ -38,17 +38,36 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
     items: 5,
     rowHeight: 30,
     onLayoutChange: () => {},
+    columnCount: 3,
   };
 
   constructor(props: RendererProps) {
     super(props);
     this.state = {
-      layouts: this.generateLayouts()
+      layouts: this.generateLayouts(),
+      currentBreakpoint: 'lg'
     };
+  }
+
+  componentDidUpdate(prevProps: RendererProps) {
+    if (prevProps.columnCount !== this.props.columnCount) {
+      this.setState({ 
+        layouts: this.generateLayouts() 
+      });
+    }
   }
 
   onLayoutChange = (layout: LayoutItem[]) => {
     this.props.onLayoutChange?.(layout);
+  };
+
+  onBreakpointChange = (newBreakpoint: string) => {
+    this.setState({ currentBreakpoint: newBreakpoint });
+    console.log('Current breakpoint:', newBreakpoint);
+  };
+
+  getCurrentBreakpoint = () => {
+    return this.state.currentBreakpoint;
   };
 
   generateDOM() {
@@ -60,24 +79,25 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
   }
 
   generateLayouts() {
-    const { items = 5 } = this.props;
-    const breakpoints = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 };
-    const cols = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 };
+    const { items = 5, columnCount = 3 } = this.props;
     
-    return Object.keys(breakpoints).reduce((memo, breakpoint) => {
-      const width = breakpoints[breakpoint as keyof typeof breakpoints];
-      const colCount = cols[breakpoint as keyof typeof cols];
-      
-      memo[breakpoint] = [...Array(items)].map((_, i) => ({
-        x: (i * width) % colCount,
-        y: Math.floor(i / colCount) * 4,
-        w: width,
-        h: 4,
-        i: String(i)
-      }));
-      
-      return memo;
-    }, {} as { [key: string]: LayoutItem[] });
+    // Create a single layout configuration for all breakpoints
+    const layout = [...Array(items)].map((_, i) => ({
+      x: (i % columnCount) * (12 / columnCount), // Distribute items across columns
+      y: Math.floor(i / columnCount) * 4, // Stack items vertically
+      w: 12 / columnCount, // Width is total columns (12) divided by column count
+      h: 4,
+      i: String(i)
+    }));
+
+    // Use the same layout for all breakpoints
+    return {
+      lg: layout,
+      md: layout,
+      sm: layout,
+      xs: layout,
+      xxs: layout
+    };
   }
 
   render() {
@@ -87,13 +107,16 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
           className={this.props.className}
           layouts={this.state.layouts}
           breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
-          cols={{ lg: 16, md: 12, sm: 8, xs: 4, xxs: 2 }}
+          cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
           rowHeight={this.props.rowHeight}
           isDraggable={this.props.isDraggable}
           isResizable={this.props.isResizable}
           onLayoutChange={this.onLayoutChange}
+          onBreakpointChange={this.onBreakpointChange}
           margin={[30, 30]}
           containerPadding={[10, 10]}
+          compactType="vertical"
+          preventCollision={false}
         >
           {this.generateDOM()}
         </ResponsiveReactGridLayout>
