@@ -1,17 +1,32 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import Renderer from './components/portfolio-renderer/Renderer'
-import layoutSchema from './components/portfolio-renderer/test-layout.json'; // Path to the JSON file
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState<number>(0)
+  const [isViewMode, setIsViewMode] = useState(false)
 
   return (
-    <>
-      <Renderer jsonString={JSON.stringify(layoutSchema)} />
-    </>
+    <div className="app-container">
+      <div className="app-header">
+        <h1>Portfolio Builder</h1>
+        <button 
+          className="mode-toggle"
+          onClick={() => setIsViewMode(!isViewMode)}
+        >
+          {isViewMode ? 'Switch to Edit Mode' : 'Switch to View Mode'}
+        </button>
+      </div>
+      <div className="renderer-container">
+        <Renderer 
+          isDraggable={!isViewMode}
+          isResizable={!isViewMode}
+          items={5}
+          onLayoutChange={(newLayout) => {
+            console.log('Layout changed:', newLayout);
+          }}
+        />
+      </div>
+    </div>
   )
 }
 

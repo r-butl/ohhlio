@@ -7,7 +7,7 @@ type ImageBoxProps = {
 };
 
 export function ImageBox({ content }: ImageBoxProps){
-  return <img src={content} alt="Image box" className="image-box" />;
+  return <img src={content} alt="Image box" className="image-box"/>;
 };
 
 export default ImageBox;

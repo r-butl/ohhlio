@@ -1,72 +1,103 @@
-import React, { useEffect, useState } from 'react';
-import { LayoutNode, SectionNode, BlockNode, ContentNode, TextBlockNode, ImageNode } from './render-layout-schema';
-import { GridBox } from '../grid-box/GridBox'; // Import GridBox to render content inside blocks
-import TextBox from '../text-box/TextBox';
-import ImageBox from '../image-box/ImageBox';
+import React from "react";
+import { WidthProvider, Responsive } from "react-grid-layout";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import "./Renderer.css";
+
+const ResponsiveReactGridLayout = WidthProvider(Responsive);
+
+interface LayoutItem {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  i: string;
+}
 
 interface RendererProps {
-  jsonString: string; // JSON string representing the layout schema
+  className?: string;
+  isDraggable?: boolean;
+  isResizable?: boolean;
+  items?: number;
+  rowHeight?: number;
+  onLayoutChange?: (layout: LayoutItem[]) => void;
 }
 
-// The component for rendering the layout
-export function Renderer( { jsonString }: RendererProps) {
-  const [layoutData, setLayoutData] = useState<LayoutNode | null>(null);
+interface RendererState {
+  layouts: { [key: string]: LayoutItem[] };
+}
 
-  useEffect(() => {
-    // Parse the JSON schema string to an object
-    const layout = JSON.parse(jsonString) as LayoutNode;
-    setLayoutData(layout);
-  }, [jsonString]);
-
-  if (!layoutData) {
-    return <div>Loading...</div>;
-  }
-
-  // Render grid based on the layout schema
-  const renderBlocks = (blocks: BlockNode[]) => {
-    return blocks.map((block) => {
-      const { colStart, rowStart, colSpan, rowSpan } = block.props;
-      const content = block.children; // Either a TextBlockNode or ImageNode
-
-      // Render the content based on its type
-      const renderContent = (content: ContentNode) => {
-        switch (content.type) {
-          case 'TextBlock':
-            return <TextBox content={content.props.text} />;
-          case 'Image':
-            return <ImageBox content={content.props.src} />;
-          default:
-            return null;
-        }
-      };
-
-      return (
-        <div
-          key={block.id}
-          style={{
-            gridColumnStart: colStart,
-            gridRowStart: rowStart,
-            gridColumnEnd: `span ${colSpan}`,
-            gridRowEnd: `span ${rowSpan}`,
-          }}
-        >
-          {renderContent(content)}
-        </div>
-      );
-    });
+/**
+ * This example illustrates how to let grid items lay themselves out with a bootstrap-style specification.
+ */
+export default class Renderer extends React.PureComponent<RendererProps, RendererState> {
+  static defaultProps: RendererProps = {
+    className: "layout",
+    isDraggable: true,
+    isResizable: true,
+    items: 5,
+    rowHeight: 30,
+    onLayoutChange: () => {},
   };
 
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${(layoutData as SectionNode).props.columns}, 1fr)`,
-        gap: `${(layoutData as SectionNode).props.gap}px`,
-      }}
-    >
-      {renderBlocks((layoutData as SectionNode).children)}
-    </div>
-  );
-}
+  constructor(props: RendererProps) {
+    super(props);
+    this.state = {
+      layouts: this.generateLayouts()
+    };
+  }
 
-export default Renderer;
+  onLayoutChange = (layout: LayoutItem[]) => {
+    this.props.onLayoutChange?.(layout);
+  };
+
+  generateDOM() {
+    return [...Array(this.props.items)].map((_, i) => (
+      <div key={i} className="grid-item">
+        <span className="text">Item {i + 1}</span>
+      </div>
+    ));
+  }
+
+  generateLayouts() {
+    const { items = 5 } = this.props;
+    const breakpoints = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 };
+    const cols = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 };
+    
+    return Object.keys(breakpoints).reduce((memo, breakpoint) => {
+      const width = breakpoints[breakpoint as keyof typeof breakpoints];
+      const colCount = cols[breakpoint as keyof typeof cols];
+      
+      memo[breakpoint] = [...Array(items)].map((_, i) => ({
+        x: (i * width) % colCount,
+        y: Math.floor(i / colCount) * 4,
+        w: width,
+        h: 4,
+        i: String(i)
+      }));
+      
+      return memo;
+    }, {} as { [key: string]: LayoutItem[] });
+  }
+
+  render() {
+    return (
+      <div style={{ width: "100%", height: "100%", minHeight: "500px", maxWidth: "1600px", margin: "0 auto" }}>
+        <ResponsiveReactGridLayout
+          className={this.props.className}
+          layouts={this.state.layouts}
+          breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
+          cols={{ lg: 16, md: 12, sm: 8, xs: 4, xxs: 2 }}
+          rowHeight={this.props.rowHeight}
+          isDraggable={this.props.isDraggable}
+          isResizable={this.props.isResizable}
+          onLayoutChange={this.onLayoutChange}
+          margin={[30, 30]}
+          containerPadding={[10, 10]}
+        >
+          {this.generateDOM()}
+        </ResponsiveReactGridLayout>
+      </div>
+    );
+  }
+}
