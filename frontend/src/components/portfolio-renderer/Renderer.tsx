@@ -84,15 +84,13 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
           initialText={`Item ${i + 1}`}
           isEditing={this.state.textEditorsEditing[String(i)] || false}
           onEditingChange={(isEditing) => {
-            this.setState((prevState) => {
-              this.setState((prevState) => ({
-                textEditorsEditing: {
-                  ...prevState.textEditorsEditing,
-                  [String(i)]: isEditing
-                },
-                activeEditorId: isEditing ? String(i) : null
-              }))
-            });
+            this.setState((prevState) => ({
+              textEditorsEditing: {
+                ...prevState.textEditorsEditing,
+                [String(i)]: isEditing
+              },
+              activeEditorId: isEditing ? String(i) : null
+            }))
           }}
         />
       </div>

@@ -1,6 +1,59 @@
 // frontend/src/components/TextEditor/TextEditor.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+
 import './TextEditor.css';
+
+const FloatingToolbarPortal: React.FC<{
+  fontFamily: string;
+  fontSize: number;
+  onFontFamilyChange: (font: string) => void;
+  onFontSizeChange: (size: number) => void;
+}> = ({ 
+  fontFamily,
+  fontSize,
+  onFontFamilyChange,
+  onFontSizeChange
+}) => {
+  const fontFamilies = ['Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Courier New'];
+
+  console.log('Toolbar render:', { fontFamily, fontSize });
+  return createPortal(
+    <div className="floating-toolbar">
+      <div className="toolbar-group">
+        <label>Font</label>
+        <select 
+          value={fontFamily} 
+          onChange={(e) => onFontFamilyChange(e.target.value)}
+          className="font-family-select"
+        >
+          {fontFamilies.map(font => (
+            <option key={font} value={font} style={{ fontFamily: font }}>
+              {font}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="toolbar-group">
+        <label>Size</label>
+        <select 
+          value={fontSize} 
+          onChange={(e) => onFontSizeChange(Number(e.target.value))}
+          className="font-size-select"
+        >
+          {[12, 14, 16, 18, 20, 24, 28, 32, 36, 48].map(size => (
+            <option key={size} value={size}>
+              {size}px
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>,
+    document.getElementById('portal-root') || document.body
+
+  );
+};
 
 interface TextEditorProps {
   initialText?: string;
@@ -20,34 +73,9 @@ const TextEditor: React.FC<TextEditorProps> = ({
   onEditingChange,
 }) => {
   const [text, setText] = useState(initialText);
-  const [fontSize, setFontSize] = useState(initialFontSize);
   const [fontFamily, setFontFamily] = useState(initialFontFamily);
-  const [showToolbar, setShowToolbar] = useState(false);
-  
-  const fontFamilies = [
-    'Arial',
-    'Times New Roman',
-    'Helvetica',
-    'Georgia',
-    'Courier New',
-    'Verdana'
-  ];
-
-  useEffect(() => {
-    setShowToolbar(isEditing);
-  }, [isEditing]);
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setText(e.target.value);
-  };
-
-  const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFontSize(Number(e.target.value));
-  };
-
-  const handleFontFamilyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFontFamily(e.target.value);
-  };
+  const [fontSize, setFontSize] = useState(initialFontSize);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   const toggleEditMode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -55,7 +83,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
   };
 
   return (
-    <div className="text-editor">
+    <div ref={editorRef} className="text-editor">
       {isEditable && (
         <button 
           className="edit-button"
@@ -65,63 +93,36 @@ const TextEditor: React.FC<TextEditorProps> = ({
           {isEditing ? '✓' : '✎'}
         </button>
       )}
-
-      {showToolbar && (
-        <div className="floating-toolbar">
-          <div className="toolbar-group">
-            <label>Font</label>
-            <select 
-              value={fontFamily} 
-              onChange={handleFontFamilyChange}
-              className="font-family-select"
-            >
-              {fontFamilies.map(font => (
-                <option key={font} value={font} style={{ fontFamily: font }}>
-                  {font}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="toolbar-group">
-            <label>Size</label>
-            <select 
-              value={fontSize} 
-              onChange={handleFontSizeChange}
-              className="font-size-select"
-            >
-              {[12, 14, 16, 18, 20, 24, 28, 32, 36, 48].map(size => (
-                <option key={size} value={size}>
-                  {size}px
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )}
       
       {isEditing ? (
         <textarea
           value={text}
-          onChange={handleTextChange}
-          style={{ 
-            fontSize: `${fontSize}px`,
-            fontFamily: fontFamily
+          onChange={(e) => setText(e.target.value)}
+          style={{
+            fontFamily,
+            fontSize: `${fontSize}px`
           }}
           className="text-editor-textarea"
           autoFocus
         />
       ) : (
-        <div
-          style={{ 
-            fontSize: `${fontSize}px`,
-            fontFamily: fontFamily
-          }}
-          className="text-editor-content"
-        >
+        <p style={{
+          fontFamily,
+          fontSize: `${fontSize}px`
+        }}>
           {text}
-        </div>
+        </p>
       )}
+
+      {isEditing && (
+        <FloatingToolbarPortal
+        fontFamily={fontFamily}
+        fontSize={fontSize}
+        onFontFamilyChange={setFontFamily}
+        onFontSizeChange={setFontSize}
+      />
+      )}
+
     </div>
   );
 };
