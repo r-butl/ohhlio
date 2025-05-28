@@ -18,8 +18,7 @@ interface LayoutItem {
 
 interface RendererProps {
   className?: string;
-  isDraggable?: boolean;
-  isResizable?: boolean;
+  isEditing?: boolean;
   items?: number;
   rowHeight?: number;
   onLayoutChange?: (layout: LayoutItem[]) => void;
@@ -29,15 +28,14 @@ interface RendererProps {
 interface RendererState {
   layouts: { [key: string]: LayoutItem[] };
   currentBreakpoint: string;
-  textEditorsEditing: { [key: string]: boolean };  // Add this line
+  textEditorsEditing: { [key: string]: boolean };
   activeEditorId: string | null;
 }
 
 export default class Renderer extends React.PureComponent<RendererProps, RendererState> {
   static defaultProps: RendererProps = {
     className: "layout",
-    isDraggable: true,
-    isResizable: true,
+    isEditing: false,
     items: 5,
     rowHeight: 30,
     onLayoutChange: () => {},
@@ -80,10 +78,24 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
     return [...Array(this.props.items)].map((_, i) => (
       <div key={i} className="grid-item">
         <TextEditor 
-          isEditable={!this.state.activeEditorId || this.state.activeEditorId === String(i)}
+          isEditable={(() => {
+            const isEditable = this.props.isEditing && (!this.state.activeEditorId || this.state.activeEditorId === String(i));
+            console.log(`Text Editor ${i} isEditable changed:`, {
+              isEditable,
+              activeEditorId: this.state.activeEditorId,
+              currentItemId: String(i),
+              isEditing: this.props.isEditing
+            });
+            return isEditable;
+          })()}
           initialText={`Item ${i + 1}`}
           isEditing={this.state.textEditorsEditing[String(i)] || false}
           onEditingChange={(isEditing) => {
+            console.log(`Text Editor ${i} state change:`, {
+              previousState: this.state.textEditorsEditing,
+              newEditingState: isEditing,
+              activeEditorId: isEditing ? String(i) : null
+            });
             this.setState((prevState) => ({
               textEditorsEditing: {
                 ...prevState.textEditorsEditing,
@@ -130,8 +142,8 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
           breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
           cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
           rowHeight={this.props.rowHeight}
-          isDraggable={this.props.isDraggable && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
-          isResizable={this.props.isResizable && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
+          isDraggable={this.props.isEditing && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
+          isResizable={this.props.isEditing && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
           onLayoutChange={this.onLayoutChange}
           onBreakpointChange={this.onBreakpointChange}
           margin={[20, 20]}

@@ -74,8 +74,7 @@ const ProjectPage: React.FC = () => {
 
       <div ref={rendererRef} className="renderer-container">
         <Renderer
-          isDraggable={isEditMode}
-          isResizable={isEditMode}
+          isEditing={isEditMode}
         />
       </div>
 
