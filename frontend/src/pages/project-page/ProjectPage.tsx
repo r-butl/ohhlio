@@ -7,6 +7,8 @@ import SelectionBar from '../../components/selection-bar/SelectionBar';
 const ProjectPage: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSelectionBarOpen, setIsSelectionBarOpen] = useState(false);
+  const [contentSchema, setContentSchema] = useState<ContentItem[]>([]);
+
   const [isHeaderShadowed, setIsHeaderShadowed] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<HTMLDivElement>(null);
@@ -48,6 +50,7 @@ const ProjectPage: React.FC = () => {
   const handleAddText = () => {
     console.log('Adding text block');
     setIsSelectionBarOpen(false);
+    setContentSchema(prev => [...prev, { type: 'text' }]);
   };
 
   const handleAddImage = (type: 'upload' | 'gallery') => {
@@ -75,6 +78,8 @@ const ProjectPage: React.FC = () => {
       <div ref={rendererRef} className="renderer-container">
         <Renderer
           isEditing={isEditMode}
+          contentSchema={contentSchema}
+          onContentChange={setContentSchema}
         />
       </div>
 

@@ -16,12 +16,24 @@ interface LayoutItem {
   aspectRatio?: number;
 }
 
+interface ContentItem {
+  id: string;
+  type: 'text' | 'image';
+  content: string;
+  layout: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    i: string;
+  };
+}
+
 interface RendererProps {
   className?: string;
   isEditing?: boolean;
-  items?: number;
-  rowHeight?: number;
-  onLayoutChange?: (layout: LayoutItem[]) => void;
+  contentSchema?: ContentItem[];
+  onContentChange?: (content: ContentItem[]) => void;
   columnCount?: number;
 }
 
@@ -30,15 +42,15 @@ interface RendererState {
   currentBreakpoint: string;
   textEditorsEditing: { [key: string]: boolean };
   activeEditorId: string | null;
+  items: number;
 }
 
 export default class Renderer extends React.PureComponent<RendererProps, RendererState> {
   static defaultProps: RendererProps = {
     className: "layout",
     isEditing: false,
-    items: 5,
-    rowHeight: 30,
-    onLayoutChange: () => {},
+    contentSchema: [],
+    onContentChange: () => {},
     columnCount: 3,
   };
 
@@ -48,20 +60,56 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
       layouts: this.generateLayouts(),
       currentBreakpoint: 'lg',
       textEditorsEditing: {},
-      activeEditorId: null
+      activeEditorId: null,
+      items: props.contentSchema?.length || 0
     };
   }
 
   componentDidUpdate(prevProps: RendererProps) {
-    if (prevProps.columnCount !== this.props.columnCount) {
-      this.setState({ 
-        layouts: this.generateLayouts() 
-      });
+    if (prevProps.contentSchema !== this.props.contentSchema) {
+      // Handle new content being added
+      const newContent = this.props.contentSchema?.filter(
+        item => !prevProps.contentSchema?.some(prev => prev.id === item.id)
+      ) || [];
+      
+      if (newContent.length > 0) {
+        // Initialize new content with proper layout
+        const updatedSchema = this.props.contentSchema?.map(item => {
+          if (!item.layout) {
+            return {
+              ...item,
+              id: String(Date.now()),
+              content: item.type === 'text' ? 'New Text Block' : '',
+              layout: {
+                x: 0,
+                y: 0,
+                w: 12 / (this.props.columnCount || 2),
+                h: 12,
+                i: String(Date.now())
+              }
+            };
+          }
+          return item;
+        }) || [];
+        console.log('Content Schema Updated:', updatedSchema);
+        this.props.onContentChange?.(updatedSchema);
+      }
     }
   }
 
   onLayoutChange = (layout: LayoutItem[]) => {
-    this.props.onLayoutChange?.(layout);
+    this.props.onContentChange?.(layout.map(item => ({
+      id: item.i,
+      type: 'text',
+      content: '',
+      layout: {
+        x: item.x,
+        y: item.y,
+        w: item.w,
+        h: item.h,
+        i: item.i
+      }
+    })));
   };
 
   onBreakpointChange = (newBreakpoint: string) => {
@@ -74,52 +122,48 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
   };
 
   private generateDOM() {
-
-    return [...Array(this.props.items)].map((_, i) => (
-      <div key={i} className="grid-item">
-        <TextEditor 
-          isEditable={(() => {
-            const isEditable = this.props.isEditing && (!this.state.activeEditorId || this.state.activeEditorId === String(i));
-            console.log(`Text Editor ${i} isEditable changed:`, {
-              isEditable,
-              activeEditorId: this.state.activeEditorId,
-              currentItemId: String(i),
-              isEditing: this.props.isEditing
-            });
-            return isEditable;
-          })()}
-          initialText={`Item ${i + 1}`}
-          isEditing={this.state.textEditorsEditing[String(i)] || false}
-          onEditingChange={(isEditing) => {
-            console.log(`Text Editor ${i} state change:`, {
-              previousState: this.state.textEditorsEditing,
-              newEditingState: isEditing,
-              activeEditorId: isEditing ? String(i) : null
-            });
-            this.setState((prevState) => ({
-              textEditorsEditing: {
-                ...prevState.textEditorsEditing,
-                [String(i)]: isEditing
-              },
-              activeEditorId: isEditing ? String(i) : null
-            }))
-          }}
-        />
-      </div>
-    ));
+    return this.props.contentSchema?.map((item) => {
+      switch (item.type) {
+        case 'text':
+          return (
+            <div key={item.id} className="grid-item">
+              <TextEditor 
+                isEditable={(() => {
+                  const isEditable = this.props.isEditing && (!this.state.activeEditorId || this.state.activeEditorId === item.id);
+                  return isEditable;
+                })()}
+                initialText={item.content}
+                isEditing={this.state.textEditorsEditing[item.id] || false}
+                onEditingChange={(isEditing) => {
+                  this.setState((prevState) => ({
+                    textEditorsEditing: {
+                      ...prevState.textEditorsEditing,
+                      [item.id]: isEditing
+                    },
+                    activeEditorId: isEditing ? item.id : null
+                  }))
+                }}
+              />
+            </div>
+          );
+        case 'image':
+          return (
+            <div key={item.id} className="grid-item">
+              {/* Image component will go here */}
+              <div>Image: {item.content}</div>
+            </div>
+          );
+        default:
+          return null;
+      }
+    }) || [];
   }
 
   generateLayouts() {
-    const { items = 5, columnCount = 3 } = this.props;
+    const { contentSchema = [], columnCount = 3 } = this.props;
     
     // Create a single layout configuration for all breakpoints
-    const layout = [...Array(items)].map((_, i) => ({
-      x: (i % columnCount) * (12 / columnCount), // Distribute items across columns
-      y: Math.floor(i / columnCount) * 4, // Stack items vertically
-      w: 12 / columnCount, // Width is total columns (12) divided by column count
-      h: 4,
-      i: String(i)
-    }));
+    const layout = contentSchema.map(item => item.layout);
 
     // Use the same layout for all breakpoints
     return {
@@ -141,7 +185,7 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
           layouts={this.state.layouts}
           breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
           cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
-          rowHeight={this.props.rowHeight}
+          rowHeight={30}
           isDraggable={this.props.isEditing && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
           isResizable={this.props.isEditing && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
           onLayoutChange={this.onLayoutChange}
