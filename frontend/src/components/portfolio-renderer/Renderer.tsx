@@ -83,7 +83,7 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
               layout: {
                 x: 0,
                 y: 0,
-                w: 12 / (this.props.columnCount || 2),
+                w: 10,//12 / (this.props.columnCount || 2),
                 h: 12,
                 i: String(Date.now())
               }
@@ -184,8 +184,8 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
           className={this.props.className}
           layouts={this.state.layouts}
           breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
-          cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
-          rowHeight={30}
+          cols={{ lg: 5, md: 5, sm: 5, xs: 5, xxs: 5 }}
+          rowHeight={100}
           isDraggable={this.props.isEditing && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
           isResizable={this.props.isEditing && !Object.values(this.state.textEditorsEditing).some(isEditing => isEditing)}
           onLayoutChange={this.onLayoutChange}
