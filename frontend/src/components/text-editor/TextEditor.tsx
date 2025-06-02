@@ -17,7 +17,6 @@ const FloatingToolbarPortal: React.FC<{
 }) => {
   const fontFamilies = ['Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Courier New'];
 
-  console.log('Toolbar render:', { fontFamily, fontSize });
   return createPortal(
     <div className="floating-toolbar">
       <div className="toolbar-group">
@@ -76,10 +75,16 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const [fontFamily, setFontFamily] = useState(initialFontFamily);
   const [fontSize, setFontSize] = useState(initialFontSize);
   const editorRef = useRef<HTMLDivElement>(null);
+  const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0});
 
   const toggleEditMode = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onEditingChange?.(!isEditing);
+    const newEditingState = !isEditing;
+    console.log('Toggling edit mode:', {
+      previousState: isEditing,
+      newState: newEditingState
+  });
+    onEditingChange?.(newEditingState);
   };
 
   return (

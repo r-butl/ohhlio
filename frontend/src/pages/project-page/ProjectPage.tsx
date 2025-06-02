@@ -3,11 +3,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import './ProjectPage.css';
 import Renderer from '../../components/portfolio-renderer/Renderer';
 import SelectionBar from '../../components/selection-bar/SelectionBar';
+import { useFormState } from 'react-dom';
 
 const ProjectPage: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSelectionBarOpen, setIsSelectionBarOpen] = useState(false);
   const [contentSchema, setContentSchema] = useState<ContentItem[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [isHeaderShadowed, setIsHeaderShadowed] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -58,6 +60,11 @@ const ProjectPage: React.FC = () => {
     setIsSelectionBarOpen(false);
   };
 
+  const handleEditingStateChange = (isEditing: boolean) => {
+    console.log('ProjectPage editing state changed:', isEditing);
+    setIsEditing(isEditing);
+  }
+
   return (
     <div className="project-page">
       <header 
@@ -69,6 +76,7 @@ const ProjectPage: React.FC = () => {
           <button
             className="mode-toggle"
             onClick={() => setIsEditMode(!isEditMode)}
+            disabled={isEditing}
           >
             {isEditMode ? 'Preview' : 'Edit'}
           </button>
@@ -77,9 +85,11 @@ const ProjectPage: React.FC = () => {
 
       <div ref={rendererRef} className="renderer-container">
         <Renderer
-          isEditing={isEditMode}
+          isEditMode={isEditMode}
+          isEditing={isEditing}
           contentSchema={contentSchema}
           onContentChange={setContentSchema}
+          onEditingStateChange={handleEditingStateChange}
         />
       </div>
 

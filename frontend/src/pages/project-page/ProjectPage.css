@@ -50,6 +50,13 @@
     font-size: 14px;
   }
   
+  .mode-toggle:disabled {
+    background-color: #cccccc;  /* Gray color */
+    cursor: not-allowed;        /* Shows the not-allowed cursor */
+    opacity: 0.7;              /* Makes it look slightly faded */
+    pointer-events: none;      /* Prevents hover effects */
+  }
+
   .mode-toggle:hover {
     background-color: #0056b3;
   }
