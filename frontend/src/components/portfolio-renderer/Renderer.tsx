@@ -125,6 +125,30 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
     return this.state.currentBreakpoint;
   };
 
+  private handleEditingChange = (itemId: string, isEditing: boolean) => {
+    this.setState((prevState) => ({
+      textEditorsEditing: {
+        ...prevState.textEditorsEditing,
+        [itemId]: isEditing
+      },
+      activeEditorId: isEditing ? itemId : null
+    }), () => {
+      const isAnyEditorEditing = Object.values(this.state.textEditorsEditing).some(isEditing => isEditing);
+      this.props.onEditingStateChange?.(isAnyEditorEditing);
+    });
+  };
+
+  private handleIsEditableChange = (item: any) => {
+    const isEditable = this.props.isEditMode && (!this.state.activeEditorId || this.state.activeEditorId === item.id);
+    console.log('TextEditor editable state:', {
+      itemId: item.id,
+      isEditMode: this.props.isEditMode,
+      activeEditorId: this.state.activeEditorId,
+      isEditable
+    });
+    return isEditable;
+  };
+
   private generateDOM() {
     return this.props.contentSchema?.map((item) => {
       switch (item.type) {
@@ -132,43 +156,10 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
           return (
             <div key={item.id} className="grid-item">
               <TextEditor 
-                isEditable={(() => {
-                  const isEditable = this.props.isEditMode && (!this.state.activeEditorId || this.state.activeEditorId === item.id);
-                  console.log('TextEditor editable state:', {
-                    itemId: item.id,
-                    isEditMode: this.props.isEditMode,
-                    activeEditorId: this.state.activeEditorId,
-                    isEditable
-                  });
-                  return isEditable;
-                })()}
+                isEditable={this.handleIsEditableChange(item)}
                 initialText={item.content}
                 isEditing={this.state.textEditorsEditing[item.id] || false}
-                onEditingChange={(isEditing) => {
-
-                  // Debug statement
-                  console.log('TextEditor editing change:', {
-                    itemId: item.id,
-                    isEditing,
-                    isEditMode: this.props.isEditMode
-                  });
-
-                  // State update
-                  this.setState((prevState) => ({
-                    textEditorsEditing: {
-                      ...prevState.textEditorsEditing,
-                      [item.id]: isEditing
-                    },
-                    activeEditorId: isEditing ? item.id : null
-
-                  }), () => {
-
-                    // Notify parent component of the state change
-                    const isAnyEditorEditing = Object.values(this.state.textEditorsEditing).some(isEditing => isEditing);
-                    this.props.onEditingStateChange?.(isAnyEditorEditing);
-
-                  });
-                }}
+                onEditingChange={(isEditing) => this.handleEditingChange(item.id, isEditing)}
               />
             </div>
           );
