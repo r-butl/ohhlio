@@ -1,7 +1,10 @@
 // frontend/src/components/TextEditor/TextEditor.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import TextStyle from '@tiptap/extension-text-style';
+import FontFamily from '@tiptap/extension-font-family';
 import './TextEditor.css';
 
 const FloatingToolbarPortal: React.FC<{
@@ -9,39 +12,33 @@ const FloatingToolbarPortal: React.FC<{
   fontSize: number;
   onFontFamilyChange: (font: string) => void;
   onFontSizeChange: (size: number) => void;
-}> = ({ 
-  fontFamily,
-  fontSize,
-  onFontFamilyChange,
-  onFontSizeChange
-}) => {
+}> = ({ fontFamily, fontSize, onFontFamilyChange, onFontSizeChange }) => {
   const fontFamilies = ['Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Courier New'];
 
   return createPortal(
     <div className="floating-toolbar">
       <div className="toolbar-group">
         <label>Font</label>
-        <select 
-          value={fontFamily} 
+        <select
+          value={fontFamily}
           onChange={(e) => onFontFamilyChange(e.target.value)}
           className="font-family-select"
         >
-          {fontFamilies.map(font => (
+          {fontFamilies.map((font) => (
             <option key={font} value={font} style={{ fontFamily: font }}>
               {font}
             </option>
           ))}
         </select>
       </div>
-
       <div className="toolbar-group">
         <label>Size</label>
-        <select 
-          value={fontSize} 
+        <select
+          value={fontSize}
           onChange={(e) => onFontSizeChange(Number(e.target.value))}
           className="font-size-select"
         >
-          {[12, 14, 16, 18, 20, 24, 28, 32, 36, 48].map(size => (
+          {[12, 14, 16, 18, 20, 24, 28, 32, 36, 48].map((size) => (
             <option key={size} value={size}>
               {size}px
             </option>
@@ -50,7 +47,6 @@ const FloatingToolbarPortal: React.FC<{
       </div>
     </div>,
     document.getElementById('portal-root') || document.body
-
   );
 };
 
@@ -64,33 +60,59 @@ interface TextEditorProps {
 }
 
 const TextEditor: React.FC<TextEditorProps> = ({
-  initialText = 'Click to edit',
   initialFontSize = 16,
   initialFontFamily = 'Arial',
   isEditable = true,
   isEditing = false,
   onEditingChange,
 }) => {
-  const [text, setText] = useState(initialText);
   const [fontFamily, setFontFamily] = useState(initialFontFamily);
   const [fontSize, setFontSize] = useState(initialFontSize);
   const editorRef = useRef<HTMLDivElement>(null);
-  const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0});
+
+  const defaultMessage = '<p style="color: gray;">enter text</p>';
+
+  const editor = useEditor({
+    extensions: [StarterKit, TextStyle, FontFamily],
+    content: defaultMessage,
+    editable: isEditable,
+    editorProps: {
+      attributes: {
+        style: `font-family: ${fontFamily}; font-size: ${fontSize}px;`,
+      },
+    },
+  });
+
+  // Controls font family updates
+  useEffect(() => {
+    if (editor && isEditing) {
+      editor.chain().focus().setFontFamily(fontFamily).run();
+    }
+  }, [fontFamily, editor, isEditing]);
+
+  // Controls font size updates
+  useEffect(() => {
+    if (editor && isEditing) {
+      editor.chain().focus().setMark('textStyle', { fontSize: `${fontSize}px` }).run();
+    }
+  }, [fontSize, editor, isEditing]);
+
+  // Activates editing capability
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(isEditing);
+    }
+  }, [isEditing, editor]);
 
   const toggleEditMode = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const newEditingState = !isEditing;
-    console.log('Toggling edit mode:', {
-      previousState: isEditing,
-      newState: newEditingState
-  });
-    onEditingChange?.(newEditingState);
+    onEditingChange?.(!isEditing);
   };
 
   return (
     <div ref={editorRef} className="text-editor">
       {isEditable && (
-        <button 
+        <button
           className="edit-button"
           onClick={toggleEditMode}
           onMouseDown={(e) => e.stopPropagation()}
@@ -98,36 +120,17 @@ const TextEditor: React.FC<TextEditorProps> = ({
           {isEditing ? '✓' : '✎'}
         </button>
       )}
-      
-      {isEditing ? (
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          style={{
-            fontFamily,
-            fontSize: `${fontSize}px`
-          }}
-          className="text-editor-textarea"
-          autoFocus
-        />
-      ) : (
-        <p style={{
-          fontFamily,
-          fontSize: `${fontSize}px`
-        }}>
-          {text}
-        </p>
-      )}
+
+      <EditorContent editor={editor} className="text-editor-tiptap" />
 
       {isEditing && (
         <FloatingToolbarPortal
-        fontFamily={fontFamily}
-        fontSize={fontSize}
-        onFontFamilyChange={setFontFamily}
-        onFontSizeChange={setFontSize}
-      />
+          fontFamily={fontFamily}
+          fontSize={fontSize}
+          onFontFamilyChange={setFontFamily}
+          onFontSizeChange={setFontSize}
+        />
       )}
-
     </div>
   );
 };

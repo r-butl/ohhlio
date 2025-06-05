@@ -4,24 +4,18 @@ import './SelectionBar.css';
 
 interface SelectionBarProps {
   isOpen: boolean;
-  onClose: () => void;
   onAddText: () => void;
   onAddImage: (type: 'upload' | 'gallery') => void;
 }
 
 const SelectionBar: React.FC<SelectionBarProps> = ({
   isOpen,
-  onClose,
   onAddText,
   onAddImage
 }) => {
   return (
-    <div className={`selection-bar ${isOpen ? 'open' : ''}`}>
-      <button className="close-button" onClick={onClose}>×</button>
-      
-      <div className="selection-content">
-        <h3>Add Content</h3>
-        
+    <div className={`selection-bar ${isOpen ? 'open' : ''}`}> 
+      <div className="selection-content">        
         <div className="selection-options">
           <button 
             className="option-button"

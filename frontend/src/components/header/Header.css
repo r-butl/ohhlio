@@ -1,0 +1,25 @@
+.app-header {
+width: 100%;
+max-width: 1600px;
+margin: 0 auto 20px auto;
+display: flex;
+justify-content: space-between;
+align-items: center;
+position: sticky;
+top: 0;
+background: white;
+padding: 20px 0;
+z-index: 1000;
+transition: box-shadow 0.3s ease;
+}
+
+
+.app-header.shadowed {
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-header h1 {
+margin: 0;
+font-size: 24px;
+color: #333;
+}

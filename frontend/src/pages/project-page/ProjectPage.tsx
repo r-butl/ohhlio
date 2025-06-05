@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import './ProjectPage.css';
 import Renderer from '../../components/portfolio-renderer/Renderer';
 import SelectionBar from '../../components/selection-bar/SelectionBar';
+import Header from '../../components/header/Header';
 import { useFormState } from 'react-dom';
 
 const ProjectPage: React.FC = () => {
@@ -10,6 +11,7 @@ const ProjectPage: React.FC = () => {
   const [isSelectionBarOpen, setIsSelectionBarOpen] = useState(false);
   const [contentSchema, setContentSchema] = useState<ContentItem[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [isHomeUser, setIsHomeUser] = useState(true);
 
   const [isHeaderShadowed, setIsHeaderShadowed] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -70,18 +72,20 @@ const ProjectPage: React.FC = () => {
       <header 
         ref={headerRef}
         className={`project-header ${isHeaderShadowed ? 'shadowed' : ''}`}
-      >
-        <h1>ProjectBuilder</h1>
-        <div className="controls">
-          <button
-            className="mode-toggle"
-            onClick={() => setIsEditMode(!isEditMode)}
-            disabled={isEditing}
-          >
-            {isEditMode ? 'Preview' : 'Edit'}
-          </button>
-        </div>
-      </header>
+      ></header>
+
+      <Header
+          isEditMode={isEditMode}
+          isEditing={isEditing}
+          setIsEditMode={setIsEditMode}
+          isHomeUser={isHomeUser}
+      />
+
+      <SelectionBar
+          isOpen={isEditMode}
+          onAddText={handleAddText}
+          onAddImage={handleAddImage}
+      />
 
       <div ref={rendererRef} className="renderer-container">
         <Renderer
@@ -93,21 +97,7 @@ const ProjectPage: React.FC = () => {
         />
       </div>
 
-      {isEditMode && (
-        <button 
-          className="add-content-button"
-          onClick={() => setIsSelectionBarOpen(true)}
-        >
-          Add Content
-        </button>
-      )}
 
-      <SelectionBar
-        isOpen={isSelectionBarOpen}
-        onClose={() => setIsSelectionBarOpen(false)}
-        onAddText={handleAddText}
-        onAddImage={handleAddImage}
-      />
     </div>
   );
 };

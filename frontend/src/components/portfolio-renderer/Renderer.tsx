@@ -193,7 +193,7 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
   }
 
   render() {
-    const columnCount = 5;
+    const columnCount = 9;
     const maxWidth = 1600;
     const rowHeight = maxWidth / 16;
     return (
