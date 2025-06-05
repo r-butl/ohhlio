@@ -1,72 +1,42 @@
 /* frontend/src/components/TextEditor/TextEditor.css */
 .text-editor {
     width: 100%;
-    height: 100%;
+    height: 90%;
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    box-sizing: border-box;
-    position: relative;
-  }
-  
-  .floating-toolbar {
+    padding: 1px;
     position: absolute;
-    right: 200px; 
-    top: 50%;
-    transform: translateY(-50%);
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 1000;
+    overflow: hidden;
   }
-  
-  .toolbar-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  
-  .toolbar-group label {
-    font-size: 12px;
-    color: #666;
-  }
-  
-  .font-family-select,
-  .font-size-select {
-    padding: 4px 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-    min-width: 100px;
-  }
-  
-  .text-editor-content {
+
+  .text-editor-tiptap {
+    width: 100%;
+    height: 100%;
     flex: 1;
-    padding: 10px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
+    overflow-y: auto; /* Allow vertical scrolling */
+    max-height: 100%; /* Limit height to parent */
   }
   
-  .text-editor-textarea {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    resize: none;
-    font-family: inherit;
-    line-height: 1.5;
+  .text-editor-tiptap .ProseMirror {
+    height: auto;
+    min-height: 100%;
+    max-height: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
+  .text-editor-tiptap .ProseMirror p {
+    margin: 0;
+    padding: 0;
   }
   
-  .text-editor-textarea:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  /* Remove any default spacing from the editor */
+  .text-editor-tiptap .ProseMirror > *:first-child {
+    margin-top: 0;
+  }
+  
+  /* If there's still a gap, you can try */
+  .text-editor-tiptap .ProseMirror > * {
+    margin: 0;
+    padding: 0;
   }

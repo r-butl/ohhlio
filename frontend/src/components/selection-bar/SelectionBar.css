@@ -16,7 +16,7 @@
   }
   
   .selection-content {
-    padding: 10px;
+    padding: 5px;
     height: 100%;
     box-sizing: border-box;
     display: flex;
@@ -35,11 +35,11 @@
     flex-direction: row; 
     align-items: right;
     margin-left: auto;
-    margin-right: 20px;
+    margin-right: 0px;
     justify-content: right;
     gap: 20px;
     padding: 0px;
-    width: 800px;
+    width: 1000px;
     margin: 0 auto;
   }
   
@@ -54,8 +54,8 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-    width: 5px;
-    height: 5px;
+    width: 1px;
+    height: 1px;
   }
   
   .option-button:hover {
@@ -64,7 +64,7 @@
   }
   
   .option-button .icon {
-    font-size: 24px;
+    font-size: 16px;
     margin-bottom: 8px;
   }
   

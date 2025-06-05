@@ -14,6 +14,7 @@
     max-width: 800px;
     min-width: 800px;
     height: calc(100vh - 180px);
+    padding: 30px;
     min-height: 500px;
     margin: 0 auto;
     margin-bottom: 100px;
