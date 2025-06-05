@@ -1,15 +1,24 @@
-// HoverOverlay.tsx
+// GridItemOptions.tsx
 import React from 'react';
-import './HoverOverlay.css';
+import './GridItemOptions.css';
 
 interface GridItemOptionsProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
+  className: string
 }
 
-const GridItemOptions: React.FC<GridItemOptionsProps> = ({ children }) => {
+const GridItemOptions: React.FC<GridItemOptionsProps> = ({ 
+  isOpen,
+  onOpenChange,
+  children
+ }) => {
   return (
-    <div className="hover-overlay">
-      {children}
+    <div className={`grid-item-options ${isOpen ? 'open' : ''} `}>
+      <div className="options-content">
+        {children}
+      </div>
     </div>
   );
 };

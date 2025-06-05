@@ -1,6 +1,7 @@
 // EditableContainer.tsx
 import React, { useState } from 'react';
 import './GridItem.css';
+import GridItemOptions from './GriditemOptions'; 
 
 interface GridItemProps {
   isEditable?: boolean;
@@ -15,23 +16,52 @@ const GridItem: React.FC<GridItemProps> = ({
   onEditingChange,
   children
 }) => {
+
+  const [ isOptionsOpen, setIsOptionsOpen ] = useState(false);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
   const toggleEditMode = (e: React.MouseEvent) => {
     e.stopPropagation();
     onEditingChange?.(!isEditing);
   };
 
+  const handleMouseEnter = () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    setIsOptionsOpen(true);
+  };
+  
+  const handleMouseLeave = () => {
+    const id = setTimeout(() => {
+      setIsOptionsOpen(false);
+    }, 100);
+    setTimeoutId(id);
+  };
+  
+
   return (
-    <div className="grid-item">
-      {isEditable && (
-        <button
-          className="edit-button"
-          onClick={toggleEditMode}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          {isEditing ? '✓' : '✎'}
-        </button>
+    <div 
+      className="grid-item"
+      onMouseLeave={handleMouseLeave}  // Add mouse leave to the entire grid item
+    >
+      <div className="content-area">
+        {children}
+      </div>
+      {isEditable && !isOptionsOpen && (
+        <div
+          className="hover-area"
+          onMouseEnter={handleMouseEnter}
+        />
       )}
-      {children}
+
+      {
+        isEditable && (
+          <GridItemOptions
+            isOpen={isOptionsOpen}
+            onOpenChange={setIsOptionsOpen}
+            children={children}
+            className="grid-item-options"
+          />
+      )}
     </div>
   );
 };
