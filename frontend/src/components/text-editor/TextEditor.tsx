@@ -51,20 +51,15 @@ const FloatingToolbarPortal: React.FC<{
 };
 
 interface TextEditorProps {
-  initialText?: string;
   initialFontSize?: number;
   initialFontFamily?: string;
-  isEditable?: boolean;
   isEditing?: boolean;
-  onEditingChange?: (isEditing: boolean) => void;
 }
 
 const TextEditor: React.FC<TextEditorProps> = ({
   initialFontSize = 16,
   initialFontFamily = 'Arial',
-  isEditable = true,
   isEditing = false,
-  onEditingChange,
 }) => {
   const [fontFamily, setFontFamily] = useState(initialFontFamily);
   const [fontSize, setFontSize] = useState(initialFontSize);
@@ -75,7 +70,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const editor = useEditor({
     extensions: [StarterKit, TextStyle, FontFamily],
     content: defaultMessage,
-    editable: isEditable,
+    editable: isEditing,
     editorProps: {
       attributes: {
         style: `font-family: ${fontFamily}; font-size: ${fontSize}px;`,
@@ -104,25 +99,9 @@ const TextEditor: React.FC<TextEditorProps> = ({
     }
   }, [isEditing, editor]);
 
-  const toggleEditMode = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEditingChange?.(!isEditing);
-  };
-
   return (
     <div ref={editorRef} className="text-editor">
-      {isEditable && (
-        <button
-          className="edit-button"
-          onClick={toggleEditMode}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          {isEditing ? '✓' : '✎'}
-        </button>
-      )}
-
       <EditorContent editor={editor} className="text-editor-tiptap" />
-
       {isEditing && (
         <FloatingToolbarPortal
           fontFamily={fontFamily}

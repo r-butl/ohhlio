@@ -4,6 +4,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./Renderer.css";
 import TextEditor from "../text-editor/TextEditor";
+import GridItem from "../grid-item/GridItem";
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
@@ -155,12 +156,15 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
         case 'text':
           return (
             <div key={item.id} className={`grid-item ${this.props.isEditMode ? 'edit' : ''}`}>
-              <TextEditor 
+              <GridItem
                 isEditable={this.handleIsEditableChange(item)}
-                initialText={item.content}
                 isEditing={this.state.textEditorsEditing[item.id] || false}
                 onEditingChange={(isEditing) => this.handleEditingChange(item.id, isEditing)}
-              />
+              >
+                <TextEditor 
+                  isEditing={this.state.textEditorsEditing[item.id] || false}
+                />
+              </GridItem>
             </div>
           );
         case 'image':

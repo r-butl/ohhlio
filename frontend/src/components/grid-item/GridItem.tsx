@@ -9,7 +9,7 @@ interface GridItemProps {
   children: React.ReactNode;
 }
 
-const EditableContainer: React.FC<GridItemProps> = ({
+const GridItem: React.FC<GridItemProps> = ({
   isEditable = true,
   isEditing = false,
   onEditingChange,
@@ -21,7 +21,7 @@ const EditableContainer: React.FC<GridItemProps> = ({
   };
 
   return (
-    <div className="editable-container">
+    <div className="grid-item">
       {isEditable && (
         <button
           className="edit-button"
@@ -36,4 +36,4 @@ const EditableContainer: React.FC<GridItemProps> = ({
   );
 };
 
-export default EditableContainer;
+export default GridItem;
