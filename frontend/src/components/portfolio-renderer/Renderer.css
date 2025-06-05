@@ -1,10 +1,7 @@
 .grid-item {
   background: #fff;
-  border: 1px solid #ddd;
   border-radius: 10px;
   padding: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,7 +12,14 @@
   z-index: 1;
 }
 
-.grid-item:hover {
+.edit {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+  border: 1px solid #ddd;
+
+}
+
+.grid-item:hover .edit{
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 

@@ -22,7 +22,6 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
             onClick={onAddText}
           >
             <span className="icon">📝</span>
-            <span className="label">Text Block</span>
           </button>
 
           <button 
@@ -30,7 +29,6 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
             onClick={() => onAddImage('upload')}
           >
             <span className="icon">📤</span>
-            <span className="label">Upload Image</span>
           </button>
 
           <button 
@@ -38,7 +36,6 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
             onClick={() => onAddImage('gallery')}
           >
             <span className="icon">🖼️</span>
-            <span className="label">Image Gallery</span>
           </button>
         </div>
       </div>

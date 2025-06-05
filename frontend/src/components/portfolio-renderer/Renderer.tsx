@@ -154,7 +154,7 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
       switch (item.type) {
         case 'text':
           return (
-            <div key={item.id} className="grid-item">
+            <div key={item.id} className={`grid-item ${this.props.isEditMode ? 'edit' : ''}`}>
               <TextEditor 
                 isEditable={this.handleIsEditableChange(item)}
                 initialText={item.content}
