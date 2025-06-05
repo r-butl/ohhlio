@@ -87,7 +87,8 @@ const ProjectPage: React.FC = () => {
           onAddImage={handleAddImage}
       />
 
-      <div ref={rendererRef} className="renderer-container">
+      <div ref={rendererRef} className={`renderer-container ${isEditMode ? 'shifted' : ''}`}
+      >
         <Renderer
           isEditMode={isEditMode}
           isEditing={isEditing}

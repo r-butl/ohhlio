@@ -2,39 +2,11 @@
 .project-page {
     width: 100%;
     min-height: 100vh;
-    padding: 0px 20px 20px 20px;
+    padding: 0px 0px 0px 0px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     position: relative;
-  }
-  
-  .controls {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    z-index: 1000;
-  }
-  
-  .mode-toggle {
-    padding: 8px 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
-  .mode-toggle:disabled {
-    background-color: #cccccc;  /* Gray color */
-    cursor: not-allowed;        /* Shows the not-allowed cursor */
-    opacity: 0.7;              /* Makes it look slightly faded */
-    pointer-events: none;      /* Prevents hover effects */
-  }
-
-  .mode-toggle:hover {
-    background-color: #0056b3;
   }
   
   .renderer-container {
@@ -50,5 +22,9 @@
     align-items: center;
     position: relative;
     top: 0;
-    transition: margin-top 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .renderer-container.shifted {
+    margin-top: 0px;
   }

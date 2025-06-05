@@ -19,17 +19,26 @@ const Header: React.FC<HeaderProps> = ({
     
     <div className="app-header">
         <h1>ProjectBuilder</h1>
+
         <div className="controls">
-        
-        { isHomeUser &&
-            <button
-                className="mode-toggle"
-                onClick={() => setIsEditMode(!isEditMode)}
-                disabled={isEditing}
+
+
+            { isHomeUser &&
+                <button
+                    className="button control"
+                    onClick={() => setIsEditMode(!isEditMode)}
+                    disabled={isEditing}
+                >
+                    {isEditMode ? 'Preview' : 'Edit'}
+                </button>
+            }
+
+            <button 
+                className="button profile"
             >
-                {isEditMode ? 'Preview' : 'Edit'}
+                Profile
             </button>
-        }
+            
 
         </div>
     </div>
