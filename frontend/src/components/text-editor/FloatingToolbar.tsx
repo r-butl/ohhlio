@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import 'FloatingToolbar.css';
+import './FloatingToolbar.css';
 
 const FloatingToolbarPortal: React.FC<{
     fontFamily: string;
@@ -9,6 +9,8 @@ const FloatingToolbarPortal: React.FC<{
     onFontSizeChange: (size: number) => void;
   }> = ({ fontFamily, fontSize, onFontFamilyChange, onFontSizeChange }) => {
     const fontFamilies = ['Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Courier New'];
+
+    console.log('Floating tool bar toggled');
   
     return createPortal(
       <div className="floating-toolbar">
