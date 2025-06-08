@@ -37,7 +37,6 @@ const GridItem: React.FC<GridItemProps> = ({
     setTimeoutId(id);
   };
   
-
   return (
     <div 
       className="grid-item"
@@ -58,9 +57,15 @@ const GridItem: React.FC<GridItemProps> = ({
           <GridItemOptions
             isOpen={isOptionsOpen}
             onOpenChange={setIsOptionsOpen}
-            children={children}
             className="grid-item-options"
-          />
+          >
+            <button
+              className="edit-toggle-button"
+              onClick={() => onEditingChange?.(!isEditing)}
+            >
+              edit
+            </button>
+          </GridItemOptions>
       )}
     </div>
   );
