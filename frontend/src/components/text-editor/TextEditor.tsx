@@ -1,4 +1,3 @@
-// frontend/src/components/TextEditor/TextEditor.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -65,6 +64,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
           fontSize={fontSize}
           onFontFamilyChange={setFontFamily}
           onFontSizeChange={setFontSize}
+          gridItemRef={editorRef}
         />
       )}
     </div>

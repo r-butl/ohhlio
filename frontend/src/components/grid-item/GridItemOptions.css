@@ -2,9 +2,10 @@
 .grid-item-options {
     position: absolute;
     top: 0;
+    bottom: 10px;
     right: 0;
     height: 100%;
-    width: 25%; /* Adjust width as needed */
+    width: 100px; /* Adjust width as needed */
     background: white;
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
     transform: translateX(100%);

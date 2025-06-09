@@ -2,18 +2,49 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './FloatingToolbar.css';
 
-const FloatingToolbarPortal: React.FC<{
-    fontFamily: string;
-    fontSize: number;
-    onFontFamilyChange: (font: string) => void;
-    onFontSizeChange: (size: number) => void;
-  }> = ({ fontFamily, fontSize, onFontFamilyChange, onFontSizeChange }) => {
+interface FloatingToolbarProps {
+  fontFamily: string;
+  fontSize: number;
+  onFontFamilyChange: (font: string) => void;
+  onFontSizeChange: (size: number) => void;
+  gridItemRef: React.RefObject<HTMLDivElement>;
+}
+
+const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
+    fontFamily,
+    fontSize,
+    onFontFamilyChange,
+    onFontSizeChange,
+    gridItemRef
+  }) => {
+
+    const [position, setPosition] = useState({ top: 0, left: 0 });
     const fontFamilies = ['Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Courier New'];
 
-    console.log('Floating tool bar toggled');
+    useEffect(() => {
+      const updatePosition = () => {
+        const gridItem = gridItemRef.current;
+        if (gridItem) {
+          const rect = gridItem.getBoundingClientRect();
+          setPosition({
+            top: rect.top + window.scrollY - 10,
+            left: rect.left + window.scrollX + rect.width - 200,
+          });
+        }
+      };
+
+      updatePosition();
+      window.addEventListener('resize', updatePosition);
+      window.addEventListener('scroll', updatePosition, true);
+
+      return () => {
+        window.removeEventListener('resize', updatePosition);
+        window.removeEventListener('scroll', updatePosition, true);
+      };
+    }, [gridItemRef]);
   
     return createPortal(
-      <div className="floating-toolbar">
+      <div className="floating-toolbar" style={{ top: position.top, left: position.left, position: 'absolute' }}>
         <div className="toolbar-group">
           <label>Font</label>
           <select

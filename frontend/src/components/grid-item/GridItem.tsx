@@ -1,12 +1,12 @@
 // EditableContainer.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './GridItem.css';
-import GridItemOptions from './GriditemOptions'; 
 
 interface GridItemProps {
   isEditable?: boolean;
   isEditing?: boolean;
   onEditingChange?: (isEditing: boolean) => void;
+  onOptionsHoverChange?: (isHovered: boolean) => void;
   children: React.ReactNode;
 }
 
@@ -14,58 +14,91 @@ const GridItem: React.FC<GridItemProps> = ({
   isEditable = true,
   isEditing = false,
   onEditingChange,
+  onOptionsHoverChange,
   children
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isOptionsHovered, setIsOptionsHovered] = useState(false);
 
-  const [ isOptionsOpen, setIsOptionsOpen ] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    if (!isOptionsHovered) {
+      setIsOptionsOpen(false);
+      onOptionsHoverChange?.(false);
+    }
+  };
+
+  const handleOptionsMouseEnter = () => {
+    setIsOptionsHovered(true);
+    onOptionsHoverChange?.(true);
+  };
+
+  const handleOptionsMouseLeave = () => {
+    setIsOptionsHovered(false);
+    onOptionsHoverChange?.(false);
+  };
+
+  const toggleOptions = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOptionsOpen(!isOptionsOpen);
+    onOptionsHoverChange?.(!isOptionsOpen);
+  };
 
   const toggleEditMode = (e: React.MouseEvent) => {
     e.stopPropagation();
     onEditingChange?.(!isEditing);
   };
 
-  const handleMouseEnter = () => {
-    if (timeoutId) clearTimeout(timeoutId);
-    setIsOptionsOpen(true);
-  };
-  
-  const handleMouseLeave = () => {
-    const id = setTimeout(() => {
-      setIsOptionsOpen(false);
-    }, 100);
-    setTimeoutId(id);
-  };
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isEditing) {
+        onEditingChange?.(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      window.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isEditing, onEditingChange]);
   
   return (
     <div 
       className="grid-item"
-      onMouseLeave={handleMouseLeave}  // Add mouse leave to the entire grid item
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="content-area">
         {children}
       </div>
-      {isEditable && !isOptionsOpen && (
-        <div
-          className="hover-area"
-          onMouseEnter={handleMouseEnter}
-        />
-      )}
-
-      {
-        isEditable && (
-          <GridItemOptions
-            isOpen={isOptionsOpen}
-            onOpenChange={setIsOptionsOpen}
-            className="grid-item-options"
+      {isEditable && isHovered && !isEditing && (
+        <div 
+          className="grid-item-options"
+          onMouseEnter={handleOptionsMouseEnter}
+          onMouseLeave={handleOptionsMouseLeave}
+        >
+          <button 
+            className="options-toggle-btn"
+            onClick={toggleOptions}
           >
-            <button
-              className="edit-toggle-button"
-              onClick={() => onEditingChange?.(!isEditing)}
-            >
-              edit
-            </button>
-          </GridItemOptions>
+            Options
+          </button>
+          {isOptionsOpen && (
+            <div className="options-panel">
+              <button
+                className="edit-toggle-button"
+                onClick={toggleEditMode}
+              >
+                Edit
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

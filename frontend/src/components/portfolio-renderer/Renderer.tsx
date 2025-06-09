@@ -48,6 +48,7 @@ interface RendererState {
   textEditorsEditing: { [key: string]: boolean };
   activeEditorId: string | null;
   items: number;
+  isOptionsHovered: boolean;
 }
 
 export default class Renderer extends React.PureComponent<RendererProps, RendererState> {
@@ -60,10 +61,10 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
   };
 
   private static readonly defaultLayout = {
-    minW: 2,
-    maxW: 5,
-    minH: 2,
-    maxH: 5
+    minW: 8,
+    maxW: 24,
+    minH: 1,
+    maxH: 24
   };
 
   constructor(props: RendererProps) {
@@ -73,12 +74,12 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
       currentBreakpoint: 'lg',
       textEditorsEditing: {},
       activeEditorId: null,
-      items: props.contentSchema?.length || 0
+      items: props.contentSchema?.length || 0,
+      isOptionsHovered: false
     };
   };
 
   onLayoutChange = (layout: LayoutItem[]) => {
-    
     this.props.onContentChange?.(layout.map(item => ({
       id: item.i,
       type: 'text',
@@ -98,9 +99,9 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
     console.log('Current breakpoint:', newBreakpoint);
   };
 
-  getCurrentBreakpoint = () => {
-    return this.state.currentBreakpoint;
-  };
+  private handleOptionsHoverChange = (isHovered: boolean) => {
+    this.setState({ isOptionsHovered: isHovered });
+  }
 
   private handleEditingChange = (itemId: string, isEditing: boolean) => {
     this.setState((prevState) => ({
@@ -132,7 +133,8 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
         key: item.id,
         isEditable: this.handleIsEditableChange(item),
         isEditing: this.state.textEditorsEditing[item.id] || false,
-        onEditingChange: (isEditing: boolean) => this.handleEditingChange(item.id, isEditing)
+        onEditingChange: (isEditing: boolean) => this.handleEditingChange(item.id, isEditing),
+        onOptionsHoverChange: this.handleOptionsHoverChange
       }
 
       switch (item.type) {
@@ -193,7 +195,6 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
     };
   }
   
-
   componentDidUpdate(prevProps: RendererProps) {
 
     if (prevProps.contentSchema !== this.props.contentSchema) {
@@ -230,10 +231,12 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
 
   render() {
     const { isEditMode, className } = this.props;
-    const columnCount = 9;
+    const columnCount = 24;
     const maxWidth = 1600;
     const rowHeight = maxWidth / 16;
-    const isDraggable = isEditMode && !Object.values(this.state.textEditorsEditing).some(Boolean);
+    const isDraggable = isEditMode && 
+                        !Object.values(this.state.textEditorsEditing).some(Boolean) && 
+                        !this.state.isOptionsHovered;
 
     return (
       <div style={{ width: "100%", height: "100%", minHeight: "500px", maxWidth: `${maxWidth}px`, margin: "0 auto"}}>
