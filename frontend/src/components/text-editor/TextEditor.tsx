@@ -5,21 +5,27 @@ import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
 import './TextEditor.css';
 import FloatingToolbarPortal from './FloatingToolbar';
+import { GridDimensions } from '../grid-item/GridItem';
 
-interface TextEditorProps {
+interface TextEditorProps extends GridDimensions{
   initialFontSize?: number;
   initialFontFamily?: string;
   isEditing?: boolean;
+
 }
 
 const TextEditor: React.FC<TextEditorProps> = ({
   initialFontSize = 16,
   initialFontFamily = 'Arial',
   isEditing = false,
+  gridWidth,
+  gridHeight
 }) => {
   const [fontFamily, setFontFamily] = useState(initialFontFamily);
   const [fontSize, setFontSize] = useState(initialFontSize);
-  const editorRef = useRef<HTMLDivElement>(null);
+  const [maxChars, setMaxChars] = useState(0);
+  const [charCount, setCharCount] = useState(0);
+  const editorRef = useRef<HTMLDivElement>(null!);
 
   const defaultMessage = '<p style="color: gray;">enter text</p>';
 
@@ -29,9 +35,13 @@ const TextEditor: React.FC<TextEditorProps> = ({
     editable: isEditing,
     editorProps: {
       attributes: {
-        style: `font-family: ${fontFamily}; font-size: ${fontSize}px;`,
-      },
+        style: `font-family: ${fontFamily}; font-size: ${fontSize}px`,
+      }
     },
+    onUpdate: ({ editor }) => {
+      const content = editor.getText();
+      setCharCount(content.length);
+    }
   });
 
   // Controls font family updates
@@ -55,17 +65,33 @@ const TextEditor: React.FC<TextEditorProps> = ({
     }
   }, [isEditing, editor]);
 
+  // Calculate max characters based on grid size and font size
+  useEffect(() => {
+    if (gridWidth && gridHeight && fontSize) {
+      // More conservative estimate that accounts for wider characters
+      const charsPerLine = Math.floor(gridWidth / (fontSize * 0.7));
+      const lines = Math.floor(gridHeight / (fontSize * 1.5));
+      const maxChars = Math.floor(charsPerLine * lines * 0.8);
+      setMaxChars(maxChars);
+    }
+  }, [gridHeight, gridWidth, fontSize]);
+
   return (
     <div ref={editorRef} className="text-editor">
       <EditorContent editor={editor} className="text-editor-tiptap" />
       {isEditing && (
-        <FloatingToolbarPortal
-          fontFamily={fontFamily}
-          fontSize={fontSize}
-          onFontFamilyChange={setFontFamily}
-          onFontSizeChange={setFontSize}
-          gridItemRef={editorRef}
-        />
+        <>
+          <FloatingToolbarPortal
+            fontFamily={fontFamily}
+            fontSize={fontSize}
+            onFontFamilyChange={setFontFamily}
+            onFontSizeChange={setFontSize}
+            gridItemRef={editorRef}
+          />
+          <div className={`char-count ${charCount > maxChars ? 'exceeded' : ''}`}>
+          {charCount}/{maxChars}
+          </div>
+        </>
       )}
     </div>
   );

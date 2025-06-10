@@ -1,6 +1,11 @@
 // EditableContainer.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './GridItem.css';
+
+export interface GridDimensions {
+  gridWidth?: number;
+  gridHeight?: number;
+}
 
 interface GridItemProps {
   isEditable?: boolean;
@@ -8,7 +13,7 @@ interface GridItemProps {
   onEditingChange?: (isEditing: boolean) => void;
   onOptionsHoverChange?: (isHovered: boolean) => void;
   onDelete?: () => void;
-  children: React.ReactNode;
+  children: React.ReactElement<GridDimensions>;
 }
 
 const GridItem: React.FC<GridItemProps> = ({
@@ -22,6 +27,19 @@ const GridItem: React.FC<GridItemProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isOptionsHovered, setIsOptionsHovered] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const containerRef = useRef<HTMLDivElement>(null!);
+
+  // Observes resizing of the component and stores its dimensions
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      setDimensions({ width, height });
+    });
+
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -72,12 +90,16 @@ const GridItem: React.FC<GridItemProps> = ({
   
   return (
     <div 
+      ref={containerRef}
       className="grid-item"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <div className="content-area">
-        {children}
+      {React.cloneElement(children as React.ReactElement, {
+        gridWidth: dimensions.width,
+        gridHeight: dimensions.height
+      })}    
       </div>
       {isEditable && isHovered && !isEditing && (
         <div className="options-container">

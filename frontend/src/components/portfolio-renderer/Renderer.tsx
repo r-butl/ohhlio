@@ -49,6 +49,7 @@ interface RendererState {
   activeEditorId: string | null;
   items: number;
   isOptionsHovered: boolean;
+  isDragging: boolean;
 }
 
 export default class Renderer extends React.PureComponent<RendererProps, RendererState> {
