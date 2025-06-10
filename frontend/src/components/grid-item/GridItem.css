@@ -94,3 +94,20 @@
 .edit-toggle-button:hover {
   background: #e5e5e5;
 }
+
+.delete-button {
+  display: block;
+  width: 100%;
+  padding: 4px 8px;
+  margin: 4px 0;
+  border: none;
+  background: #ffebee;
+  color: #d32f2f;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.delete-button:hover {
+  background: #ffcdd2;
+}

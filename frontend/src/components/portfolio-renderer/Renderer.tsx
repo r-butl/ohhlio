@@ -127,6 +127,11 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
     return isEditable;
   };
 
+  private handleDeleteItem = (itemId: string) => {
+    const updatedSchema = this.props.contentSchema?.filter(item => item.id !== itemId) || [];
+    this.props.onContentChange?.(updatedSchema);
+  };
+
   private generateDOM() {
     return this.props.contentSchema?.map((item) => {
       const commonProps = {
@@ -134,7 +139,8 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
         isEditable: this.handleIsEditableChange(item),
         isEditing: this.state.textEditorsEditing[item.id] || false,
         onEditingChange: (isEditing: boolean) => this.handleEditingChange(item.id, isEditing),
-        onOptionsHoverChange: this.handleOptionsHoverChange
+        onOptionsHoverChange: this.handleOptionsHoverChange,
+        onDelete: () => this.handleDeleteItem(item.id)
       }
 
       switch (item.type) {

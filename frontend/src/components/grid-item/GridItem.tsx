@@ -7,6 +7,7 @@ interface GridItemProps {
   isEditing?: boolean;
   onEditingChange?: (isEditing: boolean) => void;
   onOptionsHoverChange?: (isHovered: boolean) => void;
+  onDelete?: () => void;
   children: React.ReactNode;
 }
 
@@ -15,6 +16,7 @@ const GridItem: React.FC<GridItemProps> = ({
   isEditing = false,
   onEditingChange,
   onOptionsHoverChange,
+  onDelete,
   children
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -98,6 +100,12 @@ const GridItem: React.FC<GridItemProps> = ({
               onClick={toggleEditMode}
             >
               Edit
+            </button>
+            <button
+              className="delete-button"
+              onClick={onDelete}
+            >
+              Delete
             </button>
           </div>
         </div>
