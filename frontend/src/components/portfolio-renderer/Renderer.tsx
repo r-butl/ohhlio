@@ -255,6 +255,7 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
           rowHeight={rowHeight}
           isDraggable={isDraggable}
           isResizable={isDraggable}
+          resizeHandles={['sw', 'se']} 
           onLayoutChange={this.onLayoutChange}
           onBreakpointChange={this.onBreakpointChange}
           margin={[5, 5]}
