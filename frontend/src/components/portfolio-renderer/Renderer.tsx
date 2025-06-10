@@ -61,9 +61,9 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
   };
 
   private static readonly defaultLayout = {
-    minW: 8,
+    minW: 4,
     maxW: 24,
-    minH: 1,
+    minH: 3,
     maxH: 24
   };
 
@@ -233,7 +233,7 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
     const { isEditMode, className } = this.props;
     const columnCount = 24;
     const maxWidth = 1600;
-    const rowHeight = maxWidth / 16;
+    const rowHeight = maxWidth / 60;
     const isDraggable = isEditMode && 
                         !Object.values(this.state.textEditorsEditing).some(Boolean) && 
                         !this.state.isOptionsHovered;
@@ -251,8 +251,8 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
           isResizable={isDraggable}
           onLayoutChange={this.onLayoutChange}
           onBreakpointChange={this.onBreakpointChange}
-          margin={[20, 20]}
-          containerPadding={[10, 10]}
+          margin={[5, 5]}
+          containerPadding={[1, 1]}
           compactType="vertical"
           preventCollision={false}
         >

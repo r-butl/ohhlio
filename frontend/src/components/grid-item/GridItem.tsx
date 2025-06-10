@@ -41,6 +41,7 @@ const GridItem: React.FC<GridItemProps> = ({
   const handleOptionsMouseLeave = () => {
     setIsOptionsHovered(false);
     onOptionsHoverChange?.(false);
+    setIsOptionsOpen(false);
   };
 
   const toggleOptions = (e: React.MouseEvent) => {
@@ -77,27 +78,28 @@ const GridItem: React.FC<GridItemProps> = ({
         {children}
       </div>
       {isEditable && isHovered && !isEditing && (
-        <div 
-          className="grid-item-options"
-          onMouseEnter={handleOptionsMouseEnter}
-          onMouseLeave={handleOptionsMouseLeave}
-        >
-          <button 
+        <div className="options-container">
+          {!isOptionsOpen && <button 
             className="options-toggle-btn"
             onClick={toggleOptions}
+            onMouseEnter={handleOptionsMouseEnter}
+            onMouseLeave={handleOptionsMouseLeave}
           >
             Options
           </button>
-          {isOptionsOpen && (
-            <div className="options-panel">
-              <button
-                className="edit-toggle-button"
-                onClick={toggleEditMode}
-              >
-                Edit
-              </button>
-            </div>
-          )}
+          }
+          <div 
+            className={`options-panel ${isOptionsOpen ? 'open' : ''}`}
+            onMouseEnter={handleOptionsMouseEnter}
+            onMouseLeave={handleOptionsMouseLeave}
+          >
+            <button
+              className="edit-toggle-button"
+              onClick={toggleEditMode}
+            >
+              Edit
+            </button>
+          </div>
         </div>
       )}
     </div>

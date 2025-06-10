@@ -1,6 +1,6 @@
 .floating-toolbar {
 position: absolute;
-transform: translateY(-50%);
+transform: translateX(120%) translateY(10%);
 background: white;
 padding: 10px;
 border-radius: 8px;
