@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
+import Underline from '@tiptap/extension-underline';
 import './TextEditor.css';
 import FloatingToolbarPortal from './FloatingToolbar';
 import { GridDimensions } from '../grid-item/GridItem';
@@ -31,7 +32,12 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const defaultMessage = '<p style="color: gray;">enter text</p>';
 
   const editor = useEditor({
-    extensions: [StarterKit, TextStyle, FontFamily],
+    extensions: [
+      StarterKit,
+      TextStyle,
+      FontFamily,
+      Underline,
+    ],
     content: defaultMessage,
     editable: isEditing,
     editorProps: {
@@ -83,6 +89,22 @@ const TextEditor: React.FC<TextEditorProps> = ({
     }
   };
 
+  const handleCancel = () => {
+    // Implement cancel logic
+  };
+
+  const toggleBold = () => {
+    editor?.chain().focus().toggleBold().run();
+  };
+
+  const toggleItalic = () => {
+    editor?.chain().focus().toggleItalic().run();
+  };
+
+  const toggleUnderline = () => {
+    editor?.chain().focus().toggleUnderline().run();
+  };
+
   return (
     <div ref={editorRef} className="text-editor">
       <EditorContent editor={editor} className="text-editor-tiptap" />
@@ -95,9 +117,15 @@ const TextEditor: React.FC<TextEditorProps> = ({
             onFontSizeChange={setFontSize}
             gridItemRef={editorRef}
             onConfirm={handleConfirm}
+            onBold={toggleBold}
+            onItalic={toggleItalic}
+            onUnderline={toggleUnderline}
+            isBold={editor?.isActive('bold')}
+            isItalic={editor?.isActive('italic')}
+            isUnderline={editor?.isActive('underline')}
           />
           <div className={`char-count ${charCount > maxChars ? 'exceeded' : ''}`}>
-          {charCount}/{maxChars}
+            {charCount}/{maxChars}
           </div>
         </>
       )}

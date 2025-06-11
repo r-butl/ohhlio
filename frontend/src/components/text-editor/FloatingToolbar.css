@@ -31,3 +31,23 @@ color: #666;
   cursor: pointer;
   min-width: 100px;
 }
+
+.format-button {
+  padding: 4px 8px;
+  margin: 0 2px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  min-width: 30px;
+}
+
+.format-button:hover {
+  background-color: #f0f0f0;
+}
+
+.format-button.active {
+  background-color: #e0e0e0;
+  border-color: #999;
+}
