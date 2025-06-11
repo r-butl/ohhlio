@@ -19,9 +19,9 @@ interface TextEditorProps extends GridDimensions{
 const TextEditor: React.FC<TextEditorProps> = ({
   initialFontSize = 16,
   initialFontFamily = 'Arial',
-  isEditing = false,
   gridWidth,
-  gridHeight,
+  gridHeight,  
+  isEditing = false,
   onEditingChange
 }) => {
   const [fontFamily, setFontFamily] = useState(initialFontFamily);
@@ -30,7 +30,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const [charCount, setCharCount] = useState(0);
   const editorRef = useRef<HTMLDivElement>(null!);
 
-  const defaultMessage = '<p style="color: gray;">enter text</p>';
+  const defaultMessage = 'Enter Text Here...'
 
   const editor = useEditor({
     extensions: [
@@ -91,10 +91,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
     if (onEditingChange) {
       onEditingChange(false);
     }
-  };
-
-  const handleCancel = () => {
-    // Implement cancel logic
   };
 
   const toggleBold = () => {

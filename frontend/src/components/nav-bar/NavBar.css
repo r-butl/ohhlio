@@ -1,4 +1,4 @@
-.app-header {
+.app-nav-bar {
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -45,11 +45,11 @@
     background-color: #0056b3;
 }
 
-.app-header.shadowed {
+.app-nav-bar.shadowed {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.app-header h1 {
+.app-nav-bar h1 {
     margin-right: auto;
     margin-left: 10px;
     font-size: 24px;

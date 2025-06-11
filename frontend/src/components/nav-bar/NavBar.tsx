@@ -1,14 +1,14 @@
 import React from 'react';
-import './Header.css';
+import './NavBar.css';
 
-interface HeaderProps {
+interface NavBarProps {
     isEditMode: boolean;
     isEditing: boolean;
     setIsEditMode: (value: boolean) => void;
     isHomeUser: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({
+const NavBar: React.FC<NavBarProps> = ({
     isEditMode,
     isEditing,
     setIsEditMode,
@@ -17,11 +17,10 @@ const Header: React.FC<HeaderProps> = ({
     
     return (
     
-    <div className="app-header">
-        <h1>ProjectBuilder</h1>
+    <div className="app-nav-bar">
+        <h1>Ohhlio</h1>
 
         <div className="controls">
-
 
             { isHomeUser &&
                 <button
@@ -45,4 +44,4 @@ const Header: React.FC<HeaderProps> = ({
     )
 }
 
-export default Header;
+export default NavBar;

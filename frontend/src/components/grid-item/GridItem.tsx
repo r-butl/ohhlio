@@ -30,7 +30,6 @@ const GridItem: React.FC<GridItemProps> = ({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null!);
 
-  // Observes resizing of the component and stores its dimensions
   useEffect(() => {
     const resizeObserver = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect;
@@ -75,6 +74,7 @@ const GridItem: React.FC<GridItemProps> = ({
     onEditingChange?.(!isEditing);
   };
 
+  // Allows the usage of the escape key to leave the editing mode
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isEditing) {
@@ -87,6 +87,17 @@ const GridItem: React.FC<GridItemProps> = ({
       window.removeEventListener('keydown', handleEscapeKey);
     };
   }, [isEditing, onEditingChange]);
+
+  // resets the hover state and options panel when the floating tool bar is exited.
+  useEffect(() => {
+    if (!isEditing) {
+      setIsHovered(false);
+      setIsOptionsOpen(false);
+      setIsOptionsHovered(false);
+      onOptionsHoverChange?.(false);
+    }
+  }, [isEditing, onOptionsHoverChange]);
+  
   
   return (
     <div 

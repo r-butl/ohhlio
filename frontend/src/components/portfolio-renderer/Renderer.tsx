@@ -1,273 +1,131 @@
-import React, { useEffect} from "react";
-import { WidthProvider, Responsive } from "react-grid-layout";
-import "react-grid-layout/css/styles.css";
-import "react-resizable/css/styles.css";
-import "./Renderer.css";
-import TextEditor from "../text-editor/TextEditor";
-import GridItem from "../grid-item/GridItem";
+import React, { useEffect, useState, useCallback } from 'react';
+import { WidthProvider, Responsive } from 'react-grid-layout';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+import './Renderer.css';
+import TextEditor from '../text-editor/TextEditor';
+import ImageEditor from '../image-editor/ImageEditor';
+import GridItem from '../grid-item/GridItem';
+import { ContentItem } from '../../components/types/ContentItem';
 
-const ResponsiveReactGridLayout = WidthProvider(Responsive);
+const ResponsiveGrid = WidthProvider(Responsive);
 
-interface LayoutItem {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  i: string;
-  minW?: number;
-  maxW?: number;
-  minH?: number;
-  maxH?: number;
-}
-
-interface ContentItem {
-  id: string;
-  type: 'text' | 'image';
-  content: string;
-  layout: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    i: string;
-  };
-}
+const defaultLayout = {
+  minW: 4,
+  maxW: 24,
+  minH: 3,
+  maxH: 24,
+};
 
 interface RendererProps {
-  className?: string;
   isEditMode?: boolean;
   isEditing?: boolean;
   contentSchema?: ContentItem[];
   onContentChange?: (content: ContentItem[]) => void;
-  onEditingStateChange?: (isEditing: boolean) => void;
+  onEditingStateChange?: (editing: boolean) => void;
 }
 
-interface RendererState {
-  layouts: { [key: string]: LayoutItem[] };
-  currentBreakpoint: string;
-  textEditorsEditing: { [key: string]: boolean };
-  activeEditorId: string | null;
-  items: number;
-  isOptionsHovered: boolean;
-  isDragging: boolean;
-}
+const Renderer: React.FC<RendererProps> = ({
+  isEditMode = false,
+  contentSchema = [],
+  onContentChange,
+  onEditingStateChange,
+}) => {
+  const [editingMap, setEditingMap] = useState<Record<string, boolean>>({});
+  const [activeEditor, setActiveEditor] = useState<string | null>(null);
+  const [isOptionsHovered, setOptionsHovered] = useState(false);
 
-export default class Renderer extends React.PureComponent<RendererProps, RendererState> {
-  static defaultProps: RendererProps = {
-    className: "layout",
-    isEditMode: false,
-    isEditing: false,
-    contentSchema: [],
-    onContentChange: () => {},
-  };
+  const isDraggable = isEditMode && !Object.values(editingMap).some(Boolean) && !isOptionsHovered;
 
-  private static readonly defaultLayout = {
-    minW: 4,
-    maxW: 24,
-    minH: 3,
-    maxH: 24
-  };
+  const handleEditingChange = useCallback((id: string, editing: boolean) => {
+    setEditingMap((prev) => ({ ...prev, [id]: editing }));
+    setActiveEditor(editing ? id : null);
+  }, []);
 
-  constructor(props: RendererProps) {
-    super(props);
-    this.state = {
-      layouts: this.generateLayouts(),
-      currentBreakpoint: 'lg',
-      textEditorsEditing: {},
-      activeEditorId: null,
-      items: props.contentSchema?.length || 0,
-      isOptionsHovered: false
-    };
-  };
+  useEffect(() => {
+    const anyEditing = Object.values(editingMap).some(Boolean);
+    onEditingStateChange?.(anyEditing);
+  }, [editingMap]);
 
-  onLayoutChange = (layout: LayoutItem[]) => {
-    this.props.onContentChange?.(layout.map(item => ({
-      id: item.i,
-      type: 'text',
-      content: '',
-      layout: {
-        x: item.x,
-        y: item.y,
-        w: item.w,
-        h: item.h,
-        i: item.i
-      }
-    })));
-  };
+  const handleDelete = useCallback(
+    (id: string) => {
+      const updated = contentSchema.filter((item) => item.id !== id);
+      onContentChange?.(updated);
+    },
+    [contentSchema, onContentChange]
+  );
 
-  onBreakpointChange = (newBreakpoint: string) => {
-    this.setState({ currentBreakpoint: newBreakpoint });
-    console.log('Current breakpoint:', newBreakpoint);
-  };
-
-  private handleOptionsHoverChange = (isHovered: boolean) => {
-    this.setState({ isOptionsHovered: isHovered });
-  }
-
-  private handleEditingChange = (itemId: string, isEditing: boolean) => {
-    this.setState((prevState) => ({
-      textEditorsEditing: {
-        ...prevState.textEditorsEditing,
-        [itemId]: isEditing
-      },
-      activeEditorId: isEditing ? itemId : null
-    }), () => {
-      const isAnyEditorEditing = Object.values(this.state.textEditorsEditing).some(isEditing => isEditing);
-      this.props.onEditingStateChange?.(isAnyEditorEditing);
+  const onLayoutChange = (layout: any[]) => {
+    const updated = contentSchema.map((item) => {
+      const layoutItem = layout.find((l) => l.i === item.id);
+      return layoutItem ? { ...item, layout: layoutItem } : item;
     });
+    onContentChange?.(updated);
   };
 
-  private handleIsEditableChange = (item: any) => {
-    const isEditable = this.props.isEditMode && (!this.state.activeEditorId || this.state.activeEditorId === item.id);
-    console.log('TextEditor editable state:', {
-      itemId: item.id,
-      isEditMode: this.props.isEditMode,
-      activeEditorId: this.state.activeEditorId,
-      isEditable
-    });
-    return isEditable;
-  };
-
-  private handleDeleteItem = (itemId: string) => {
-    const updatedSchema = this.props.contentSchema?.filter(item => item.id !== itemId) || [];
-    this.props.onContentChange?.(updatedSchema);
-  };
-
-  private generateDOM() {
-    return this.props.contentSchema?.map((item) => {
-      const commonProps = {
-        key: item.id,
-        isEditable: this.handleIsEditableChange(item),
-        isEditing: this.state.textEditorsEditing[item.id] || false,
-        onEditingChange: (isEditing: boolean) => this.handleEditingChange(item.id, isEditing),
-        onOptionsHoverChange: this.handleOptionsHoverChange,
-        onDelete: () => this.handleDeleteItem(item.id)
-      }
-
-      switch (item.type) {
-        case 'text':
-          return (
-            <div 
-            key={item.id}   
-            data-grid={{
-              ...item.layout,
-              minW: Renderer.defaultLayout.minW,
-              maxW: Renderer.defaultLayout.maxW,
-              minH: Renderer.defaultLayout.minH,
-              maxH: Renderer.defaultLayout.maxH
-            }}
-            className={`${this.props.isEditMode ? 'edit' : ''}`}>
-
-              <GridItem {...commonProps}>
-                <TextEditor 
-                  isEditing={commonProps.isEditing}
-                  onEditingChange={(isEditing) => this.handleEditingChange(item.id, isEditing)}
-                />
-              </GridItem>
-            </div>
-          );
-        case 'image':
-          return (
-            <div key={item.id} className="grid-item">
-              {/* Image component will go here */}
-              <div>Image: {item.content}</div>
-            </div>
-          );
-        default:
-          return null;
-      }
-    }) || [];
-  }
-
-  generateLayouts() {
-    const { contentSchema = []} = this.props;
-  
-    const layout = contentSchema.map(item => ({
-      x: item.layout.x,
-      y: item.layout.y,
-      w: Math.max(item.layout.w, Renderer.defaultLayout.minW),
-      h: Math.max(item.layout.h, Renderer.defaultLayout.minH),
-      i: item.layout.i,
-      minW: Renderer.defaultLayout.minW,
-      maxW: Renderer.defaultLayout.maxW,
-      minH: Renderer.defaultLayout.minH,
-      maxH: Renderer.defaultLayout.maxH
-    }));
-  
-    return {
-      lg: layout,
-      md: layout,
-      sm: layout,
-      xs: layout,
-      xxs: layout
-    };
-  }
-  
-  componentDidUpdate(prevProps: RendererProps) {
-
-    if (prevProps.contentSchema !== this.props.contentSchema) {
-      // Handle new content being added
-      const newContent = this.props.contentSchema?.filter(
-        item => !prevProps.contentSchema?.some(prev => prev.id === item.id)
-      ) || [];
-      
-      if (newContent.length > 0) {
-        // Initialize new content with proper layout
-        const updatedSchema = this.props.contentSchema?.map(item => {
-          if (!item.layout) {
-            return {
-              ...item,
-              id: String(Date.now()),
-              content: item.type === 'text' ? 'New Text Block' : '',
-              layout: {
-                x: 0,
-                y: 0,
-                w: Renderer.defaultLayout.minW,
-                h: Renderer.defaultLayout.minH,
-                i: String(Date.now()),
-                ...Renderer.defaultLayout
-              }
-            };
-          }
-          return item;
-        }) || [];
-        console.log('Content Schema Updated:', updatedSchema);
-        this.props.onContentChange?.(updatedSchema);
-      }
-    }
-  }
-
-  render() {
-    const { isEditMode, className } = this.props;
-    const columnCount = 24;
-    const maxWidth = 1600;
-    const rowHeight = maxWidth / 60;
-    const isDraggable = isEditMode && 
-                        !Object.values(this.state.textEditorsEditing).some(Boolean) && 
-                        !this.state.isOptionsHovered;
+  const renderItem = (item: ContentItem) => {
+    const isEditing = editingMap[item.id] || false;
+    const isEditable = isEditMode && (!activeEditor || activeEditor === item.id);
 
     return (
-      <div style={{ width: "100%", height: "100%", minHeight: "500px", maxWidth: `${maxWidth}px`, margin: "0 auto"}}>
-
-        <ResponsiveReactGridLayout
-          className={className}
-          layouts={this.state.layouts}
-          breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
-          cols={{ lg: columnCount, md: columnCount, sm: columnCount, xs: columnCount, xxs: columnCount }}
-          rowHeight={rowHeight}
-          isDraggable={isDraggable}
-          isResizable={isDraggable}
-          resizeHandles={['sw', 'se']} 
-          onLayoutChange={this.onLayoutChange}
-          onBreakpointChange={this.onBreakpointChange}
-          margin={[5, 5]}
-          containerPadding={[1, 1]}
-          compactType="vertical"
-          preventCollision={false}
+      <div
+        key={item.id}
+        data-grid={{
+          ...item.layout,
+          ...defaultLayout,
+        }}
+        className={isEditMode ? 'edit' : ''}
+      >
+        <GridItem
+          key={item.id}
+          isEditable={isEditable}
+          isEditing={isEditing}
+          onEditingChange={(v) => handleEditingChange(item.id, v)}
+          onOptionsHoverChange={setOptionsHovered}
+          onDelete={() => handleDelete(item.id)}
         >
-          {this.generateDOM()}
-        </ResponsiveReactGridLayout>
+          {item.type === 'text' ? (
+            <TextEditor isEditing={isEditing} onEditingChange={(v) => handleEditingChange(item.id, v)} />
+          ) : (
+            <ImageEditor
+              isEditing={isEditing}
+              onEditingChange={(v) => handleEditingChange(item.id, v)}
+              gridWidth={item.layout.w * (1600 / 24)}
+              gridHeight={item.layout.h * (1600 / 60)}
+            />
+          )}
+        </GridItem>
       </div>
     );
-  }
-}
+  };
+
+  // Params for react grid
+  const maxWidth = 1600;
+  const rowHeight = maxWidth / 60;
+  const columnCount = 24;
+
+  return (
+
+    <div style={{ width: '100%', maxWidth: `${maxWidth}px`, margin: '0 auto' }}>
+      <ResponsiveGrid
+        className="layout"
+        layouts={{ lg: contentSchema.map((item) => ({ ...item.layout, ...defaultLayout })) }}
+        breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
+        cols={{ lg: columnCount, md: columnCount, sm: columnCount, xs: columnCount, xxs: columnCount }}
+        rowHeight={rowHeight}
+        isDraggable={isDraggable}
+        isResizable={isDraggable}
+        resizeHandles={['sw', 'se']}
+        onLayoutChange={onLayoutChange}
+        margin={[5, 5]}
+        containerPadding={[1, 1]}
+        compactType="vertical"
+        preventCollision={false}
+      >
+        {contentSchema.map(renderItem)}
+      </ResponsiveGrid>
+    </div>
+  );
+};
+
+export default Renderer;

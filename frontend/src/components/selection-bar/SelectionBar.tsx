@@ -30,13 +30,6 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
           >
             <span className="icon">📤</span>
           </button>
-
-          <button 
-            className="option-button"
-            onClick={() => onAddImage('gallery')}
-          >
-            <span className="icon">🖼️</span>
-          </button>
         </div>
       </div>
     </div>
