@@ -4,6 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
 import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
 import './TextEditor.css';
 import FloatingToolbarPortal from './FloatingToolbar';
 import { GridDimensions } from '../grid-item/GridItem';
@@ -37,6 +38,9 @@ const TextEditor: React.FC<TextEditorProps> = ({
       TextStyle,
       FontFamily,
       Underline,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     content: defaultMessage,
     editable: isEditing,
@@ -105,6 +109,10 @@ const TextEditor: React.FC<TextEditorProps> = ({
     editor?.chain().focus().toggleUnderline().run();
   };
 
+  const setAlignment = (alignment: 'left' | 'center' | 'right') => {
+    editor?.chain().focus().setTextAlign(alignment).run();
+  };
+
   return (
     <div ref={editorRef} className="text-editor">
       <EditorContent editor={editor} className="text-editor-tiptap" />
@@ -120,9 +128,13 @@ const TextEditor: React.FC<TextEditorProps> = ({
             onBold={toggleBold}
             onItalic={toggleItalic}
             onUnderline={toggleUnderline}
-            isBold={editor?.isActive('bold')}
-            isItalic={editor?.isActive('italic')}
-            isUnderline={editor?.isActive('underline')}
+            isBold={editor?.isActive('bold') ?? false}
+            isItalic={editor?.isActive('italic') ?? false}
+            isUnderline={editor?.isActive('underline') ?? false}
+            onAlignLeft={() => setAlignment('left')}
+            onAlignCenter={() => setAlignment('center')}
+            onAlignRight={() => setAlignment('right')}
+            alignment={editor?.getAttributes('paragraph').textAlign || 'left'}
           />
           <div className={`char-count ${charCount > maxChars ? 'exceeded' : ''}`}>
             {charCount}/{maxChars}

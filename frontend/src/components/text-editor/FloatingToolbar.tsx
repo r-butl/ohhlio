@@ -9,13 +9,16 @@ interface FloatingToolbarProps {
   onFontSizeChange: (size: number) => void;
   gridItemRef: React.RefObject<HTMLDivElement>;
   onConfirm: () => void;
-  onCancel: () => void;
   onBold: () => void;
   onItalic: () => void;
   onUnderline: () => void;
   isBold: boolean;
   isItalic: boolean;
   isUnderline: boolean;
+  onAlignLeft: () => void;
+  onAlignCenter: () => void;
+  onAlignRight: () => void;
+  alignment: string;
 }
 
 const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
@@ -25,13 +28,16 @@ const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
     onFontSizeChange,
     gridItemRef,
     onConfirm,
-    onCancel,
     onBold,
     onItalic,
     onUnderline,
     isBold,
     isItalic,
-    isUnderline
+    isUnderline,
+    onAlignLeft,
+    onAlignCenter,
+    onAlignRight,
+    alignment
   }) => {
 
     const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -62,29 +68,6 @@ const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
     return createPortal(
       <div className="floating-toolbar" style={{ top: position.top, left: position.left, position: 'absolute' }}>
         <div className="toolbar-group">
-          <button 
-            onClick={onBold} 
-            className={`format-button ${isBold ? 'active' : ''}`}
-            title="Bold"
-          >
-            <strong>B</strong>
-          </button>
-          <button 
-            onClick={onItalic} 
-            className={`format-button ${isItalic ? 'active' : ''}`}
-            title="Italic"
-          >
-            <em>I</em>
-          </button>
-          <button 
-            onClick={onUnderline} 
-            className={`format-button ${isUnderline ? 'active' : ''}`}
-            title="Underline"
-          >
-            <u>U</u>
-          </button>
-        </div>
-        <div className="toolbar-group">
           <label>Font</label>
           <select
             value={fontFamily}
@@ -112,6 +95,62 @@ const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
             ))}
           </select>
         </div>
+        
+        <div className="button-group">
+          <label>Text Formatting</label>
+          <div className='format-buttons'>
+            <button 
+            onClick={onBold} 
+            className={`format-button ${isBold ? 'active' : ''}`}
+            title="Bold"
+          >
+            <strong>B</strong>
+          </button>
+          <button 
+            onClick={onItalic} 
+            className={`format-button ${isItalic ? 'active' : ''}`}
+            title="Italic"
+          >
+            <em>I</em>
+          </button>
+          <button 
+            onClick={onUnderline} 
+            className={`format-button ${isUnderline ? 'active' : ''}`}
+            title="Underline"
+          >
+            <u>U</u>
+          </button>
+        </div>
+
+        </div>
+        <div className="button-group">
+          <label>Alignment</label>
+          <div className='format-buttons'>
+
+            <button 
+              onClick={onAlignLeft} 
+              className={`format-button ${alignment === 'left' ? 'active' : ''}`}
+              title="Align Left"
+            >
+              ⇤
+            </button>
+            <button 
+              onClick={onAlignCenter} 
+              className={`format-button ${alignment === 'center' ? 'active' : ''}`}
+              title="Align Center"
+            >
+              ⇔
+            </button>
+            <button 
+              onClick={onAlignRight} 
+              className={`format-button ${alignment === 'right' ? 'active' : ''}`}
+              title="Align Right"
+            >
+              ⇥
+            </button>
+          </div>
+        </div>
+        
         <div className="toolbar-group">
           <button onClick={onConfirm} className="confirm-button">✓</button>
         </div>
