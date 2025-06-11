@@ -3,6 +3,7 @@ import Cropper from 'react-easy-crop';
 import { GridDimensions } from '../grid-item/GridItem';
 import './ImageEditor.css';
 
+
 interface ImageEditorProps extends GridDimensions {
   isEditing?: boolean;
   onEditingChange?: (isEditing: boolean) => void;
