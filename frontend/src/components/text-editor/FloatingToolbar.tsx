@@ -8,6 +8,7 @@ interface FloatingToolbarProps {
   onFontFamilyChange: (font: string) => void;
   onFontSizeChange: (size: number) => void;
   gridItemRef: React.RefObject<HTMLDivElement>;
+  onConfirm: () => void;
 }
 
 const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
@@ -15,7 +16,8 @@ const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
     fontSize,
     onFontFamilyChange,
     onFontSizeChange,
-    gridItemRef
+    gridItemRef,
+    onConfirm,
   }) => {
 
     const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -72,6 +74,9 @@ const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
               </option>
             ))}
           </select>
+        </div>
+        <div className="toolbar-group">
+          <button onClick={onConfirm} className="confirm-button">✓</button>
         </div>
       </div>,
       document.getElementById('portal-root') || document.body

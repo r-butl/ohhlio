@@ -11,7 +11,7 @@ interface TextEditorProps extends GridDimensions{
   initialFontSize?: number;
   initialFontFamily?: string;
   isEditing?: boolean;
-
+  onEditingChange?: (isEditing: boolean) => void;
 }
 
 const TextEditor: React.FC<TextEditorProps> = ({
@@ -19,7 +19,8 @@ const TextEditor: React.FC<TextEditorProps> = ({
   initialFontFamily = 'Arial',
   isEditing = false,
   gridWidth,
-  gridHeight
+  gridHeight,
+  onEditingChange
 }) => {
   const [fontFamily, setFontFamily] = useState(initialFontFamily);
   const [fontSize, setFontSize] = useState(initialFontSize);
@@ -76,6 +77,12 @@ const TextEditor: React.FC<TextEditorProps> = ({
     }
   }, [gridHeight, gridWidth, fontSize]);
 
+  const handleConfirm = () => {
+    if (onEditingChange) {
+      onEditingChange(false);
+    }
+  };
+
   return (
     <div ref={editorRef} className="text-editor">
       <EditorContent editor={editor} className="text-editor-tiptap" />
@@ -87,6 +94,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
             onFontFamilyChange={setFontFamily}
             onFontSizeChange={setFontSize}
             gridItemRef={editorRef}
+            onConfirm={handleConfirm}
           />
           <div className={`char-count ${charCount > maxChars ? 'exceeded' : ''}`}>
           {charCount}/{maxChars}

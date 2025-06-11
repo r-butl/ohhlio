@@ -161,6 +161,7 @@ export default class Renderer extends React.PureComponent<RendererProps, Rendere
               <GridItem {...commonProps}>
                 <TextEditor 
                   isEditing={commonProps.isEditing}
+                  onEditingChange={(isEditing) => this.handleEditingChange(item.id, isEditing)}
                 />
               </GridItem>
             </div>
