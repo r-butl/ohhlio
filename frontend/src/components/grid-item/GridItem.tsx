@@ -30,6 +30,7 @@ const GridItem: React.FC<GridItemProps> = ({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null!);
 
+  // Gets the dimensions of the grid item on change
   useEffect(() => {
     const resizeObserver = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect;
@@ -97,7 +98,6 @@ const GridItem: React.FC<GridItemProps> = ({
       onOptionsHoverChange?.(false);
     }
   }, [isEditing, onOptionsHoverChange]);
-  
   
   return (
     <div 
