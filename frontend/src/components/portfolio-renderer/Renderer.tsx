@@ -7,6 +7,7 @@ import TextEditor from '../text-editor/TextEditor';
 import ImageEditor from '../image-editor/ImageEditor';
 import GridItem from '../grid-item/GridItem';
 import { ContentItem } from '../../components/types/ContentItem';
+import { useButtonHover } from '../../hooks/useButtonHover';
 
 const ResponsiveGrid = WidthProvider(Responsive);
 
@@ -33,9 +34,9 @@ const Renderer: React.FC<RendererProps> = ({
 }) => {
   const [editingMap, setEditingMap] = useState<Record<string, boolean>>({});
   const [activeEditor, setActiveEditor] = useState<string | null>(null);
-  const [isOptionsHovered, setOptionsHovered] = useState(false);
+  const { isHovered: isButtonHovered, handleMouseEnter, handleMouseLeave } = useButtonHover();
 
-  const isDraggable = isEditMode && !Object.values(editingMap).some(Boolean) && !isOptionsHovered;
+  const isDraggable = isEditMode && !Object.values(editingMap).some(Boolean) && !isButtonHovered;
 
   const handleEditingChange = useCallback((id: string, editing: boolean) => {
     setEditingMap((prev) => ({ ...prev, [id]: editing }));
@@ -81,17 +82,26 @@ const Renderer: React.FC<RendererProps> = ({
           isEditable={isEditable}
           isEditing={isEditing}
           onEditingChange={(v) => handleEditingChange(item.id, v)}
-          onOptionsHoverChange={setOptionsHovered}
+          onButtonHoverChange={handleMouseEnter}
           onDelete={() => handleDelete(item.id)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           {item.type === 'text' ? (
-            <TextEditor isEditing={isEditing} onEditingChange={(v) => handleEditingChange(item.id, v)} />
+            <TextEditor 
+              isEditing={isEditing} 
+              onEditingChange={(v) => handleEditingChange(item.id, v)}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            />
           ) : (
             <ImageEditor
               isEditing={isEditing}
               onEditingChange={(v) => handleEditingChange(item.id, v)}
               gridWidth={item.layout.w * (1600 / 24)}
               gridHeight={item.layout.h * (1600 / 60)}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
             />
           )}
         </GridItem>

@@ -9,7 +9,7 @@ import './TextEditor.css';
 import FloatingToolbarPortal from './FloatingToolbar';
 import { GridDimensions } from '../grid-item/GridItem';
 
-interface TextEditorProps extends GridDimensions{
+interface TextEditorProps extends GridDimensions {
   initialFontSize?: number;
   initialFontFamily?: string;
   isEditing?: boolean;
@@ -22,7 +22,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
   gridWidth,
   gridHeight,  
   isEditing = false,
-  onEditingChange
+  onEditingChange,
 }) => {
   const [fontFamily, setFontFamily] = useState(initialFontFamily);
   const [fontSize, setFontSize] = useState(initialFontSize);
@@ -110,7 +110,10 @@ const TextEditor: React.FC<TextEditorProps> = ({
   };
 
   return (
-    <div ref={editorRef} className="text-editor">
+    <div 
+      ref={editorRef}
+      className="text-editor"
+    >
       <EditorContent editor={editor} className="text-editor-tiptap" />
       {isEditing && (
         <>
