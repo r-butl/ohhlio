@@ -117,8 +117,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
             onCropChange={setCrop}
             onCropComplete={onCropComplete}
             onZoomChange={setZoom}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
           />
           <button 
             className="confirm-crop-button"
@@ -132,7 +130,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       ) : (
         <div className="display-container">
           <img 
-            src={croppedImage} 
+            src={croppedImage || ''} 
             alt="Cropped" 
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />

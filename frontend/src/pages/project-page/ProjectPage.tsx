@@ -22,13 +22,18 @@ const ProjectPage: React.FC = () => {
   }, []);
 
   // Utility to create layout
-  const generateLayout = (index: number) => ({
-    x: 0,
-    y: index,
-    w: 12,
-    h: 8,
-    i: String(Date.now())
-  });
+  const generateLayout = (index: number) => {
+    // Find the highest y position in the current grid
+    const maxY = contentSchema.reduce((max, item) => Math.max(max, item.layout.y + item.layout.h), 0);
+    
+    return {
+      x: 0,
+      y: maxY, // Place at the bottom of the grid
+      w: 12,
+      h: 8,
+      i: String(Date.now())
+    };
+  };
 
   const addItem = useCallback((type: 'text' | 'image') => {
     const id = String(Date.now());

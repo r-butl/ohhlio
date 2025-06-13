@@ -49,6 +49,7 @@ const GridItem: React.FC<GridItemProps> = ({
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isEditing) {
         onEditingChange?.(false);
+        onMouseLeave?.();
       }
     };
 
