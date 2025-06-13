@@ -14,6 +14,8 @@ interface TextEditorProps extends GridDimensions {
   initialFontFamily?: string;
   isEditing?: boolean;
   onEditingChange?: (isEditing: boolean) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 const TextEditor: React.FC<TextEditorProps> = ({
@@ -23,6 +25,8 @@ const TextEditor: React.FC<TextEditorProps> = ({
   gridHeight,  
   isEditing = false,
   onEditingChange,
+  onMouseEnter,
+  onMouseLeave,
 }) => {
   const [fontFamily, setFontFamily] = useState(initialFontFamily);
   const [fontSize, setFontSize] = useState(initialFontSize);
@@ -90,6 +94,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const handleConfirm = () => {
     if (onEditingChange) {
       onEditingChange(false);
+      onMouseLeave?.();
     }
   };
 

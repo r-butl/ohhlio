@@ -5,7 +5,6 @@ interface GridItemOptionsProps {
   isEditable: boolean;
   isEditing: boolean;
   onEditingChange: (isEditing: boolean) => void;
-  onButtonHoverChange: (isHovered: boolean) => void;
   onDelete: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -15,7 +14,6 @@ const GridItemOptions: React.FC<GridItemOptionsProps> = ({
   isEditable,
   isEditing,
   onEditingChange,
-  onButtonHoverChange,
   onDelete,
   onMouseEnter,
   onMouseLeave
@@ -64,12 +62,14 @@ const GridItemOptions: React.FC<GridItemOptionsProps> = ({
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        <button
-          className="edit-toggle-button"
-          onClick={toggleEditMode}
-        >
-          Edit
-        </button>
+        {isEditable &&
+            <button
+            className="edit-toggle-button"
+            onClick={toggleEditMode}
+            >
+            Edit
+            </button>
+        }
         <button
           className="delete-button"
           onClick={onDelete}

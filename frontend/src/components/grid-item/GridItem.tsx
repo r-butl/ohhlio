@@ -12,7 +12,6 @@ interface GridItemProps {
   isEditable?: boolean;
   isEditing?: boolean;
   onEditingChange?: (isEditing: boolean) => void;
-  onButtonHoverChange?: (isHovered: boolean) => void;
   onDelete?: () => void;
   children: React.ReactElement<GridDimensions>;
   onMouseEnter?: () => void;
@@ -23,7 +22,6 @@ const GridItem: React.FC<GridItemProps> = ({
   isEditable = true,
   isEditing = false,
   onEditingChange,
-  onButtonHoverChange,
   onDelete,
   children,
   onMouseEnter,
@@ -77,7 +75,6 @@ const GridItem: React.FC<GridItemProps> = ({
           isEditable={isEditable}
           isEditing={isEditing}
           onEditingChange={onEditingChange}
-          onButtonHoverChange={onButtonHoverChange}
           onDelete={onDelete}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}

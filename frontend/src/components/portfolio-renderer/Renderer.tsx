@@ -82,7 +82,6 @@ const Renderer: React.FC<RendererProps> = ({
           isEditable={isEditable}
           isEditing={isEditing}
           onEditingChange={(v) => handleEditingChange(item.id, v)}
-          onButtonHoverChange={handleMouseEnter}
           onDelete={() => handleDelete(item.id)}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
