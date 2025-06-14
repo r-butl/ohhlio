@@ -13,7 +13,7 @@
     width: 100%;
     height: 100%;
     flex: 1;
-    overflow-y: hidden; 
+    overflow-y: hidden !important; 
     max-height: 100%; 
   }
   
@@ -21,7 +21,7 @@
     height: auto;
     min-height: 100%;
     max-height: 100%;
-    padding: 1rem;
+    padding: 0.5rem 1rem 1rem 1rem; /* top right bottom left */
     box-sizing: border-box;
     overflow: hidden;
     white-space: normal;
@@ -57,4 +57,38 @@
   
   .char-count.exceeded {
     color: #ff6b6b;
+  }
+
+  .text-editor-tiptap .ProseMirror ul,
+  .text-editor-tiptap .ProseMirror ol {
+    padding-left: 1.5em;
+    margin: 0;
+  }
+
+  .text-editor-tiptap .ProseMirror li {
+    margin: 0;
+    padding: 0;
+  }
+
+  .text-editor-tiptap .ProseMirror li > p {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Explicit alignment handling */
+  .text-editor-tiptap .ProseMirror .is-text-aligned-center ul,
+  .text-editor-tiptap .ProseMirror .is-text-aligned-center ol {
+    text-align: center;
+    padding-left: 0;
+  }
+
+  .text-editor-tiptap .ProseMirror .is-text-aligned-right ul,
+  .text-editor-tiptap .ProseMirror .is-text-aligned-right ol {
+    text-align: right;
+    padding-left: 0;
+  }
+
+  .text-editor-tiptap .ProseMirror .is-text-aligned-center li,
+  .text-editor-tiptap .ProseMirror .is-text-aligned-right li {
+    text-align: inherit;
   }

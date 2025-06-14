@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import './FloatingToolbar.css';
+import './TextToolbar.css';
 
-interface FloatingToolbarProps {
+interface TextToolbarProps {
+  gridItemRef: React.RefObject<HTMLDivElement>;
+  onConfirm: () => void;
+  onCancel: () => void;
   fontFamily: string;
   fontSize: number;
   onFontFamilyChange: (font: string) => void;
   onFontSizeChange: (size: number) => void;
-  gridItemRef: React.RefObject<HTMLDivElement>;
-  onConfirm: () => void;
   onBold: () => void;
   onItalic: () => void;
   onUnderline: () => void;
@@ -21,13 +22,14 @@ interface FloatingToolbarProps {
   alignment: string;
 }
 
-const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
+const TextToolbarPortal: React.FC<TextToolbarProps> = ({
     fontFamily,
     fontSize,
     onFontFamilyChange,
     onFontSizeChange,
     gridItemRef,
     onConfirm,
+    onCancel,
     onBold,
     onItalic,
     onUnderline,
@@ -153,10 +155,11 @@ const FloatingToolbarPortal: React.FC<FloatingToolbarProps> = ({
         
         <div className="toolbar-group">
           <button onClick={onConfirm} className="confirm-button">✓</button>
+          <button onClick={onCancel} className="cancel-button">✕</button>
         </div>
       </div>,
       document.getElementById('portal-root') || document.body
     );
   };
 
-export default FloatingToolbarPortal;
+export default TextToolbarPortal;

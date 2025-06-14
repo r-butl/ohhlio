@@ -14,7 +14,7 @@ const ResponsiveGrid = WidthProvider(Responsive);
 const defaultLayout = {
   minW: 4,
   maxW: 24,
-  minH: 3,
+  minH: 6,
   maxH: 24,
 };
 
@@ -37,6 +37,7 @@ const Renderer: React.FC<RendererProps> = ({
   const { isHovered: isButtonHovered, handleMouseEnter, handleMouseLeave } = useButtonHover();
 
   const isDraggable = isEditMode && !Object.values(editingMap).some(Boolean) && !isButtonHovered;
+  const isResizable = isEditMode && !isButtonHovered;
 
   const handleEditingChange = useCallback((id: string, editing: boolean) => {
     setEditingMap((prev) => ({ ...prev, [id]: editing }));
@@ -64,16 +65,49 @@ const Renderer: React.FC<RendererProps> = ({
     onContentChange?.(updated);
   };
 
+  const getTypeSpecificLayout = (type: 'text' | 'image') => {
+    const baseLayout = {
+      maxW: 24,
+      maxH: 24,
+    };
+
+    switch (type) {
+      case 'text':
+        return {
+          ...baseLayout,
+          minW: 4,  
+          minH: 4,
+          maxW: 24,
+          maxH: 40,
+        };
+      case 'image':
+        return {
+          ...baseLayout,
+          minW: 10,  
+          minH: 18,  
+          maxW: 24,
+          maxH: 40,
+        };
+      default:
+        return {
+          ...baseLayout,
+          minW: 4,
+          minH: 6,
+        };
+    }
+  };
+
   const renderItem = (item: ContentItem) => {
     const isEditing = editingMap[item.id] || false;
     const isEditable = isEditMode && (!activeEditor || activeEditor === item.id);
+    const typeSpecificLayout = getTypeSpecificLayout(item.type);
 
     return (
       <div
         key={item.id}
         data-grid={{
           ...item.layout,
-          ...defaultLayout,
+          ...typeSpecificLayout,
         }}
         className={isEditMode ? 'edit' : ''}
       >
@@ -110,7 +144,7 @@ const Renderer: React.FC<RendererProps> = ({
 
   // Params for react grid
   const maxWidth = 1600;
-  const rowHeight = maxWidth / 60;
+  const rowHeight = maxWidth / 160;
   const columnCount = 24;
 
   return (
@@ -123,7 +157,7 @@ const Renderer: React.FC<RendererProps> = ({
         cols={{ lg: columnCount, md: columnCount, sm: columnCount, xs: columnCount, xxs: columnCount }}
         rowHeight={rowHeight}
         isDraggable={isDraggable}
-        isResizable={isDraggable}
+        isResizable={isResizable}
         resizeHandles={['sw', 'se']}
         onLayoutChange={onLayoutChange}
         margin={[5, 5]}

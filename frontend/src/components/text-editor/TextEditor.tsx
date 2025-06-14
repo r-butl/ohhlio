@@ -6,7 +6,7 @@ import FontFamily from '@tiptap/extension-font-family';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import './TextEditor.css';
-import FloatingToolbarPortal from './FloatingToolbar';
+import TextToolbarPortal from './TextToolbar';
 import { GridDimensions } from '../grid-item/GridItem';
 
 interface TextEditorProps extends GridDimensions {
@@ -32,9 +32,8 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const [fontSize, setFontSize] = useState(initialFontSize);
   const [maxChars, setMaxChars] = useState(0);
   const [charCount, setCharCount] = useState(0);
+  const [savedContent, setSavedContent] = useState('Hover over this item, then select: <strong>Options > Edit</strong>');
   const editorRef = useRef<HTMLDivElement>(null!);
-
-  const defaultMessage = 'Enter Text Here...'
 
   const editor = useEditor({
     extensions: [
@@ -43,15 +42,46 @@ const TextEditor: React.FC<TextEditorProps> = ({
       FontFamily,
       Underline,
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ['heading', 'paragraph', 'listItem', 'bulletList', 'orderedList'],
+        defaultAlignment: 'center',
+        alignments: ['left', 'center', 'right']
       }),
     ],
-    content: defaultMessage,
+    content: savedContent,
     editable: isEditing,
     editorProps: {
       attributes: {
         style: `font-family: ${fontFamily}; font-size: ${fontSize}px`,
+      },
+      handleDOMEvents: {
+        keydown: (view, event) => {
+          const editorEl = view.dom as HTMLElement;
+      
+          // Ignore non-character keys unless Enter
+          const isEnter = event.key === 'Enter';
+          const isChar = event.key.length === 1;
+          if (!isChar && !isEnter) return false;
+      
+          // Delay DOM measurement until after key press
+          requestAnimationFrame(() => {
+            const currentHeight = editorEl.scrollHeight;
+      
+            if (gridHeight && currentHeight > gridHeight) {
+              // Undo the character or newline that caused overflow
+              view.dispatch(
+                view.state.tr.delete(
+                  view.state.selection.from - 1,
+                  view.state.selection.from
+                )
+              );
+            }
+          });
+      
+          return false;
+        }
       }
+      
+      
     },
     onUpdate: ({ editor }) => {
       const content = editor.getText();
@@ -83,20 +113,60 @@ const TextEditor: React.FC<TextEditorProps> = ({
   // Calculate max characters based on grid size and font size
   useEffect(() => {
     if (gridWidth && gridHeight && fontSize) {
-      // More conservative estimate that accounts for wider characters
-      const charsPerLine = Math.floor(gridWidth / (fontSize * 0.7));
-      const lines = Math.floor(gridHeight / (fontSize * 1.5));
-      const maxChars = Math.floor(charsPerLine * lines * 0.8);
+      // Calculate average character width (using a conservative estimate)
+      const avgCharWidth = fontSize * 0.6; // Most characters are about 60% of font size width
+      
+      // Calculate characters per line, accounting for padding
+      const padding = 32; // 1rem padding on each side
+      const availableWidth = gridWidth - padding;
+      const charsPerLine = Math.floor(availableWidth / avgCharWidth);
+      
+      // Calculate number of lines that can fit
+      const lineHeight = fontSize * 1.5; // Standard line height
+      const availableHeight = gridHeight - padding;
+      const maxLines = Math.floor(availableHeight / lineHeight);
+      
+      // Calculate total characters, with some buffer for safety
+      const maxChars = Math.floor(charsPerLine * maxLines * 0.9); // 90% of theoretical max for safety
+      
       setMaxChars(maxChars);
     }
   }, [gridHeight, gridWidth, fontSize]);
 
   const handleConfirm = () => {
+    if (editor) {
+      // Save the current content when confirming
+      setSavedContent(editor.getHTML());
+    }
     if (onEditingChange) {
       onEditingChange(false);
       onMouseLeave?.();
     }
   };
+
+  const handleCancel = () => {
+    if (editor) {
+      // Revert to saved content
+      editor.commands.setContent(savedContent);
+    }
+    if (onEditingChange) {
+      onEditingChange(false);
+      onMouseLeave?.();
+    }
+  };
+
+  // Reset to saved content when entering edit mode or when escape is pressed
+  useEffect(() => {
+    if (editor) {
+      if (isEditing) {
+        // When entering edit mode, show the saved content
+        editor.commands.setContent(savedContent);
+      } else {
+        // When exiting edit mode (including via escape), revert to saved content
+        editor.commands.setContent(savedContent);
+      }
+    }
+  }, [isEditing, editor, savedContent]);
 
   const toggleBold = () => {
     editor?.chain().focus().toggleBold().run();
@@ -122,13 +192,14 @@ const TextEditor: React.FC<TextEditorProps> = ({
       <EditorContent editor={editor} className="text-editor-tiptap" />
       {isEditing && (
         <>
-          <FloatingToolbarPortal
+          <TextToolbarPortal
             fontFamily={fontFamily}
             fontSize={fontSize}
             onFontFamilyChange={setFontFamily}
             onFontSizeChange={setFontSize}
             gridItemRef={editorRef}
             onConfirm={handleConfirm}
+            onCancel={handleCancel}
             onBold={toggleBold}
             onItalic={toggleItalic}
             onUnderline={toggleUnderline}
@@ -140,9 +211,9 @@ const TextEditor: React.FC<TextEditorProps> = ({
             onAlignRight={() => setAlignment('right')}
             alignment={editor?.getAttributes('paragraph').textAlign || 'left'}
           />
-          <div className={`char-count ${charCount > maxChars ? 'exceeded' : ''}`}>
+          {/* <div className={`char-count ${charCount > maxChars ? 'exceeded' : ''}`}>
             {charCount}/{maxChars}
-          </div>
+          </div> */}
         </>
       )}
     </div>
