@@ -32,7 +32,8 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const [fontSize, setFontSize] = useState(initialFontSize);
   const [maxChars, setMaxChars] = useState(0);
   const [charCount, setCharCount] = useState(0);
-  const [savedContent, setSavedContent] = useState('Hover over this item, then select: <strong>Options > Edit</strong>');
+  const DEFAULT_MESSAGE = "Select <strong>Options &gt; Edit</strong> to add text.";
+  const [savedContent, setSavedContent] = useState(DEFAULT_MESSAGE);
   const editorRef = useRef<HTMLDivElement>(null!);
 
   const editor = useEditor({
@@ -122,7 +123,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
       const charsPerLine = Math.floor(availableWidth / avgCharWidth);
       
       // Calculate number of lines that can fit
-      const lineHeight = fontSize * 1.5; // Standard line height
+      const lineHeight = fontSize * 1.25; // Standard line height
       const availableHeight = gridHeight - padding;
       const maxLines = Math.floor(availableHeight / lineHeight);
       

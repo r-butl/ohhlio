@@ -11,13 +11,6 @@ import { useButtonHover } from '../../hooks/useButtonHover';
 
 const ResponsiveGrid = WidthProvider(Responsive);
 
-const defaultLayout = {
-  minW: 4,
-  maxW: 24,
-  minH: 6,
-  maxH: 24,
-};
-
 interface RendererProps {
   isEditMode?: boolean;
   isEditing?: boolean;
@@ -75,24 +68,24 @@ const Renderer: React.FC<RendererProps> = ({
       case 'text':
         return {
           ...baseLayout,
-          minW: 4,  
-          minH: 4,
-          maxW: 24,
-          maxH: 40,
+          minW: 2,  
+          minH: 2,
+          maxW: 12,
+          maxH: 12,
         };
       case 'image':
         return {
           ...baseLayout,
-          minW: 10,  
-          minH: 18,  
-          maxW: 24,
-          maxH: 40,
+          minW: 2,  
+          minH: 2,  
+          maxW: 12,
+          maxH: 12,
         };
       default:
         return {
           ...baseLayout,
-          minW: 4,
-          minH: 6,
+          minW: 1,
+          minH: 1,
         };
     }
   };
@@ -144,15 +137,15 @@ const Renderer: React.FC<RendererProps> = ({
 
   // Params for react grid
   const maxWidth = 1600;
-  const rowHeight = maxWidth / 160;
-  const columnCount = 24;
+  const rowHeight = maxWidth / 25;
+  const columnCount = 12;
 
   return (
 
     <div style={{ width: '100%', maxWidth: `${maxWidth}px`, margin: '0 auto' }}>
       <ResponsiveGrid
         className="layout"
-        layouts={{ lg: contentSchema.map((item) => ({ ...item.layout, ...defaultLayout })) }}
+        layouts={{ lg: contentSchema.map((item) => ({ ...item.layout })) }}
         breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: columnCount, md: columnCount, sm: columnCount, xs: columnCount, xxs: columnCount }}
         rowHeight={rowHeight}

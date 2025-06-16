@@ -19,11 +19,16 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   onMouseEnter,
   onMouseLeave,
 }) => {
+
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
-  const [previousCrop, setPreviousCrop] = useState<{ crop: { x: number; y: number }; zoom: number } | null>(null);
+  const [previousCrop, setPreviousCrop] = useState<{ 
+    crop: { x: number; y: number }; 
+    zoom: number;
+    croppedImage: string | null;
+  } | null>(null);
   const editorRef = useRef<HTMLDivElement>(null!);
 
   const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
@@ -60,8 +65,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       reader.onload = () => {
         const imageData = reader.result as string;
         setOriginalImage(imageData);
-        setCroppedImage(imageData); // Initially set cropped image to original
-        onEditingChange?.(true); // Enter edit mode when image is uploaded
+        setCroppedImage(imageData); 
+        onEditingChange?.(true); 
       };
       reader.readAsDataURL(file);
     }
@@ -73,23 +78,26 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   };
 
   const handleConfirm = () => {
-    // Save the current crop state as the new previous state
+    // Save the current crop state and cropped image as the new previous state
     setPreviousCrop({
       crop: { ...crop },
-      zoom
+      zoom,
+      croppedImage: croppedImage
     });
     onEditingChange?.(false);
   };
 
   const handleCancel = () => {
     if (previousCrop) {
-      // Revert to the previous crop state
+      // Revert to the previous crop state and cropped image
       setCrop(previousCrop.crop);
       setZoom(previousCrop.zoom);
+      setCroppedImage(previousCrop.croppedImage);
     } else {
       // If there's no previous state, revert to initial values
       setCrop({ x: 0, y: 0 });
       setZoom(1);
+      setCroppedImage(originalImage);
     }
     onEditingChange?.(false);
   };
@@ -99,10 +107,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     if (isEditing) {
       setPreviousCrop({
         crop: { ...crop },
-        zoom
+        zoom,
+        croppedImage: croppedImage
       });
     }
-  }, [isEditing]);
+  }, [isEditing, crop, zoom, croppedImage]);
 
   return (
     <div 
@@ -110,7 +119,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       style={{ width: gridWidth, height: gridHeight }}
     >
       {!originalImage ? (
-        isEditing ? (
           <div className="image-upload-options">
             <div className="upload-button-container">
               <input
@@ -139,13 +147,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               Choose from Gallery
             </button>
           </div>
-        ) : (
-          <div>
-            <p>
-            No image set.
-            </p>
-          </div>
-        )
+
       ) : isEditing ? (
         <div className="crop-container" ref={editorRef}>
           <Cropper

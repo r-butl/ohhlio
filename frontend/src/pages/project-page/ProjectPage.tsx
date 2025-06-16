@@ -28,9 +28,9 @@ const ProjectPage: React.FC = () => {
     
     return {
       x: 0,
-      y: maxY, // Place at the bottom of the grid
-      w: 12,
-      h: 8,
+      y: maxY, 
+      w: 3,
+      h: 3,
       i: String(Date.now())
     };
   };
