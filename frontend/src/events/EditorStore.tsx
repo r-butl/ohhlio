@@ -20,6 +20,17 @@ type Item = {
   props: any
 }
 
+// Layout configuration for renderer
+const LAYOUT_CONFIG = {
+  maxWidth: 1600,
+  rowHeight: 1600 / 25,
+  columnCount: 12,
+  defaultItemSize: {
+    w: 3,
+    h: 3
+  }
+} as const
+
 // State information for the Editor page
 type State = {
   items: Record<string, Item>     // Items in the layout
@@ -35,6 +46,8 @@ type State = {
   editorMaxWidth: number          // Width of the renderer content on the portfolio
   gridRowHeight: number           // Height in pixels of each row of the grid
   gridColumnCount: number         // Number of columns that will fit within the renderer
+  defaultItemWidth: number
+  defaultItemHeight: number
 
   // History interaction
   undo: () => void
@@ -51,25 +64,16 @@ type State = {
   updateLayout: (layout: any[]) => void
 }
 
-// Layout configuration for renderer
-const LAYOUT_CONFIG = {
-  maxWidth: 1600,
-  rowHeight: 1600 / 25,
-  columnCount: 12,
-  defaultItemSize: {
-    w: 3,
-    h: 3
-  }
-} as const
-
 export const useEditorStore = create<State>((set, get) => ({
   items: {},
   mode: 'edit',
   history: { past: [], present: {}, future: [] },
   activeEditor: null,
-  editorMaxWidth: LAYOUT_CONFIG.maxWidth,
-  gridRowHeight: LAYOUT_CONFIG.rowHeight,
-  gridColumnCount: LAYOUT_CONFIG.columnCount,
+  editorMaxWidth: 1600,
+  gridRowHeight: 1600 / 25,
+  gridColumnCount: 12,
+  defaultItemWidth: 3,
+  defaultItemHeight: 3,
 
   // Use this function to make changes the grid items
   setItems: (fn) => {
@@ -133,7 +137,8 @@ export const useEditorStore = create<State>((set, get) => ({
 
   // Adds an item to the grid
   addItem: (type) => {
-    
+    console.log(`Adding item: ${type}`);
+
     const { items } = get()
     const id = String(Date.now())
     
@@ -149,8 +154,8 @@ export const useEditorStore = create<State>((set, get) => ({
       layout: {
         x: 0,
         y: maxY,
-        w: LAYOUT_CONFIG.defaultItemSize.w,     // Inital width and height of the new grid item
-        h: LAYOUT_CONFIG.defaultItemSize.h,
+        w: get().defaultItemWidth,     // Inital width and height of the new grid item
+        h: get().defaultItemHeight,
         i: id
       }
     }

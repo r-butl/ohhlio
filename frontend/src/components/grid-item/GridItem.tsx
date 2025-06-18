@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './GridItem.css';
 import GridItemOptions from './GridItemOptions';
+import { useEditorStore } from '../../events/EditorStore';
 
 export interface GridDimensions {
   gridWidth?: number;
@@ -9,27 +10,29 @@ export interface GridDimensions {
 }
 
 interface GridItemProps {
+  id: string;
   isEditable?: boolean;
-  isEditing?: boolean;
-  onEditingChange?: (isEditing: boolean) => void;
-  onDelete?: () => void;
   children: React.ReactElement<GridDimensions>;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 }
 
 const GridItem: React.FC<GridItemProps> = ({
+  id,
   isEditable = true,
-  isEditing = false,
-  onEditingChange,
-  onDelete,
   children,
   onMouseEnter,
   onMouseLeave
 }) => {
+  
   const [isHovered, setIsHovered] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null!);
+
+  const activeEditor = useEditorStore(state => state.activeEditor);
+  const isEditing = activeEditor === id;
+  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
+  const deleteItem = useEditorStore(state => state.deleteItem);
 
   // Gets the dimensions of the grid item on change
   useEffect(() => {
@@ -46,7 +49,7 @@ const GridItem: React.FC<GridItemProps> = ({
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isEditing) {
-        onEditingChange?.(false);
+        setActiveEditor(null);
         onMouseLeave?.();
       }
     };
@@ -55,7 +58,7 @@ const GridItem: React.FC<GridItemProps> = ({
     return () => {
       window.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [isEditing, onEditingChange]);
+  }, [isEditing, setActiveEditor, onMouseLeave]);
 
   return (
     <div 
@@ -65,7 +68,7 @@ const GridItem: React.FC<GridItemProps> = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="content-area">
-        {React.cloneElement(children as React.ReactElement, {
+        {React.cloneElement(children as React.ReactElement<GridDimensions>, {
           gridWidth: dimensions.width,
           gridHeight: dimensions.height
         })}    
@@ -74,8 +77,8 @@ const GridItem: React.FC<GridItemProps> = ({
         <GridItemOptions
           isEditable={isEditable}
           isEditing={isEditing}
-          onEditingChange={onEditingChange}
-          onDelete={onDelete}
+          onEditingChange={(editing) => setActiveEditor(editing ? id: null)}
+          onDelete={() => deleteItem(id)}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
         />

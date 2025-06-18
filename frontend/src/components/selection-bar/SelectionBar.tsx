@@ -1,32 +1,28 @@
 // frontend/src/components/SelectionBar/SelectionBar.tsx
 import React from 'react';
 import './SelectionBar.css';
+import { useEditorStore } from "../../events/EditorStore";
 
-interface SelectionBarProps {
-  isOpen: boolean;
-  onAddText: () => void;
-  onAddImage: (type: 'upload' | 'gallery') => void;
-}
+interface SelectionBarProps {}
 
-const SelectionBar: React.FC<SelectionBarProps> = ({
-  isOpen,
-  onAddText,
-  onAddImage
-}) => {
+const SelectionBar: React.FC<SelectionBarProps> = () => {
+  const mode = useEditorStore(state => state.mode);
+  const addItem = useEditorStore(state => state.addItem);
+
   return (
-    <div className={`selection-bar ${isOpen ? 'open' : ''}`}> 
+    <div className={`selection-bar ${mode === 'edit' ? 'open' : ''}`}> 
       <div className="selection-content">        
         <div className="selection-options">
           <button 
-            className="option-button"
-            onClick={onAddText}
+            className="option-button text"
+            onClick={() => addItem('text')}
           >
             <span className="icon">📝</span>
           </button>
 
           <button 
-            className="option-button"
-            onClick={() => onAddImage('upload')}
+            className="option-button image"
+            onClick={() => addItem('image')}
           >
             <span className="icon">📤</span>
           </button>

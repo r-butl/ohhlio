@@ -2,61 +2,33 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { WidthProvider, Responsive } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import './Renderer.css';
+import './PortfolioRenderer.css';
+
 import TextEditor from '../text-editor/TextEditor';
 import ImageEditor from '../image-editor/ImageEditor';
 import GridItem from '../grid-item/GridItem';
 import { ContentItem } from '../../types/ContentItem';
 import { useButtonHover } from '../../hooks/useButtonHover';
 
+import { useEditorStore } from '../../events/EditorStore';
+
 const ResponsiveGrid = WidthProvider(Responsive);
 
-interface RendererProps {
-  isEditMode?: boolean;
-  isEditing?: boolean;
-  contentSchema?: ContentItem[];
-  onContentChange?: (content: ContentItem[]) => void;
-  onEditingStateChange?: (editing: boolean) => void;
-}
+interface RendererProps {}
 
-const Renderer: React.FC<RendererProps> = ({
-  isEditMode = false,
-  contentSchema = [],
-  onContentChange,
-  onEditingStateChange,
-}) => {
-  const [editingMap, setEditingMap] = useState<Record<string, boolean>>({});
-  const [activeEditor, setActiveEditor] = useState<string | null>(null);
+const Renderer: React.FC<RendererProps> = ({}) => {
+
   const { isHovered: isButtonHovered, handleMouseEnter, handleMouseLeave } = useButtonHover();
 
-  const isDraggable = isEditMode && !Object.values(editingMap).some(Boolean) && !isButtonHovered;
-  const isResizable = isEditMode && !isButtonHovered;
+  const mode = useEditorStore(state => state.mode);
+  const activeEditor = useEditorStore(state => state.activeEditor);
+  const items = useEditorStore(state => state.items);
+  const updateLayout = useEditorStore(state => state.updateLayout);
 
-  const handleEditingChange = useCallback((id: string, editing: boolean) => {
-    setEditingMap((prev) => ({ ...prev, [id]: editing }));
-    setActiveEditor(editing ? id : null);
-  }, []);
+  const isDraggable = mode && (!activeEditor === null) && !isButtonHovered;
+  const isResizable = mode && !isButtonHovered;
 
-  useEffect(() => {
-    const anyEditing = Object.values(editingMap).some(Boolean);
-    onEditingStateChange?.(anyEditing);
-  }, [editingMap]);
-
-  const handleDelete = useCallback(
-    (id: string) => {
-      const updated = contentSchema.filter((item) => item.id !== id);
-      onContentChange?.(updated);
-    },
-    [contentSchema, onContentChange]
-  );
-
-  const onLayoutChange = (layout: any[]) => {
-    const updated = contentSchema.map((item) => {
-      const layoutItem = layout.find((l) => l.i === item.id);
-      return layoutItem ? { ...item, layout: layoutItem } : item;
-    });
-    onContentChange?.(updated);
-  };
+  const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
 
   const getTypeSpecificLayout = (type: 'text' | 'image') => {
     const baseLayout = {
@@ -90,9 +62,9 @@ const Renderer: React.FC<RendererProps> = ({
     }
   };
 
-  const renderItem = (item: ContentItem) => {
-    const isEditing = editingMap[item.id] || false;
-    const isEditable = isEditMode && (!activeEditor || activeEditor === item.id);
+  const renderItem = (item: typeof items[string]) => {
+    const isEditing = activeEditor === item.id || false;
+    const isEditable = mode && (!activeEditor || activeEditor === item.id);
     const typeSpecificLayout = getTypeSpecificLayout(item.type);
 
     return (
@@ -102,28 +74,23 @@ const Renderer: React.FC<RendererProps> = ({
           ...item.layout,
           ...typeSpecificLayout,
         }}
-        className={isEditMode ? 'edit' : ''}
+        className={mode ? 'edit' : ''}
       >
         <GridItem
-          key={item.id}
+          id={item.id}
           isEditable={isEditable}
-          isEditing={isEditing}
-          onEditingChange={(v) => handleEditingChange(item.id, v)}
-          onDelete={() => handleDelete(item.id)}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
           {item.type === 'text' ? (
             <TextEditor 
               isEditing={isEditing} 
-              onEditingChange={(v) => handleEditingChange(item.id, v)}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             />
           ) : (
             <ImageEditor
               isEditing={isEditing}
-              onEditingChange={(v) => handleEditingChange(item.id, v)}
               gridWidth={item.layout.w * (1600 / 24)}
               gridHeight={item.layout.h * (1600 / 60)}
               onMouseEnter={handleMouseEnter}
@@ -135,30 +102,26 @@ const Renderer: React.FC<RendererProps> = ({
     );
   };
 
-  // Params for react grid
-  const maxWidth = 1600;
-  const rowHeight = maxWidth / 25;
-  const columnCount = 12;
 
   return (
 
-    <div style={{ width: '100%', maxWidth: `${maxWidth}px`, margin: '0 auto' }}>
+    <div style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
       <ResponsiveGrid
         className="layout"
-        layouts={{ lg: contentSchema.map((item) => ({ ...item.layout })) }}
+        layouts={{ lg: Object.values(items).map((item) => ({ ...item.layout })) }}
         breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: columnCount, md: columnCount, sm: columnCount, xs: columnCount, xxs: columnCount }}
-        rowHeight={rowHeight}
+        cols={{ lg: gridColumnCount, md: gridColumnCount, sm: gridColumnCount, xs: gridColumnCount, xxs: gridColumnCount }}
+        rowHeight={gridRowHeight}
         isDraggable={isDraggable}
         isResizable={isResizable}
         resizeHandles={['sw', 'se']}
-        onLayoutChange={onLayoutChange}
+        onLayoutChange={updateLayout}
         margin={[5, 5]}
         containerPadding={[1, 1]}
         compactType="vertical"
         preventCollision={false}
       >
-        {contentSchema.map(renderItem)}
+        {Object.values(items).map(renderItem)}
       </ResponsiveGrid>
     </div>
   );
