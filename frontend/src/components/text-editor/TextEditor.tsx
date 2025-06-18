@@ -6,7 +6,7 @@ import FontFamily from '@tiptap/extension-font-family';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import './TextEditor.css';
-import TextToolbarPortal from './TextToolbar';
+import TextToolbarPortal from '../options-panel/TextToolbar';
 import { GridDimensions } from '../grid-item/GridItem';
 
 interface TextEditorProps extends GridDimensions {

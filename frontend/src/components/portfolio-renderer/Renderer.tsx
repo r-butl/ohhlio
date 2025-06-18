@@ -6,7 +6,7 @@ import './Renderer.css';
 import TextEditor from '../text-editor/TextEditor';
 import ImageEditor from '../image-editor/ImageEditor';
 import GridItem from '../grid-item/GridItem';
-import { ContentItem } from '../../components/types/ContentItem';
+import { ContentItem } from '../../types/ContentItem';
 import { useButtonHover } from '../../hooks/useButtonHover';
 
 const ResponsiveGrid = WidthProvider(Responsive);

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import Cropper from 'react-easy-crop';
 import { GridDimensions } from '../grid-item/GridItem';
-import ImageToolbar from './ImageToolbar';
+import ImageToolbar from '../options-panel/ImageToolbar';
 import './ImageEditor.css';
 
 interface ImageEditorProps extends GridDimensions {

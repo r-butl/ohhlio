@@ -1,47 +1,44 @@
 import React from 'react';
 import './NavBar.css';
+import { useEditorStore } from "../../events/EditorStore";
 
 interface NavBarProps {
-    isEditMode: boolean;
-    isEditing: boolean;
-    setIsEditMode: (value: boolean) => void;
-    isHomeUser: boolean;
+    isHomeUser: boolean;  // This will be used to determine if user is the owner
 }
 
-const NavBar: React.FC<NavBarProps> = ({
-    isEditMode,
-    isEditing,
-    setIsEditMode,
-    isHomeUser
-}) => {
+const NavBar: React.FC<NavBarProps> = ({ isHomeUser }) => {
+    // Get the editor mode and toggle function directly from the store
+    const mode = useEditorStore(state => state.mode);
+    const toggleEditorMode = useEditorStore(state => state.toggleEditorMode);
+    const activeEditor = useEditorStore(state => state.activeEditor);
+    
+    // We'll use this to determine if editing is allowed
+    const canEdit = isHomeUser;
     
     return (
-    
-    <div className="app-nav-bar">
-        <h1>Ohhlio</h1>
+        <div className="app-nav-bar">
+            <h1>Ohhlio</h1>
 
-        <div className="controls">
+            <div className="controls">
+                {canEdit && (
+                    <button
+                        className="button control"
+                        onClick={toggleEditorMode}
+                        // Disable the button if we're in the middle of editing an item
+                        disabled={activeEditor !== null}
+                    >
+                        {mode === 'edit' ? 'Preview' : 'Edit'}
+                    </button>
+                )}
 
-            { isHomeUser &&
-                <button
-                    className="button control"
-                    onClick={() => setIsEditMode(!isEditMode)}
-                    disabled={isEditing}
+                <button 
+                    className="button profile"
                 >
-                    {isEditMode ? 'Preview' : 'Edit'}
+                    Profile
                 </button>
-            }
-
-            <button 
-                className="button profile"
-            >
-                Profile
-            </button>
-            
-
+            </div>
         </div>
-    </div>
-    )
+    );
 }
 
 export default NavBar;

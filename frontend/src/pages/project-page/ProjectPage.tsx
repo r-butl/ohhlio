@@ -3,7 +3,7 @@ import './ProjectPage.css';
 import Renderer from '../../components/portfolio-renderer/Renderer';
 import SelectionBar from '../../components/selection-bar/SelectionBar';
 import NavBar from '../../components/nav-bar/NavBar';
-import { ContentItem } from '../../components/types/ContentItem';
+import { ContentItem } from '../../types/ContentItem';
 
 const ProjectPage: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);

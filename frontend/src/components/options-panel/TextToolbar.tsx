@@ -19,7 +19,11 @@ interface TextToolbarProps {
   onAlignLeft: () => void;
   onAlignCenter: () => void;
   onAlignRight: () => void;
-  alignment: string;
+  horizontalAlignment: string;
+  verticalAlignment: 'top' | 'middle' | 'bottom';
+  onVerticalAlignTop: () => void;
+  onVerticalAlignMiddle: () => void;
+  onVerticalAlignBottom: () => void;
 }
 
 const TextToolbarPortal: React.FC<TextToolbarProps> = ({
@@ -39,7 +43,11 @@ const TextToolbarPortal: React.FC<TextToolbarProps> = ({
     onAlignLeft,
     onAlignCenter,
     onAlignRight,
-    alignment
+    horizontalAlignment,
+    verticalAlignment,
+    onVerticalAlignTop,
+    onVerticalAlignMiddle,
+    onVerticalAlignBottom
   }) => {
 
     const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -131,24 +139,51 @@ const TextToolbarPortal: React.FC<TextToolbarProps> = ({
 
             <button 
               onClick={onAlignLeft} 
-              className={`format-button ${alignment === 'left' ? 'active' : ''}`}
+              className={`format-button ${horizontalAlignment === 'left' ? 'active' : ''}`}
               title="Align Left"
             >
               ⇤
             </button>
             <button 
               onClick={onAlignCenter} 
-              className={`format-button ${alignment === 'center' ? 'active' : ''}`}
+              className={`format-button ${horizontalAlignment === 'center' ? 'active' : ''}`}
               title="Align Center"
             >
               ⇔
             </button>
             <button 
               onClick={onAlignRight} 
-              className={`format-button ${alignment === 'right' ? 'active' : ''}`}
+              className={`format-button ${horizontalAlignment === 'right' ? 'active' : ''}`}
               title="Align Right"
             >
               ⇥
+            </button>
+          </div>
+        </div>
+        
+        <div className="button-group">
+          <label>Vertical Alignment</label>
+          <div className='format-buttons'>
+            <button 
+              onClick={onVerticalAlignTop} 
+              className={`format-button ${verticalAlignment === 'top' ? 'active' : ''}`}
+              title="Align Top"
+            >
+              ⇧
+            </button>
+            <button 
+              onClick={onVerticalAlignMiddle} 
+              className={`format-button ${verticalAlignment === 'middle' ? 'active' : ''}`}
+              title="Align Middle"
+            >
+              ⇔
+            </button>
+            <button 
+              onClick={onVerticalAlignBottom} 
+              className={`format-button ${verticalAlignment === 'bottom' ? 'active' : ''}`}
+              title="Align Bottom"
+            >
+              ⇩
             </button>
           </div>
         </div>

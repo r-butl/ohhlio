@@ -1,0 +1,8 @@
+.options-container {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  z-index: 10;
+}
+
+/* Move other options-related styles here */ 
