@@ -7,7 +7,6 @@ import './PortfolioRenderer.css';
 import TextEditor from '../text-editor/TextEditor';
 import ImageEditor from '../image-editor/ImageEditor';
 import GridItem from '../grid-item/GridItem';
-import { ContentItem } from '../../types/ContentItem';
 import { useButtonHover } from '../../hooks/useButtonHover';
 
 import { useEditorStore } from '../../events/EditorStore';
@@ -25,8 +24,8 @@ const Renderer: React.FC<RendererProps> = ({}) => {
   const items = useEditorStore(state => state.items);
   const updateLayout = useEditorStore(state => state.updateLayout);
 
-  const isDraggable = mode && (!activeEditor === null) && !isButtonHovered;
-  const isResizable = mode && !isButtonHovered;
+  const isDraggable = mode === 'edit' && (activeEditor === null) && !isButtonHovered;
+  const isResizable = mode === 'edit' && !isButtonHovered;
 
   const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
 
@@ -64,7 +63,7 @@ const Renderer: React.FC<RendererProps> = ({}) => {
 
   const renderItem = (item: typeof items[string]) => {
     const isEditing = activeEditor === item.id || false;
-    const isEditable = mode && (!activeEditor || activeEditor === item.id);
+    const isEditable = mode === 'edit' && (!activeEditor || activeEditor === item.id);
     const typeSpecificLayout = getTypeSpecificLayout(item.type);
 
     return (
@@ -74,7 +73,7 @@ const Renderer: React.FC<RendererProps> = ({}) => {
           ...item.layout,
           ...typeSpecificLayout,
         }}
-        className={mode ? 'edit' : ''}
+        className={mode === 'edit' ? 'edit' : ''}
       >
         <GridItem
           id={item.id}
@@ -84,15 +83,11 @@ const Renderer: React.FC<RendererProps> = ({}) => {
         >
           {item.type === 'text' ? (
             <TextEditor 
-              isEditing={isEditing} 
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
+              id={item.id}
             />
           ) : (
             <ImageEditor
               isEditing={isEditing}
-              gridWidth={item.layout.w * (1600 / 24)}
-              gridHeight={item.layout.h * (1600 / 60)}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             />
@@ -101,7 +96,6 @@ const Renderer: React.FC<RendererProps> = ({}) => {
       </div>
     );
   };
-
 
   return (
 

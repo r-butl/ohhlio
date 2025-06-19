@@ -3,6 +3,19 @@ import { create } from 'zustand'
 import { produce } from 'immer'
 import emitter from './EventBus'
 
+export type TextItemProps = {
+  content: string;
+  fontSize: number;
+  fontFamily: string;
+  textAlignVertical: 'top' | 'center' | 'bottom';
+  textAlignHorizontal: 'left' | 'center' | 'right';
+  isBold: boolean;
+  isItalic: boolean;
+  isUnderline: boolean;
+  maxChars: number;
+  charCount: number;
+}
+
 // Layout configuration for 1 item
 type Layout = {
   x: number
@@ -56,6 +69,8 @@ type State = {
   // Editor interaction
   toggleEditorMode: () => void
   setActiveEditor: (id: string | null) => void
+  confirmEdit: (id: string) => void
+  cancelEdit: (id: string) => void
 
   // Grid item interaction (text/image/ect content) 
   setItems: (fn: (draft: Record<string, Item>) => void) => void // immer function for setting items, useful for protective state updates
@@ -133,7 +148,36 @@ export const useEditorStore = create<State>((set, get) => ({
   },
 
   // Sets which grid item is actively editing
-  setActiveEditor: (id) => set({ activeEditor: id }),
+  // Creates a backup of the items contents
+  setActiveEditor: (id: string | null ) => {
+    set( state => {
+      if (id && state.items[id]) {
+        state.items[id].props._backup = { ...state.items[id].props };
+      }
+      return { activeEditor: id };
+    });
+  },
+
+  // Deletes the back up
+  confirmEdit: (id: string) => {
+    set(state => {
+      if (state.items[id]) {
+        delete state.items[id].props._backup;
+      }
+      return { activeEditor: null }
+    })
+  },
+
+  // Restores the backup
+  cancelEdit: (id: string) => {
+    set( state => {
+      if (state.items[id] && state.items[id].props._backup) {
+        state.items[id].props = { ...state.items[id].props._backup };
+        delete state.items[id].props._backup;
+      }
+      return { activeEditor: null};
+    })
+  },
 
   // Adds an item to the grid
   addItem: (type) => {

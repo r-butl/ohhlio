@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './GridItem.css';
 import GridItemOptions from './GridItemOptions';
 import { useEditorStore } from '../../events/EditorStore';
+import { useEditor } from '@tiptap/react';
 
 export interface GridDimensions {
   gridWidth?: number;
@@ -24,7 +25,7 @@ const GridItem: React.FC<GridItemProps> = ({
   onMouseEnter,
   onMouseLeave
 }) => {
-  
+
   const [isHovered, setIsHovered] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null!);

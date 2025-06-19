@@ -5,35 +5,32 @@ import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
+
 import './TextEditor.css';
 import TextToolbarPortal from '../options-panel/TextToolbar';
-import { GridDimensions } from '../grid-item/GridItem';
+import { useEditorStore } from '../../events/EditorStore';
 
-interface TextEditorProps extends GridDimensions {
-  initialFontSize?: number;
-  initialFontFamily?: string;
-  isEditing?: boolean;
-  onEditingChange?: (isEditing: boolean) => void;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
-}
+const TextEditor: React.FC<{ id: string, gridWidth?: number; gridHeight?: number  }> = ({ id, gridWidth, gridHeight }) => {
+  const item = useEditorStore(state => state.items[id]);
+  const isEditing = useEditorStore(state => state.activeEditor === id) && useEditorStore(state => state.mode === 'edit');
+  const setItems = useEditorStore(state => state.setItems);
 
-const TextEditor: React.FC<TextEditorProps> = ({
-  initialFontSize = 16,
-  initialFontFamily = 'Arial',
-  gridWidth,
-  gridHeight,  
-  isEditing = false,
-  onEditingChange,
-  onMouseEnter,
-  onMouseLeave,
-}) => {
-  const [fontFamily, setFontFamily] = useState(initialFontFamily);
-  const [fontSize, setFontSize] = useState(initialFontSize);
-  const [maxChars, setMaxChars] = useState(0);
-  const [charCount, setCharCount] = useState(0);
+  if (!item) return null;
+  const { 
+    content,
+    fontFamily, 
+    fontSize, 
+    textAlignHorizontal, 
+    textAlignVertical, 
+    isBold, 
+    isItalic, 
+    isUnderline,
+    maxChars,
+    charCount
+  } = item.props;
+
   const DEFAULT_MESSAGE = "Select <strong>Options &gt; Edit</strong> to add text.";
-  const [savedContent, setSavedContent] = useState(DEFAULT_MESSAGE);
+
   const editorRef = useRef<HTMLDivElement>(null!);
 
   const editor = useEditor({
@@ -44,11 +41,11 @@ const TextEditor: React.FC<TextEditorProps> = ({
       Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph', 'listItem', 'bulletList', 'orderedList'],
-        defaultAlignment: 'center',
+        defaultAlignment: textAlignHorizontal,
         alignments: ['left', 'center', 'right']
       }),
     ],
-    content: savedContent,
+    content: content,
     editable: isEditing,
     editorProps: {
       attributes: {
@@ -66,7 +63,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
           // Delay DOM measurement until after key press
           requestAnimationFrame(() => {
             const currentHeight = editorEl.scrollHeight;
-      
             if (gridHeight && currentHeight > gridHeight) {
               // Undo the character or newline that caused overflow
               view.dispatch(
@@ -82,34 +78,18 @@ const TextEditor: React.FC<TextEditorProps> = ({
         }
       }
       
-      
     },
     onUpdate: ({ editor }) => {
-      const content = editor.getText();
-      setCharCount(content.length);
+      const html = editor.getHTML();
+      const text = editor.getText();
+      setItems(draft => {
+        if (draft[id]) {
+          draft[id].props.content = html;
+          draft[id].props.charCount = text.length;
+        }
+      });
     }
   });
-
-  // Controls font family updates
-  useEffect(() => {
-    if (editor && isEditing) {
-      editor.chain().focus().setFontFamily(fontFamily).run();
-    }
-  }, [fontFamily, editor, isEditing]);
-
-  // Controls font size updates
-  useEffect(() => {
-    if (editor && isEditing) {
-      editor.chain().focus().setMark('textStyle', { fontSize: `${fontSize}px` }).run();
-    }
-  }, [fontSize, editor, isEditing]);
-
-  // Activates editing capability
-  useEffect(() => {
-    if (editor) {
-      editor.setEditable(isEditing);
-    }
-  }, [isEditing, editor]);
 
   // Calculate max characters based on grid size and font size
   useEffect(() => {
@@ -128,62 +108,21 @@ const TextEditor: React.FC<TextEditorProps> = ({
       const maxLines = Math.floor(availableHeight / lineHeight);
       
       // Calculate total characters, with some buffer for safety
-      const maxChars = Math.floor(charsPerLine * maxLines * 0.9); // 90% of theoretical max for safety
+      const maxCharsCalc = Math.floor(charsPerLine * maxLines * 0.9); // 90% of theoretical max for safety
       
-      setMaxChars(maxChars);
+      setItems(draft => {
+        if (draft[id]) {
+          draft[id].props.maxChars = maxCharsCalc;
+        }
+      })
     }
-  }, [gridHeight, gridWidth, fontSize]);
+  }, [gridHeight, gridWidth, fontSize, id, setItems]);
 
-  const handleConfirm = () => {
-    if (editor) {
-      // Save the current content when confirming
-      setSavedContent(editor.getHTML());
-    }
-    if (onEditingChange) {
-      onEditingChange(false);
-      onMouseLeave?.();
-    }
-  };
-
-  const handleCancel = () => {
-    if (editor) {
-      // Revert to saved content
-      editor.commands.setContent(savedContent);
-    }
-    if (onEditingChange) {
-      onEditingChange(false);
-      onMouseLeave?.();
-    }
-  };
-
-  // Reset to saved content when entering edit mode or when escape is pressed
   useEffect(() => {
     if (editor) {
-      if (isEditing) {
-        // When entering edit mode, show the saved content
-        editor.commands.setContent(savedContent);
-      } else {
-        // When exiting edit mode (including via escape), revert to saved content
-        editor.commands.setContent(savedContent);
-      }
+      editor.setEditable(isEditing);
     }
-  }, [isEditing, editor, savedContent]);
-
-  const toggleBold = () => {
-    editor?.chain().focus().toggleBold().run();
-  };
-
-  const toggleItalic = () => {
-    editor?.chain().focus().toggleItalic().run();
-  };
-
-  const toggleUnderline = () => {
-    editor?.chain().focus().toggleUnderline().run();
-  };
-
-  const setAlignment = (alignment: 'left' | 'center' | 'right') => {
-    editor?.chain().focus().setTextAlign(alignment).run();
-  };
+  }, [isEditing, editor]);
 
   return (
     <div 
@@ -192,30 +131,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
     >
       <EditorContent editor={editor} className="text-editor-tiptap" />
       {isEditing && (
-        <>
-          <TextToolbarPortal
-            fontFamily={fontFamily}
-            fontSize={fontSize}
-            onFontFamilyChange={setFontFamily}
-            onFontSizeChange={setFontSize}
-            gridItemRef={editorRef}
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}
-            onBold={toggleBold}
-            onItalic={toggleItalic}
-            onUnderline={toggleUnderline}
-            isBold={editor?.isActive('bold') ?? false}
-            isItalic={editor?.isActive('italic') ?? false}
-            isUnderline={editor?.isActive('underline') ?? false}
-            onAlignLeft={() => setAlignment('left')}
-            onAlignCenter={() => setAlignment('center')}
-            onAlignRight={() => setAlignment('right')}
-            alignment={editor?.getAttributes('paragraph').textAlign || 'left'}
-          />
-          {/* <div className={`char-count ${charCount > maxChars ? 'exceeded' : ''}`}>
-            {charCount}/{maxChars}
-          </div> */}
-        </>
+        <> <TextToolbarPortal id={id}/> </>
       )}
     </div>
   );
