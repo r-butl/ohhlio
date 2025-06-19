@@ -5,19 +5,13 @@ import ImageToolbar from '../options-panel/ImageToolbar';
 import './ImageEditor.css';
 
 interface ImageEditorProps extends GridDimensions {
-  isEditing?: boolean;
-  onEditingChange?: (isEditing: boolean) => void;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
+  id: string;
 }
 
 const ImageEditor: React.FC<ImageEditorProps> = ({
-  isEditing = false,
-  onEditingChange,
+  id,
   gridWidth,
   gridHeight,
-  onMouseEnter,
-  onMouseLeave,
 }) => {
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });

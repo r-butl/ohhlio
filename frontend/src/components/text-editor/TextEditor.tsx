@@ -61,7 +61,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
         alignments: ['left', 'center', 'right']
       }),
     ],
-    content: DEFAULT_MESSAGE,
+    content: content? content : DEFAULT_MESSAGE,
     editable: true,
     editorProps: {
       attributes: {

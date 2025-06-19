@@ -3,15 +3,6 @@ import { create } from 'zustand'
 import { produce } from 'immer'
 import emitter from './EventBus'
 
-// Layout configuration for 1 item
-type Layout = {
-  x: number
-  y: number
-  w: number
-  h: number
-  i: string
-}
-
 export type TextItemProps = {
   content: string;
   fontSize: number;
@@ -25,24 +16,22 @@ export type TextItemProps = {
   charCount: number;
 }
 
-
-
-type TextItem = {
-  id: string
-  type: 'text'
-  layout: Layout
-  props: TextItemProps
+// Layout configuration for 1 item
+type Layout = {
+  x: number
+  y: number
+  w: number
+  h: number
+  i: string
 }
 
-type ImageItem = {
+// Type definition for 1 item
+type Item = {
   id: string
-  type: 'image'
+  type: 'text' | 'image'
   layout: Layout
-  props: Record<string, any>
+  props: any
 }
-
-type Item = TextItem | ImageItem
-
 
 // Layout configuration for renderer
 const LAYOUT_CONFIG = {
@@ -179,24 +168,24 @@ export const useEditorStore = create<State>((set, get) => ({
 
   // Deletes the back up
   confirmEdit: (id: string) => {
-    console.log('Confirming edit.')
-    set(state => {
-      if (state.items[id]) {
-        delete state.items[id].props._backup;
+    console.log('Confirming edit.');
+    get().setItems(draft => {
+      if (draft[id] && draft[id].props._backup !== undefined) {
+        delete draft[id].props._backup;
       }
-      return { activeEditor: null }
-    })
+    });
+    set({ activeEditor: null });
   },
 
   // Restores the backup
   cancelEdit: (id: string) => {
     console.log('Canceling edit.')
-    set( state => {
-      if (state.items[id] && state.items[id].props._backup) {
-        state.items[id].props = { ...state.items[id].props._backup };
-        delete state.items[id].props._backup;
+    get().setItems( draft => {
+      if (draft[id] && draft[id].props._backup) {
+        draft[id].props = { ...draft[id].props._backup };
+        delete draft[id].props._backup;
       }
-      return { activeEditor: null};
+      set({ activeEditor: null });
     })
   },
 
