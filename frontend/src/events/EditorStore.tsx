@@ -3,6 +3,15 @@ import { create } from 'zustand'
 import { produce } from 'immer'
 import emitter from './EventBus'
 
+// Layout configuration for 1 item
+type Layout = {
+  x: number
+  y: number
+  w: number
+  h: number
+  i: string
+}
+
 export type TextItemProps = {
   content: string;
   fontSize: number;
@@ -16,22 +25,24 @@ export type TextItemProps = {
   charCount: number;
 }
 
-// Layout configuration for 1 item
-type Layout = {
-  x: number
-  y: number
-  w: number
-  h: number
-  i: string
+
+
+type TextItem = {
+  id: string
+  type: 'text'
+  layout: Layout
+  props: TextItemProps
 }
 
-// Type definition for 1 item
-type Item = {
+type ImageItem = {
   id: string
-  type: 'text' | 'image'
+  type: 'image'
   layout: Layout
-  props: any
+  props: Record<string, any>
 }
+
+type Item = TextItem | ImageItem
+
 
 // Layout configuration for renderer
 const LAYOUT_CONFIG = {
@@ -92,6 +103,7 @@ export const useEditorStore = create<State>((set, get) => ({
 
   // Use this function to make changes the grid items
   setItems: (fn) => {
+    console.log('Setting items.')
     const { items, history } = get()
     const nextItems = produce(items, (draft) => fn(draft))
     set({
@@ -106,6 +118,7 @@ export const useEditorStore = create<State>((set, get) => ({
 
   // Undoes changes made to the grid items
   undo: () => {
+    console.log("Undo triggered.")
     const { history } = get()
     if (history.past.length === 0) return
 
@@ -124,6 +137,7 @@ export const useEditorStore = create<State>((set, get) => ({
 
   // Redoes changes made to the grid items
   redo: () => {
+    console.log("Redo triggered.")
     const { history } = get()
     if (history.future.length === 0) return
 
@@ -150,16 +164,22 @@ export const useEditorStore = create<State>((set, get) => ({
   // Sets which grid item is actively editing
   // Creates a backup of the items contents
   setActiveEditor: (id: string | null ) => {
-    set( state => {
-      if (id && state.items[id]) {
-        state.items[id].props._backup = { ...state.items[id].props };
-      }
-      return { activeEditor: id };
-    });
+    console.log(`Setting active editor to: ${id}.`)
+
+    const { items, setItems } = get();
+    if (id && items[id]) {
+      setItems(draft => {
+        if (draft[id]) {
+          draft[id].props._backup = { ...draft[id].props };
+        }
+      });
+    }
+    set({ activeEditor: id });
   },
 
   // Deletes the back up
   confirmEdit: (id: string) => {
+    console.log('Confirming edit.')
     set(state => {
       if (state.items[id]) {
         delete state.items[id].props._backup;
@@ -170,6 +190,7 @@ export const useEditorStore = create<State>((set, get) => ({
 
   // Restores the backup
   cancelEdit: (id: string) => {
+    console.log('Canceling edit.')
     set( state => {
       if (state.items[id] && state.items[id].props._backup) {
         state.items[id].props = { ...state.items[id].props._backup };

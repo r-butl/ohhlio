@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
@@ -10,29 +10,45 @@ import './TextEditor.css';
 import TextToolbarPortal from '../options-panel/TextToolbar';
 import { useEditorStore } from '../../events/EditorStore';
 
-const TextEditor: React.FC<{ id: string, gridWidth?: number; gridHeight?: number  }> = ({ id, gridWidth, gridHeight }) => {
-  const item = useEditorStore(state => state.items[id]);
-  const isEditing = useEditorStore(state => state.activeEditor === id) && useEditorStore(state => state.mode === 'edit');
-  const setItems = useEditorStore(state => state.setItems);
+interface TextEditorProps {
+  id: string;
+  content: string;
+  fontFamily: string;
+  fontSize: number;
+  textAlignHorizontal: string;
+  textAlignVertical: string;
+  isBold: boolean;
+  isItalic: boolean;
+  isUnderline: boolean;
+  maxChars: number;
+  charCount: number;
+  gridWidth: number;
+  gridHeight: number;
+}
 
-  if (!item) return null;
-  const { 
-    content,
-    fontFamily, 
-    fontSize, 
-    textAlignHorizontal, 
-    textAlignVertical, 
-    isBold, 
-    isItalic, 
-    isUnderline,
-    maxChars,
-    charCount
-  } = item.props;
+const TextEditor: React.FC<TextEditorProps> = ({ 
+  id, 
+  content,
+  fontFamily,
+  fontSize,
+  textAlignHorizontal,
+  textAlignVertical,
+  isBold,
+  isItalic,
+  isUnderline,
+  maxChars,
+  charCount,
+  gridWidth,
+  gridHeight, }) => {
+
+  const isActiveEditor = useEditorStore(state => state.activeEditor === id);
+  const isEditMode = useEditorStore(state => state.mode === 'edit');
+  const isEditing = isActiveEditor && isEditMode;
+  const setItems = useEditorStore(state => state.setItems);
 
   const DEFAULT_MESSAGE = "Select <strong>Options &gt; Edit</strong> to add text.";
 
   const editorRef = useRef<HTMLDivElement>(null!);
-
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -45,8 +61,8 @@ const TextEditor: React.FC<{ id: string, gridWidth?: number; gridHeight?: number
         alignments: ['left', 'center', 'right']
       }),
     ],
-    content: content,
-    editable: isEditing,
+    content: DEFAULT_MESSAGE,
+    editable: true,
     editorProps: {
       attributes: {
         style: `font-family: ${fontFamily}; font-size: ${fontSize}px`,
@@ -91,6 +107,7 @@ const TextEditor: React.FC<{ id: string, gridWidth?: number; gridHeight?: number
     }
   });
 
+
   // Calculate max characters based on grid size and font size
   useEffect(() => {
     if (gridWidth && gridHeight && fontSize) {
@@ -119,10 +136,12 @@ const TextEditor: React.FC<{ id: string, gridWidth?: number; gridHeight?: number
   }, [gridHeight, gridWidth, fontSize, id, setItems]);
 
   useEffect(() => {
-    if (editor) {
+    if (editor) {      
+      console.log('Setting editable state of editor.')
       editor.setEditable(isEditing);
     }
   }, [isEditing, editor]);
+
 
   return (
     <div 

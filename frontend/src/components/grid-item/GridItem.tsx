@@ -1,9 +1,11 @@
 // EditableContainer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import './GridItem.css';
-import GridItemOptions from './GridItemOptions';
+import GridItemOptions from '../options-panel/GridItemOptions';
 import { useEditorStore } from '../../events/EditorStore';
 import { useEditor } from '@tiptap/react';
+import { useButtonHover } from '../../hooks/useButtonHover';
+
 
 export interface GridDimensions {
   gridWidth?: number;
@@ -13,6 +15,7 @@ export interface GridDimensions {
 interface GridItemProps {
   id: string;
   isEditable?: boolean;
+  itemType: string;
   children: React.ReactElement<GridDimensions>;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -21,6 +24,7 @@ interface GridItemProps {
 const GridItem: React.FC<GridItemProps> = ({
   id,
   isEditable = true,
+  itemType,
   children,
   onMouseEnter,
   onMouseLeave
@@ -29,6 +33,8 @@ const GridItem: React.FC<GridItemProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null!);
+  const { isHovered: isButtonHovered, handleMouseEnter, handleMouseLeave } = useButtonHover();
+
 
   const activeEditor = useEditorStore(state => state.activeEditor);
   const isEditing = activeEditor === id;
@@ -76,10 +82,7 @@ const GridItem: React.FC<GridItemProps> = ({
       </div>
       {isHovered && !isEditing && (
         <GridItemOptions
-          isEditable={isEditable}
-          isEditing={isEditing}
-          onEditingChange={(editing) => setActiveEditor(editing ? id: null)}
-          onDelete={() => deleteItem(id)}
+          id={id}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
         />

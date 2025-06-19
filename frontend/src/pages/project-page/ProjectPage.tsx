@@ -35,10 +35,7 @@ const ProjectPage: React.FC = () => {
         ref={rendererRef}
         className={`renderer-container ${mode === 'edit' ? 'shifted' : ''}`}
       >
-        <Renderer
-          items={items}
-          isHomeUser={isHomeUser}
-        />
+        <Renderer/>
       </div>
     </div>
   );

@@ -77,6 +77,7 @@ const Renderer: React.FC<RendererProps> = ({}) => {
       >
         <GridItem
           id={item.id}
+          itemType={item.type}
           isEditable={isEditable}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
@@ -84,12 +85,11 @@ const Renderer: React.FC<RendererProps> = ({}) => {
           {item.type === 'text' ? (
             <TextEditor 
               id={item.id}
+              {...item.props}
             />
           ) : (
             <ImageEditor
               isEditing={isEditing}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
             />
           )}
         </GridItem>

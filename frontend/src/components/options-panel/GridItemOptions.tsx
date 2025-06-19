@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import './GridItemOptions.css';
+import { useEditorStore } from '../../events/EditorStore';
 
 interface GridItemOptionsProps {
-  isEditable: boolean;
-  isEditing: boolean;
-  onEditingChange: (isEditing: boolean) => void;
-  onDelete: () => void;
+  id: string;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  contentType?: 'text' | 'image';
 }
 
 const GridItemOptions: React.FC<GridItemOptionsProps> = ({
-  isEditable,
-  isEditing,
-  onEditingChange,
-  onDelete,
+  id,
   onMouseEnter,
-  onMouseLeave,
-  contentType
+  onMouseLeave
 }) => {
+
+  const isEditable = useEditorStore(state => state.mode === 'edit');
+  const isEditing = useEditorStore(state => state.activeEditor === id);
+  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
+
+  const toggleEditorMode = useEditorStore(state => state.toggleEditorMode);
+  const deleteItem = useEditorStore(state => state.deleteItem);
+
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isOptionsHovered, setIsOptionsHovered] = useState(false);
 
@@ -32,11 +33,6 @@ const GridItemOptions: React.FC<GridItemOptionsProps> = ({
     setIsOptionsHovered(false);
     onMouseLeave?.();
     setIsOptionsOpen(false);
-  };
-
-  const toggleEditMode = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEditingChange(!isEditing);
   };
 
   if (!isEditable || isEditing) return null;
@@ -67,14 +63,14 @@ const GridItemOptions: React.FC<GridItemOptionsProps> = ({
         {isEditable &&
             <button
             className="edit-toggle-button"
-            onClick={toggleEditMode}
+            onClick={() => setActiveEditor(id)}
             >
             Edit
             </button>
         }
         <button
           className="delete-button"
-          onClick={onDelete}
+          onClick={() => deleteItem(id)}
         >
           Delete
         </button>
