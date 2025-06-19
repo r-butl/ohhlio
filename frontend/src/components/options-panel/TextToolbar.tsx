@@ -6,7 +6,6 @@ import { useEditorStore, TextItemProps } from '../../events/EditorStore';
 const TextToolbarPortal: React.FC<{ id: string }> = ({ id }) => {
   const item = useEditorStore(state => state.items[id]);
   const setItem = useEditorStore(state => state.setItems);
-  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
   const confirmEdit = useEditorStore(state => state.confirmEdit);
   const cancelEdit = useEditorStore(state => state.cancelEdit);
 
