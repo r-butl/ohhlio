@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
@@ -9,6 +9,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import './TextEditor.css';
 import TextToolbarPortal from '../options-panel/TextToolbar';
 import { useEditorStore } from '../../events/EditorStore';
+import emitter from '../../events/EventBus';
 
 interface TextEditorProps {
   id: string;
@@ -28,27 +29,41 @@ interface TextEditorProps {
 
 const TextEditor: React.FC<TextEditorProps> = ({ 
   id, 
-  content,
-  fontFamily,
-  fontSize,
-  textAlignHorizontal,
-  textAlignVertical,
-  isBold,
-  isItalic,
-  isUnderline,
-  maxChars,
-  charCount,
   gridWidth,
   gridHeight, }) => {
+
+  const item = useEditorStore(state => state.items[id]);
+  const {   
+    content,
+    fontFamily,
+    fontSize,
+    textAlignHorizontal,
+    textAlignVertical,
+    isBold,
+    isItalic,
+    isUnderline,
+    maxChars,
+    charCount 
+  } = item.props;
 
   const isActiveEditor = useEditorStore(state => state.activeEditor === id);
   const isEditMode = useEditorStore(state => state.mode === 'edit');
   const isEditing = isActiveEditor && isEditMode;
-  const setItems = useEditorStore(state => state.setItems);
-
   const DEFAULT_MESSAGE = "Select <strong>Options &gt; Edit</strong> to add text.";
-
+  const [localContent, setLocalContent] = useState(() => {
+    // Initialize with content if it exists, otherwise use default message
+    return content && content !== DEFAULT_MESSAGE ? content : DEFAULT_MESSAGE;
+  });
+  const setItems = useEditorStore(state => state.setItems);
   const editorRef = useRef<HTMLDivElement>(null!);
+
+  // Update localContent when content changes from store (e.g., when entering edit mode)
+  useEffect(() => {
+    if (isEditing && content && content !== DEFAULT_MESSAGE) {
+      setLocalContent(content);
+    }
+  }, [isEditing, content]);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -61,7 +76,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
         alignments: ['left', 'center', 'right']
       }),
     ],
-    content: content? content : DEFAULT_MESSAGE,
+    content: localContent,
     editable: true,
     editorProps: {
       attributes: {
@@ -96,17 +111,16 @@ const TextEditor: React.FC<TextEditorProps> = ({
       
     },
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      const text = editor.getText();
-      setItems(draft => {
-        if (draft[id]) {
-          draft[id].props.content = html;
-          draft[id].props.charCount = text.length;
-        }
-      });
+      setLocalContent(editor.getHTML());
     }
   });
 
+  // Update editor content when localContent changes
+  useEffect(() => {
+    if (editor && editor.getHTML() !== localContent) {
+      editor.commands.setContent(localContent);
+    }
+  }, [localContent, editor]);
 
   // Calculate max characters based on grid size and font size
   useEffect(() => {
@@ -135,13 +149,47 @@ const TextEditor: React.FC<TextEditorProps> = ({
     }
   }, [gridHeight, gridWidth, fontSize, id, setItems]);
 
+
+  // Toggle the editor state
   useEffect(() => {
     if (editor) {      
-      console.log('Setting editable state of editor.')
       editor.setEditable(isEditing);
     }
   }, [isEditing, editor]);
 
+
+  // Listen for the confirm or cancel signals
+  useEffect(() => {
+
+    const handleConfirm = ({id: editId} : {id: string}) => {
+      if (editId === id && editor) {
+        console.log('Confirm pressed - saving content:', localContent);
+        setItems(draft => {
+            if(draft[id]) {
+              draft[id].props.content = localContent;
+            }
+          }
+        )
+      }
+    }
+
+    const handleCancel = () => {
+      const resetContent = content || DEFAULT_MESSAGE;
+      console.log('Cancel pressed - resetting to:', resetContent);
+      setLocalContent(resetContent);
+      if (editor) {
+        editor.commands.setContent(resetContent);
+      }
+    }
+
+    emitter.on('confirm-edit', handleConfirm);
+    emitter.on('cancel-edit', handleCancel);
+
+    return () => {
+      emitter.off('confirm-edit', handleConfirm);
+      emitter.off('cancel-edit', handleCancel);
+    }
+  }, [id, localContent, content, editor, setItems])
 
   return (
     <div 

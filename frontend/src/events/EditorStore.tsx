@@ -69,8 +69,6 @@ type State = {
   // Editor interaction
   toggleEditorMode: () => void
   setActiveEditor: (id: string | null) => void
-  confirmEdit: (id: string) => void
-  cancelEdit: (id: string) => void
 
   // Grid item interaction (text/image/ect content) 
   setItems: (fn: (draft: Record<string, Item>) => void) => void // immer function for setting items, useful for protective state updates
@@ -164,29 +162,6 @@ export const useEditorStore = create<State>((set, get) => ({
       });
     }
     set({ activeEditor: id });
-  },
-
-  // Deletes the back up
-  confirmEdit: (id: string) => {
-    console.log('Confirming edit.');
-    get().setItems(draft => {
-      if (draft[id] && draft[id].props._backup !== undefined) {
-        delete draft[id].props._backup;
-      }
-    });
-    set({ activeEditor: null });
-  },
-
-  // Restores the backup
-  cancelEdit: (id: string) => {
-    console.log('Canceling edit.')
-    get().setItems( draft => {
-      if (draft[id] && draft[id].props._backup) {
-        draft[id].props = { ...draft[id].props._backup };
-        delete draft[id].props._backup;
-      }
-      set({ activeEditor: null });
-    })
   },
 
   // Adds an item to the grid

@@ -3,11 +3,12 @@ import { createPortal } from 'react-dom';
 import './TextToolbar.css';
 import { useEditorStore, TextItemProps } from '../../events/EditorStore';
 
+import emitter from '../../events/EventBus';
+
 const TextToolbarPortal: React.FC<{ id: string }> = ({ id }) => {
   const item = useEditorStore(state => state.items[id]);
   const setItem = useEditorStore(state => state.setItems);
-  const confirmEdit = useEditorStore(state => state.confirmEdit);
-  const cancelEdit = useEditorStore(state => state.cancelEdit);
+  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
 
   if (!item) return null;
   const { fontFamily, fontSize, textAlignHorizontal, textAlignVertical, isBold, isItalic, isUnderline } = item.props
@@ -21,6 +22,16 @@ const TextToolbarPortal: React.FC<{ id: string }> = ({ id }) => {
           draft[id].props = { ...draft[id].props, ...props};
         }
       })
+    }
+
+    const handleConfirm = () => {
+      emitter.emit('confirm-edit', { id });
+      setActiveEditor('null');
+    }
+
+    const handleCancel = () => {
+      emitter.emit('cancel-edit');
+      setActiveEditor('null');
     }
   
     return createPortal(
@@ -92,8 +103,8 @@ const TextToolbarPortal: React.FC<{ id: string }> = ({ id }) => {
         </div>
         
         <div className="toolbar-group">
-          <button onClick={() => confirmEdit(id) } className="confirm-button">✓</button>
-          <button onClick={() => cancelEdit(id) } className="cancel-button">✕</button>
+          <button onClick={ handleConfirm } className="confirm-button">✓</button>
+          <button onClick={ handleCancel } className="cancel-button">✕</button>
         </div>
       </div>,
       document.getElementById('portal-root') || document.body

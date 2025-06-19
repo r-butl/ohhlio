@@ -6,11 +6,13 @@ export const useButtonHover = (onButtonHoverChange?: (isHovered: boolean) => voi
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
     onButtonHoverChange?.(true);
+    console.log('Mouse entering');
   }, [onButtonHoverChange]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
     onButtonHoverChange?.(false);
+    console.log('Mouse leaving');
   }, [onButtonHoverChange]);
 
   return {
