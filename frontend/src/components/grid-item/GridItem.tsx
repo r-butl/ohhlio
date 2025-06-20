@@ -1,5 +1,5 @@
 // EditableContainer.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import './GridItem.css';
 import OptionsPanel from '../options-panel/OptionsPanel';
 import { useEditorStore } from '../../events/EditorStore';
@@ -26,11 +26,12 @@ const GridItem: React.FC<GridItemProps> = ({
   const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
   const buttonHovered = useEditorStore(state => state.buttonHovered);
 
+  const setActiveOptionsPanel = useEditorStore(state => state.setActiveOptionsPanel);
+  const isOptionsPanelOpen = useEditorStore(state => state.activeOptionsPanel == id);
 
   const activeEditor = useEditorStore(state => state.activeEditor);
   const isEditing = activeEditor === id;
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
-  const deleteItem = useEditorStore(state => state.deleteItem);
 
   // Gets the dimensions of the grid item on change
   useEffect(() => {
@@ -73,12 +74,12 @@ const GridItem: React.FC<GridItemProps> = ({
             gridHeight: dimensions.height
           })}    
         </div>
-        {isHovered && !isEditing && (
+        {isHovered && !isEditing && !isOptionsPanelOpen && (
 
           <button 
             className="options-toggle-btn"
             onClick={(e) => {
-              setActiveEditor(id);
+              setActiveOptionsPanel(id);
             }}
             onMouseEnter={() => {setButtonHoveredState(true)}}
             onMouseLeave={() => {setButtonHoveredState(false)}}
@@ -87,7 +88,7 @@ const GridItem: React.FC<GridItemProps> = ({
           </button>
         )}
       </div>
-      {isEditing && (
+      {isOptionsPanelOpen && (
         <OptionsPanel
           id={id} 
           parentRef={containerRef}

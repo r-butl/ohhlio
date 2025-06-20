@@ -52,6 +52,7 @@ type State = {
   items: Record<string, Item>     // Items in the layout
   mode: 'edit' | 'display'        // Mode of the editor
   activeEditor: string | null     // ID of the current item being edited
+  activeOptionsPanel: string | null // ID of the current option panel that is open
 
   history: {                      // History of all actions in the editor
     past: Record<string, Item>[]
@@ -72,8 +73,11 @@ type State = {
   // Editor interaction
   toggleEditorMode: () => void
   setActiveEditor: (id: string | null) => void
-  buttonHovered: boolean
+  setActiveOptionsPanel: (id: string | null) => void;
+  buttonHovered: boolean  // Used for controlling the resize and draggability of the grid items
+                          //   when certain buttons on the component are hovered over them
   setButtonHoveredState: (state: boolean) => void;
+
 
   // Grid item interaction (text/image/ect content) 
   setItems: (fn: (draft: Record<string, Item>) => void) => void // immer function for setting items, useful for protective state updates
@@ -93,10 +97,16 @@ export const useEditorStore = create<State>((set, get) => ({
   defaultItemWidth: 3,
   defaultItemHeight: 3,
   buttonHovered: false,
+  activeOptionsPanel: null,
 
   // Toggle the button hovered state
   setButtonHoveredState: (state: boolean) => {
     set(({ buttonHovered: state}))
+  },
+
+  // Toggle the option panel opened 
+  setActiveOptionsPanel: (id: string | null ) => {
+    set(({ activeOptionsPanel: id }))
   },
 
   // Use this function to make changes the grid items

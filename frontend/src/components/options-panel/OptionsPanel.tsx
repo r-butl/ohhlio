@@ -7,12 +7,13 @@ import { OPTION_PAGES } from './OptionsPages';
 
 const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivElement> }> = ({ id, parentRef }) => {
   const item = useEditorStore(state => state.items[id]);
-  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
   const [activePageIndex, setActivePageIndex] = React.useState<number | null>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [positionReady, setPositionReady] = useState(false);
 
+  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
   const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
+  const setActiveOptionsPanel = useEditorStore( state => state.setActiveOptionsPanel);
 
   const deleteItem = useEditorStore(state => state.deleteItem);
 
@@ -45,11 +46,15 @@ const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivEle
     >
       <div className="panel-header">
         {activePageIndex !== null && (
-          <button onClick={() => setActivePageIndex(null)} className="back-button" aria-label="Back">←</button>
+          <button onClick={() => {
+            setActiveEditor(null);
+            setActivePageIndex(null)
+          }} className="back-button" aria-label="Back">←</button>
         )}
         <button onClick={() => {
           setActiveEditor(null);
           setButtonHoveredState(false);
+          setActiveOptionsPanel(null);
         }} className="close-button" aria-label="Close">×</button>
       </div>
       <div className="panel-content">

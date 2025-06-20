@@ -13,7 +13,6 @@ const CancelButton: React.FC<{}> = () => {
         emitter.emit('cancel-edit');
         setActiveEditor(null);
         setButtonHoveredState(false);
-
     }
 
     return (

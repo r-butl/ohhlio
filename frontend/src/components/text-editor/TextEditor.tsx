@@ -142,6 +142,8 @@ const TextEditor: React.FC<TextEditorProps> = ({
     }
   }, [gridHeight, gridWidth, fontSize, id, setItems]);
 
+
+  // Handles bold, italic, and underline commands to the editor
   useEffect(() => {
 
     if (!editor) return;
@@ -176,14 +178,12 @@ const TextEditor: React.FC<TextEditorProps> = ({
 
   }, [editor, id]);
 
-
   // Toggle the editor state
   useEffect(() => {
     if (editor) {      
       editor.setEditable(isEditing);
     }
   }, [isEditing, editor]);
-
 
   // Listen for the confirm or cancel signals
   useEffect(() => {
@@ -218,14 +218,14 @@ const TextEditor: React.FC<TextEditorProps> = ({
     }
   }, [id, localContent, content, editor, setItems])
 
-  // --- Add this useEffect for textAlignHorizontal ---
+  // Horizontal Alignment updates
   useEffect(() => {
     if (editor && textAlignHorizontal) {
       editor.commands.setTextAlign(textAlignHorizontal);
     }
   }, [editor, textAlignHorizontal]);
 
-  // --- Helper for vertical alignment style ---
+  // Vertical Alignment updates
   const getVerticalAlignStyle = (): React.CSSProperties => {
     switch (textAlignVertical) {
       case 'top':

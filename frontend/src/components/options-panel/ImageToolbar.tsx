@@ -1,5 +1,4 @@
-import React from 'react';
-import emitter from '../../events/EventBus';
+import React, { useEffect } from 'react';
 import { useEditorStore } from '../../events/EditorStore';
 import './OptionsPanel.css';
 import ConfirmButton from '../buttons/Confirm';
@@ -8,17 +7,12 @@ import CancelButton from '../buttons/Cancel';
 
 const ImageToolbar: React.FC<{ id: string }> = ({ id }) => {
 
+  // tell the editor that an item is being edited
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
-
-  const handleConfirm = () => {
-    emitter.emit('confirm-edit', { id });
-    setActiveEditor('null');
-  }
-
-  const handleCancel = () => {
-    emitter.emit('cancel-edit');
-    setActiveEditor('null');
-  }
+  useEffect(() => {
+    setActiveEditor(id);
+  }, []);
+  
   return (
     <>
       <div className="toolbar-buttons">
