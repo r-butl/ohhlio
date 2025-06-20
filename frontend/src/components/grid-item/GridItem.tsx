@@ -1,9 +1,8 @@
 // EditableContainer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import './GridItem.css';
-import GridItemOptions from '../options-panel/GridItemOptions';
+import OptionsPanel from '../options-panel/OptionsPanel';
 import { useEditorStore } from '../../events/EditorStore';
-import { useEditor } from '@tiptap/react';
 import { useButtonHover } from '../../hooks/useButtonHover';
 
 
@@ -14,8 +13,6 @@ export interface GridDimensions {
 
 interface GridItemProps {
   id: string;
-  isEditable?: boolean;
-  itemType: string;
   children: React.ReactElement<GridDimensions>;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -23,8 +20,6 @@ interface GridItemProps {
 
 const GridItem: React.FC<GridItemProps> = ({
   id,
-  isEditable = true,
-  itemType,
   children,
   onMouseEnter,
   onMouseLeave
@@ -34,7 +29,6 @@ const GridItem: React.FC<GridItemProps> = ({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null!);
   const { isHovered: isButtonHovered, handleMouseEnter, handleMouseLeave } = useButtonHover();
-
 
   const activeEditor = useEditorStore(state => state.activeEditor);
   const isEditing = activeEditor === id;
@@ -68,26 +62,43 @@ const GridItem: React.FC<GridItemProps> = ({
   }, [isEditing, setActiveEditor, onMouseLeave]);
 
   return (
-    <div 
-      ref={containerRef}
-      className="grid-item"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="content-area">
-        {React.cloneElement(children as React.ReactElement<GridDimensions>, {
-          gridWidth: dimensions.width,
-          gridHeight: dimensions.height
-        })}    
+    <>
+      <div 
+        ref={containerRef}
+        className="grid-item"
+        data-item-id={id}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="content-area">
+          {React.cloneElement(children as React.ReactElement<GridDimensions>, {
+            gridWidth: dimensions.width,
+            gridHeight: dimensions.height
+          })}    
+        </div>
+        {isHovered && !isEditing && (
+
+          <button 
+            className="options-toggle-btn"
+            onClick={(e) => {
+              setActiveEditor(id);
+            }}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+          >
+            Options
+          </button>
+        )}
       </div>
-      {isHovered && !isEditing && (
-        <GridItemOptions
-          id={id}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
+      {isEditing && (
+        <OptionsPanel
+          id={id} 
+          parentRef={containerRef}
         />
       )}
-    </div>
+        
+
+    </>
   );
 };
 

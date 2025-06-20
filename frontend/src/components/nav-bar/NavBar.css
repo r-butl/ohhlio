@@ -5,7 +5,7 @@
     align-items: center;
     background: rgb(220, 240, 243);
     padding: 0px 0px 0px 0px;
-    z-index: 1000;
+    z-index: 3;
 }
 
 .controls {
@@ -21,7 +21,7 @@
     display: flex;
     align-self: right;
     justify-content: flex-end;
-    z-index: 1000;
+    z-index: 20;
 }
 
 .button {

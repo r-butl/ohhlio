@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import './GridItemOptions.css';
+import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
+import './OptionsPanel.css';
 import { useEditorStore } from '../../events/EditorStore';
 
 interface GridItemOptionsProps {
@@ -24,6 +25,9 @@ const GridItemOptions: React.FC<GridItemOptionsProps> = ({
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isOptionsHovered, setIsOptionsHovered] = useState(false);
 
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+
   const handleOptionsMouseEnter = () => {
     setIsOptionsHovered(true);
     onMouseEnter?.();
@@ -38,44 +42,22 @@ const GridItemOptions: React.FC<GridItemOptionsProps> = ({
   if (!isEditable || isEditing) return null;
 
   return (
-    <div 
-        className="options-container"
-        onMouseEnter={handleOptionsMouseEnter}
-        onMouseLeave={handleOptionsMouseLeave}
-    >
-      {!isOptionsOpen && (
-        <button 
-          className="options-toggle-btn"
-          onClick={(e) => {
-            setIsOptionsOpen(true);
-          }}
-          onMouseEnter={handleOptionsMouseEnter}
-          onMouseLeave={handleOptionsMouseLeave}
-        >
-          Options
-        </button>
-      )}
-      <div 
-        className={`options-panel ${isOptionsOpen ? 'open' : ''}`}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
+    <>
+      {isEditable &&
+          <button
+          className="edit-toggle-button"
+          onClick={() => setActiveEditor(id)}
+          >
+          Edit
+          </button>
+      }
+      <button
+        className="delete-button"
+        onClick={() => deleteItem(id)}
       >
-        {isEditable &&
-            <button
-            className="edit-toggle-button"
-            onClick={() => setActiveEditor(id)}
-            >
-            Edit
-            </button>
-        }
-        <button
-          className="delete-button"
-          onClick={() => deleteItem(id)}
-        >
-          Delete
-        </button>
-      </div>
-    </div>
+        Delete
+      </button>
+    </>
   );
 };
 

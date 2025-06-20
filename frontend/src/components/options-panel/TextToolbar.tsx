@@ -1,19 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import './TextToolbar.css';
+import './OptionsPanel.css';
 import { useEditorStore, TextItemProps } from '../../events/EditorStore';
 
 import emitter from '../../events/EventBus';
 
-const TextToolbarPortal: React.FC<{ id: string }> = ({ id }) => {
+const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
   const item = useEditorStore(state => state.items[id]);
   const setItem = useEditorStore(state => state.setItems);
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
 
   if (!item) return null;
-  const { fontFamily, fontSize, textAlignHorizontal, textAlignVertical, isBold, isItalic, isUnderline } = item.props
+  const { fontFamily, fontSize, textAlignHorizontal, textAlignVertical } = item.props
 
-    const [position, setPosition] = useState({ top: 0, left: 0 });
     const fontFamilies = ['Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Courier New'];
 
     const updateProps = (props: Partial<TextItemProps>) => {
@@ -34,9 +33,9 @@ const TextToolbarPortal: React.FC<{ id: string }> = ({ id }) => {
       setActiveEditor('null');
     }
   
-    return createPortal(
-      <div className="floating-toolbar" style={{ top: position.top, left: position.left, position: 'absolute' }}>
-        <div className="toolbar-group">
+    return (
+      <>
+        <div className="drop-down">
           <label>Font</label>
           <select value={fontFamily} onChange={(e) => updateProps({ fontFamily: e.target.value })} className="font-family-select" >
             {fontFamilies.map((font) => (
@@ -46,7 +45,7 @@ const TextToolbarPortal: React.FC<{ id: string }> = ({ id }) => {
             ))}
           </select>
         </div>
-        <div className="toolbar-group">
+        <div className="drop-down">
           <label>Size</label>
           <select value={fontSize} onChange={(e) => updateProps({ fontSize: Number(e.target.value) })} className="font-size-select" >
             {[12, 14, 16, 18, 20, 24, 28, 32, 36, 48].map((size) => (
@@ -60,13 +59,13 @@ const TextToolbarPortal: React.FC<{ id: string }> = ({ id }) => {
         <div className="button-group">
           <label>Text Formatting</label>
           <div className='format-buttons'>
-            <button onClick={() => updateProps({ isBold: !isBold })} className={`format-button ${isBold ? 'active' : ''}`} title="Bold">
+            <button onClick={() => emitter.emit('toggle:bold', { id })} className={`format-button`} title="Bold">
             <strong>B</strong>
             </button>
-            <button onClick={() => updateProps({ isItalic: isItalic })} className={`format-button ${isItalic ? 'active' : ''}`} title="Italic">
+            <button onClick={() => emitter.emit('toggle:italic', { id })} className={`format-button`} title="Italic">
               <em>I</em>
             </button>
-            <button onClick={() => updateProps({ isItalic: !isItalic })} className={`format-button ${isUnderline ? 'active' : ''}`} title="Underline" >
+            <button onClick={() => emitter.emit('toggle:underline', { id })} className={`format-button`} title="Underline" >
               <u>U</u>
             </button>
           </div>
@@ -106,9 +105,8 @@ const TextToolbarPortal: React.FC<{ id: string }> = ({ id }) => {
           <button onClick={ handleConfirm } className="confirm-button">✓</button>
           <button onClick={ handleCancel } className="cancel-button">✕</button>
         </div>
-      </div>,
-      document.getElementById('portal-root') || document.body
-    );
+      </>
+      );
   };
 
-export default TextToolbarPortal;
+export default TextToolbar;

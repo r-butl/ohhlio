@@ -18,9 +18,6 @@ interface TextEditorProps {
   fontSize: number;
   textAlignHorizontal: string;
   textAlignVertical: string;
-  isBold: boolean;
-  isItalic: boolean;
-  isUnderline: boolean;
   maxChars: number;
   charCount: number;
   gridWidth: number;
@@ -39,9 +36,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
     fontSize,
     textAlignHorizontal,
     textAlignVertical,
-    isBold,
-    isItalic,
-    isUnderline,
     maxChars,
     charCount 
   } = item.props;
@@ -51,7 +45,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const isEditing = isActiveEditor && isEditMode;
   const DEFAULT_MESSAGE = "Select <strong>Options &gt; Edit</strong> to add text.";
   const [localContent, setLocalContent] = useState(() => {
-    // Initialize with content if it exists, otherwise use default message
     return content && content !== DEFAULT_MESSAGE ? content : DEFAULT_MESSAGE;
   });
   const setItems = useEditorStore(state => state.setItems);
@@ -149,6 +142,40 @@ const TextEditor: React.FC<TextEditorProps> = ({
     }
   }, [gridHeight, gridWidth, fontSize, id, setItems]);
 
+  useEffect(() => {
+
+    if (!editor) return;
+
+    const handleToggleBold = ( { id: targetId }: { id: string }) => {
+      if (targetId === id) {
+        editor.chain().focus().toggleBold().run();
+      }
+    };
+
+    const handleToggleItalic = ( { id: targetId }: { id: string }) => {
+      if (targetId === id) {
+        editor.chain().focus().toggleItalic().run();
+      }
+    };
+
+    const handleToggleUnderline = ( { id: targetId }: { id: string }) => {
+      if (targetId === id) {
+        editor.chain().focus().toggleUnderline().run();
+      }
+    };
+
+    emitter.on("toggle:bold", handleToggleBold);
+    emitter.on("toggle:italic", handleToggleItalic);
+    emitter.on("toggle:underline", handleToggleUnderline);
+
+    return () => {
+      emitter.off("toggle:bold", handleToggleBold);
+      emitter.off("toggle:italic", handleToggleItalic);
+      emitter.off("toggle:underline", handleToggleUnderline);
+    };
+
+  }, [editor, id]);
+
 
   // Toggle the editor state
   useEffect(() => {
@@ -191,15 +218,37 @@ const TextEditor: React.FC<TextEditorProps> = ({
     }
   }, [id, localContent, content, editor, setItems])
 
+  // --- Add this useEffect for textAlignHorizontal ---
+  useEffect(() => {
+    if (editor && textAlignHorizontal) {
+      editor.commands.setTextAlign(textAlignHorizontal);
+    }
+  }, [editor, textAlignHorizontal]);
+
+  // --- Helper for vertical alignment style ---
+  const getVerticalAlignStyle = (): React.CSSProperties => {
+    switch (textAlignVertical) {
+      case 'top':
+        return { display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', height: '100%' };
+      case 'center':
+        return { display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' };
+      case 'bottom':
+        return { display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' };
+      default:
+        return { display: 'flex', flexDirection: 'column', height: '100%' };
+    }
+  };
+
+  // Add a class for vertical alignment
+  const verticalAlignClass = `vertical-align-${textAlignVertical}`;
+
   return (
     <div 
       ref={editorRef}
-      className="text-editor"
+      className={`text-editor ${verticalAlignClass}`}
+      style={getVerticalAlignStyle()}
     >
       <EditorContent editor={editor} className="text-editor-tiptap" />
-      {isEditing && (
-        <> <TextToolbarPortal id={id}/> </>
-      )}
     </div>
   );
 };

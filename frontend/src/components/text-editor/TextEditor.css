@@ -92,3 +92,31 @@
   .text-editor-tiptap .ProseMirror .is-text-aligned-right li {
     text-align: inherit;
   }
+
+  /* Vertical alignment helpers */
+  .vertical-align-top .text-editor-tiptap,
+  .vertical-align-center .text-editor-tiptap,
+  .vertical-align-bottom .text-editor-tiptap {
+    height: auto;
+    flex: none;
+    display: block;
+  }
+
+  .vertical-align-top .text-editor-tiptap .ProseMirror,
+  .vertical-align-center .text-editor-tiptap .ProseMirror,
+  .vertical-align-bottom .text-editor-tiptap .ProseMirror {
+    min-height: unset;
+    max-height: unset;
+    height: auto;
+    display: block;
+  }
+
+  .vertical-align-center .text-editor-tiptap .ProseMirror {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .vertical-align-bottom .text-editor-tiptap .ProseMirror {
+    margin-top: auto;
+    margin-bottom: 0;
+  }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import './ImageToolbar.css';
+import './OptionsPanel.css';
 
 interface ImageToolbarProps {
   gridItemRef: React.RefObject<HTMLDivElement>;
