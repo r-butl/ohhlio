@@ -4,6 +4,7 @@ import { GridDimensions } from '../grid-item/GridItem';
 import { useEditorStore } from '../../events/EditorStore';
 import './ImageEditor.css';
 
+
 interface ImageEditorProps extends GridDimensions {
   id: string;
 }

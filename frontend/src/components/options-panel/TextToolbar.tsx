@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import './OptionsPanel.css';
 import { useEditorStore, TextItemProps } from '../../events/EditorStore';
+import ConfirmButton from '../buttons/Confirm';
+import CancelButton from '../buttons/Cancel';
 
 import emitter from '../../events/EventBus';
 
@@ -21,16 +22,6 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
           draft[id].props = { ...draft[id].props, ...props};
         }
       })
-    }
-
-    const handleConfirm = () => {
-      emitter.emit('confirm-edit', { id });
-      setActiveEditor('null');
-    }
-
-    const handleCancel = () => {
-      emitter.emit('cancel-edit');
-      setActiveEditor('null');
     }
   
     return (
@@ -77,10 +68,10 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
             <button onClick={() => updateProps({ textAlignHorizontal: 'left' })} className={`format-button ${textAlignHorizontal === 'left' ? 'active' : ''}`} title="Align Left">
               ⇤
             </button>
-            <button onClick={() => updateProps({textAlignHorizontal: 'center' })} className={`format-button ${textAlignHorizontal === 'center' ? 'active' : ''}`} title="Align Center">
+            <button onClick={() => updateProps({ textAlignHorizontal: 'center' })} className={`format-button ${textAlignHorizontal === 'center' ? 'active' : ''}`} title="Align Center">
               ⇔
             </button>
-            <button onClick={() => updateProps({textAlignHorizontal: 'right' })} className={`format-button ${textAlignHorizontal === 'right' ? 'active' : ''}`} title="Align Right">
+            <button onClick={() => updateProps({ textAlignHorizontal: 'right' })} className={`format-button ${textAlignHorizontal === 'right' ? 'active' : ''}`} title="Align Right">
               ⇥
             </button>
           </div>
@@ -89,7 +80,7 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
         <div className="button-group">
           <label>Vertical Alignment</label>
           <div className='format-buttons'>
-            <button onClick={() => updateProps({textAlignVertical: 'top' })} className={`format-button ${textAlignVertical === 'top' ? 'active' : ''}`} title="Align Top">
+            <button onClick={() => updateProps({ textAlignVertical: 'top' })} className={`format-button ${textAlignVertical === 'top' ? 'active' : ''}`} title="Align Top">
               ⇧
             </button>
             <button onClick={() => updateProps({ textAlignVertical: 'center' })} className={`format-button ${textAlignVertical === 'middle' ? 'active' : ''}`} title="Align Middle">
@@ -102,8 +93,8 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
         </div>
         
         <div className="toolbar-group">
-          <button onClick={ handleConfirm } className="confirm-button">✓</button>
-          <button onClick={ handleCancel } className="cancel-button">✕</button>
+          <ConfirmButton id={id} />
+          <CancelButton/>
         </div>
       </>
       );
