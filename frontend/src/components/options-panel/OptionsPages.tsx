@@ -11,7 +11,7 @@ export interface PageEntry {
 
 export const OPTION_PAGES: Record<string, PageEntry[]> = {
   text: [
-    { label: 'Text Settings', component:  TextToolbarPortal},
+    { label: 'Edit', component:  TextToolbarPortal},
   ],
   image: [
     //{ label: 'Image Settings', component: ImageSettingsPage },

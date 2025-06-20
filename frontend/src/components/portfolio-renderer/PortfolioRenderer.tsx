@@ -15,17 +15,19 @@ const ResponsiveGrid = WidthProvider(Responsive);
 
 interface RendererProps {}
 
-const Renderer: React.FC<RendererProps> = ({}) => {
+const Renderer: React.FC<RendererProps> = () => {
 
-  const { isHovered: isButtonHovered, handleMouseEnter, handleMouseLeave } = useButtonHover();
+  const buttonHovered = useEditorStore(state => state.buttonHovered);
 
   const mode = useEditorStore(state => state.mode);
   const activeEditor = useEditorStore(state => state.activeEditor);
   const items = useEditorStore(state => state.items);
   const updateLayout = useEditorStore(state => state.updateLayout);
 
-  const isDraggable = mode === 'edit' && (activeEditor === null) && !isButtonHovered;
-  const isResizable = mode === 'edit' && !isButtonHovered;
+  const isDraggable = mode === 'edit' && (activeEditor === null) && !buttonHovered;
+  const isResizable = mode === 'edit' && !buttonHovered;
+
+  console.log(`Draggable: - ${mode} - ${activeEditor === null} - ${!buttonHovered}`);
 
   const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
 
@@ -77,10 +79,6 @@ const Renderer: React.FC<RendererProps> = ({}) => {
       >
         <GridItem
           id={item.id}
-          itemType={item.type}
-          isEditable={isEditable}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
         >
           {item.type === 'text' ? (
             <TextEditor 

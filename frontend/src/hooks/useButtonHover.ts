@@ -1,22 +1,23 @@
 import { useState, useCallback } from 'react';
+import { useEditorStore } from '../events/EditorStore';
 
 export const useButtonHover = (onButtonHoverChange?: (isHovered: boolean) => void) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const buttonHovered = useEditorStore(state => state.buttonHovered);
+  const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
 
   const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
+    setButtonHoveredState(true);
     onButtonHoverChange?.(true);
     console.log('Mouse entering');
   }, [onButtonHoverChange]);
 
   const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
+    setButtonHoveredState(false);
     onButtonHoverChange?.(false);
     console.log('Mouse leaving');
   }, [onButtonHoverChange]);
 
   return {
-    isHovered,
     handleMouseEnter,
     handleMouseLeave
   };

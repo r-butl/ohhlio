@@ -3,8 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import './GridItem.css';
 import OptionsPanel from '../options-panel/OptionsPanel';
 import { useEditorStore } from '../../events/EditorStore';
-import { useButtonHover } from '../../hooks/useButtonHover';
-
 
 export interface GridDimensions {
   gridWidth?: number;
@@ -14,21 +12,20 @@ export interface GridDimensions {
 interface GridItemProps {
   id: string;
   children: React.ReactElement<GridDimensions>;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
 }
 
 const GridItem: React.FC<GridItemProps> = ({
   id,
   children,
-  onMouseEnter,
-  onMouseLeave
 }) => {
 
   const [isHovered, setIsHovered] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null!);
-  const { isHovered: isButtonHovered, handleMouseEnter, handleMouseLeave } = useButtonHover();
+
+  const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
+  const buttonHovered = useEditorStore(state => state.buttonHovered);
+
 
   const activeEditor = useEditorStore(state => state.activeEditor);
   const isEditing = activeEditor === id;
@@ -51,7 +48,7 @@ const GridItem: React.FC<GridItemProps> = ({
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isEditing) {
         setActiveEditor(null);
-        onMouseLeave?.();
+        setButtonHoveredState(false);
       }
     };
 
@@ -59,7 +56,7 @@ const GridItem: React.FC<GridItemProps> = ({
     return () => {
       window.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [isEditing, setActiveEditor, onMouseLeave]);
+  }, [isEditing, setActiveEditor, buttonHovered]);
 
   return (
     <>
@@ -83,8 +80,8 @@ const GridItem: React.FC<GridItemProps> = ({
             onClick={(e) => {
               setActiveEditor(id);
             }}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            onMouseEnter={() => {setButtonHoveredState(true)}}
+            onMouseLeave={() => {setButtonHoveredState(false)}}
           >
             Options
           </button>

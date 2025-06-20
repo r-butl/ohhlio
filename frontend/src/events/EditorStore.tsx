@@ -69,6 +69,8 @@ type State = {
   // Editor interaction
   toggleEditorMode: () => void
   setActiveEditor: (id: string | null) => void
+  buttonHovered: boolean
+  setButtonHoveredState: (state: boolean) => void;
 
   // Grid item interaction (text/image/ect content) 
   setItems: (fn: (draft: Record<string, Item>) => void) => void // immer function for setting items, useful for protective state updates
@@ -87,6 +89,12 @@ export const useEditorStore = create<State>((set, get) => ({
   gridColumnCount: 12,
   defaultItemWidth: 3,
   defaultItemHeight: 3,
+  buttonHovered: false,
+
+  // Toggle the button hovered state
+  setButtonHoveredState: (state: boolean) => {
+    set(({ buttonHovered: state}))
+  },
 
   // Use this function to make changes the grid items
   setItems: (fn) => {

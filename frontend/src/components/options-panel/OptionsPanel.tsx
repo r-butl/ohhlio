@@ -8,9 +8,13 @@ import { OPTION_PAGES } from './OptionsPages';
 const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivElement> }> = ({ id, parentRef }) => {
   const item = useEditorStore(state => state.items[id]);
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
-  const [activePageIndex, setActivePageIndex] = React.useState(0);
+  const [activePageIndex, setActivePageIndex] = React.useState<number | null>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [positionReady, setPositionReady] = useState(false);
 
+  const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
+
+  const deleteItem = useEditorStore(state => state.deleteItem);
 
   useEffect(() => {
     if (parentRef.current) {
@@ -20,15 +24,14 @@ const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivEle
         top: rect.top + window.scrollY,
         left: rect.right + 10 // 10px to the right of the grid item
       });
+      setPositionReady(true);
     }
   }, [parentRef]);
 
-  if (!item || !parentRef.current) return null;
+  if (!item || !parentRef.current || !positionReady) return null;
 
   const pages = OPTION_PAGES[item.type];
   if (!pages) return null;
-
-  const PageComponent = pages[activePageIndex].component;
 
   return createPortal(
     <div
@@ -41,24 +44,34 @@ const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivEle
       }}
     >
       <div className="panel-header">
-        <h3>Options</h3>
-        <button onClick={() => setActiveEditor(null)} className="close-button">×</button>
+        {activePageIndex !== null && (
+          <button onClick={() => setActivePageIndex(null)} className="back-button" aria-label="Back">←</button>
+        )}
+        <button onClick={() => {
+          setActiveEditor(null);
+          setButtonHoveredState(false);
+        }} className="close-button" aria-label="Close">×</button>
       </div>
       <div className="panel-content">
-        <nav className="options-nav">
-          {pages.map((p, i) => (
-            <button
-              key={p.label}
-              className={i === activePageIndex ? 'active' : ''}
-              onClick={() => setActivePageIndex(i)}
-            >
-              {p.label}
-            </button>
-          ))}
-        </nav>
-        <div className="options-content">
-          <PageComponent id={id} />
-        </div>
+        {activePageIndex === null ? (
+          <div className="main-menu">
+            <nav className="options-nav">
+              {pages.map((p, i) => (
+                <button
+                  key={p.label}
+                  onClick={() => setActivePageIndex(i)}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </nav>
+            <button onClick={() => { deleteItem(id); setActiveEditor(null); }} className="delete-button">Delete</button>
+          </div>
+        ) : (
+          <div className="options-content">
+            {React.createElement(pages[activePageIndex].component, { id })}
+          </div>
+        )}
       </div>
     </div>,
     document.getElementById('option-panel-root') || document.body
