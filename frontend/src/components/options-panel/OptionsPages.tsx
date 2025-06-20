@@ -1,6 +1,7 @@
 // OptionPages.ts
 import { ReactNode } from 'react';
-import TextToolbarPortal from './TextToolbar';
+import TextToolbar from './TextToolbar';
+import ImageToolbar from './ImageToolbar';
 
 export type PageComponentProps = { id: string };
 
@@ -11,10 +12,9 @@ export interface PageEntry {
 
 export const OPTION_PAGES: Record<string, PageEntry[]> = {
   text: [
-    { label: 'Edit', component:  TextToolbarPortal},
+    { label: 'Edit', component:  TextToolbar},
   ],
   image: [
-    //{ label: 'Image Settings', component: ImageSettingsPage },
+    { label: 'Crop', component: ImageToolbar },
   ],
-  // ... add more item types
 };

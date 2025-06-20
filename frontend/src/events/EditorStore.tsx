@@ -16,6 +16,10 @@ export type TextItemProps = {
   charCount: number;
 }
 
+export type ImageItemProps = {
+  
+}
+
 // Layout configuration for 1 item
 type Layout = {
   x: number

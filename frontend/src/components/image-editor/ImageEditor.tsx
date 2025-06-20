@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import Cropper from 'react-easy-crop';
 import { GridDimensions } from '../grid-item/GridItem';
-import ImageToolbar from '../options-panel/ImageToolbar';
+import { useEditorStore } from '../../events/EditorStore';
 import './ImageEditor.css';
 
 interface ImageEditorProps extends GridDimensions {
@@ -13,6 +13,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   gridWidth,
   gridHeight,
 }) => {
+
+  // EditorStore stuff
+  const isEditing = useEditorStore(state => state.activeEditor === id);
+  const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
+  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -60,9 +65,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         const imageData = reader.result as string;
         setOriginalImage(imageData);
         setCroppedImage(imageData); 
-        onEditingChange?.(true); 
       };
       reader.readAsDataURL(file);
+
+      setActiveEditor(id);
     }
   };
 
@@ -71,30 +77,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     console.log('Gallery selection clicked');
   };
 
-  const handleConfirm = () => {
-    // Save the current crop state and cropped image as the new previous state
-    setPreviousCrop({
-      crop: { ...crop },
-      zoom,
-      croppedImage: croppedImage
-    });
-    onEditingChange?.(false);
-  };
-
-  const handleCancel = () => {
-    if (previousCrop) {
-      // Revert to the previous crop state and cropped image
-      setCrop(previousCrop.crop);
-      setZoom(previousCrop.zoom);
-      setCroppedImage(previousCrop.croppedImage);
-    } else {
-      // If there's no previous state, revert to initial values
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-      setCroppedImage(originalImage);
-    }
-    onEditingChange?.(false);
-  };
 
   // Update previousCrop when entering edit mode
   useEffect(() => {
@@ -121,22 +103,22 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                 onChange={handleImageUpload}
                 className="image-upload-input"
                 id="image-upload"
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
+                onMouseEnter={() => setButtonHoveredState(true)}
+                onMouseLeave={() => setButtonHoveredState(false)}
               />
               <label 
                 htmlFor="image-upload" 
                 className="upload-button"
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
+                onMouseEnter={() => setButtonHoveredState(true)}
+                onMouseLeave={() => setButtonHoveredState(false)}
               >
                 Upload Image
               </label>
             </div>
             <button 
               className="gallery-button"
-              onMouseEnter={onMouseEnter}
-              onMouseLeave={onMouseLeave}
+              onMouseEnter={() => setButtonHoveredState(true)}
+              onMouseLeave={() => setButtonHoveredState(false)}
             >
               Choose from Gallery
             </button>
@@ -152,11 +134,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
             onCropChange={setCrop}
             onCropComplete={onCropComplete}
             onZoomChange={setZoom}
-          />
-          <ImageToolbar
-            gridItemRef={editorRef}
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}
           />
         </div>
       ) : (

@@ -1,51 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import emitter from '../../events/EventBus';
+import { useEditorStore } from '../../events/EditorStore';
 import './OptionsPanel.css';
 
-interface ImageToolbarProps {
-  gridItemRef: React.RefObject<HTMLDivElement>;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
 
-const ImageToolbar: React.FC<ImageToolbarProps> = ({
-  gridItemRef,
-  onConfirm,
-  onCancel,
-}) => {
-  const [position, setPosition] = useState({ top: 0, left: 0 });
+const ImageToolbar: React.FC<{ id: string }> = ({ id }) => {
 
-  useEffect(() => {
-    const updatePosition = () => {
-      const gridItem = gridItemRef.current;
-      if (gridItem) {
-        const rect = gridItem.getBoundingClientRect();
-        setPosition({
-          top: rect.top + window.scrollY - 10,
-          left: rect.left + window.scrollX + rect.width - 200,
-        });
-      }
-    };
+  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
 
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
+  const handleConfirm = () => {
+    emitter.emit('confirm-edit', { id });
+    setActiveEditor('null');
+  }
 
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
-    };
-  }, [gridItemRef]);
-
-  return createPortal(
-    <div className="image-toolbar" style={{ top: position.top, left: position.left, position: 'absolute' }}>
+  const handleCancel = () => {
+    emitter.emit('cancel-edit');
+    setActiveEditor('null');
+  }
+  return (
+    <>
       <div className="toolbar-buttons">
-        <button onClick={onConfirm} className="confirm-button">✓</button>
-        <button onClick={onCancel} className="cancel-button">✕</button>
+        <button onClick={handleConfirm} className="confirm-button">✓</button>
+        <button onClick={handleCancel} className="cancel-button">✕</button>
       </div>
-    </div>,
-    document.getElementById('portal-root') || document.body
-  );
+    </>
+  )
 };
 
 export default ImageToolbar;

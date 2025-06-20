@@ -27,8 +27,6 @@ const Renderer: React.FC<RendererProps> = () => {
   const isDraggable = mode === 'edit' && (activeEditor === null) && !buttonHovered;
   const isResizable = mode === 'edit' && !buttonHovered;
 
-  console.log(`Draggable: - ${mode} - ${activeEditor === null} - ${!buttonHovered}`);
-
   const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
 
   const getTypeSpecificLayout = (type: 'text' | 'image') => {
@@ -87,7 +85,8 @@ const Renderer: React.FC<RendererProps> = () => {
             />
           ) : (
             <ImageEditor
-              isEditing={isEditing}
+            id={item.id}
+            {...item.props}
             />
           )}
         </GridItem>
