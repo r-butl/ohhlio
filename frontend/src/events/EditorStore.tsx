@@ -1,7 +1,6 @@
 // HistoryStore.ts
 import { create } from 'zustand'
 import { produce } from 'immer'
-import emitter from './EventBus'
 
 export type TextItemProps = {
   content: string;
@@ -17,7 +16,7 @@ export type TextItemProps = {
 }
 
 export type ImageItemProps = {
-  
+
 }
 
 // Layout configuration for 1 item

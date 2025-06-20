@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React from 'react';
 import emitter from '../../events/EventBus';
 import { useEditorStore } from '../../events/EditorStore';
 import './OptionsPanel.css';

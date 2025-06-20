@@ -1,5 +1,4 @@
 // OptionPages.ts
-import { ReactNode } from 'react';
 import TextToolbar from './TextToolbar';
 import ImageToolbar from './ImageToolbar';
 
