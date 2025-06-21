@@ -16,7 +16,11 @@ export type TextItemProps = {
 }
 
 export type ImageItemProps = {
-
+  originalImage: string | null;
+  croppedImage: string | null;
+  crop: { x: number; y: number };
+  zoom: number;
+  aspectRatio: number;
 }
 
 // Layout configuration for 1 item
@@ -197,10 +201,36 @@ export const useEditorStore = create<State>((set, get) => ({
       0
     )
     
+    // Create default props based on item type
+    let defaultProps: any = {};
+    
+    if (type === 'text') {
+      defaultProps = {
+        content: "Select <strong>Options &gt; Edit</strong> to add text.",
+        fontSize: 16,
+        fontFamily: 'Arial',
+        textAlignVertical: 'center' as const,
+        textAlignHorizontal: 'left' as const,
+        isBold: false,
+        isItalic: false,
+        isUnderline: false,
+        maxChars: 1000,
+        charCount: 0
+      };
+    } else if (type === 'image') {
+      defaultProps = {
+        originalImage: null,
+        croppedImage: null,
+        crop: { x: 0, y: 0 },
+        zoom: 1,
+        aspectRatio: 4 / 3
+      };
+    }
+    
     const newItem: Item = {
       id,
       type,                   // Type will be checked automatically
-      props: {},
+      props: defaultProps,
       layout: {
         x: 0,
         y: maxY,

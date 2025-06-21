@@ -1,50 +1,52 @@
 /* frontend/src/components/TextEditor/TextEditor.css */
 .text-editor {
-    width: 99%;
-    height: 99%;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     padding: 1px;
-    position: absolute;
+    position: relative;
     overflow: hidden;
-  }
+}
 
-  .text-editor-tiptap {
+.text-editor-tiptap {
     width: 100%;
     height: 100%;
     flex: 1;
     overflow-y: hidden !important; 
     max-height: 100%; 
-  }
-  
-  .text-editor-tiptap .ProseMirror {
-    height: auto;
+}
+
+.text-editor-tiptap .ProseMirror {
+    height: 100%;
     min-height: 100%;
     max-height: 100%;
     padding: 0.5rem 1rem 1rem 1rem; /* top right bottom left */
     box-sizing: border-box;
     overflow: hidden;
     white-space: normal;
-  }
+    display: flex;
+    flex-direction: column;
+}
 
-  .text-editor-tiptap .ProseMirror p {
+.text-editor-tiptap .ProseMirror p {
     margin: 0;
     padding: 0;
-  }
-  
-  /* Remove any default spacing from the editor */
-  .text-editor-tiptap .ProseMirror > *:first-child {
+}
+
+/* Remove any default spacing from the editor */
+.text-editor-tiptap .ProseMirror > *:first-child {
     margin-top: 0;
     padding-top: 0;
-  }
-  
-  /* If there's still a gap, you can try */
-  .text-editor-tiptap .ProseMirror > * {
+}
+
+/* If there's still a gap, you can try */
+.text-editor-tiptap .ProseMirror > * {
     margin: 0;
     padding: 0;
-  }
+}
 
-  .char-count {
+.char-count {
     position: absolute;
     bottom: 5px;
     right: 5px;
@@ -53,70 +55,75 @@
     background: rgba(255, 255, 255, 0.8);
     padding: 2px 6px;
     border-radius: 3px;
-  }
-  
-  .char-count.exceeded {
-    color: #ff6b6b;
-  }
+}
 
-  .text-editor-tiptap .ProseMirror ul,
-  .text-editor-tiptap .ProseMirror ol {
+.char-count.exceeded {
+    color: #ff6b6b;
+}
+
+.text-editor-tiptap .ProseMirror ul,
+.text-editor-tiptap .ProseMirror ol {
     padding-left: 1.5em;
     margin: 0;
-  }
+}
 
-  .text-editor-tiptap .ProseMirror li {
+.text-editor-tiptap .ProseMirror li {
     margin: 0;
     padding: 0;
-  }
+}
 
-  .text-editor-tiptap .ProseMirror li > p {
+.text-editor-tiptap .ProseMirror li > p {
     margin: 0;
     padding: 0;
-  }
+}
 
-  /* Explicit alignment handling */
-  .text-editor-tiptap .ProseMirror .is-text-aligned-center ul,
-  .text-editor-tiptap .ProseMirror .is-text-aligned-center ol {
+/* Explicit alignment handling */
+.text-editor-tiptap .ProseMirror .is-text-aligned-center ul,
+.text-editor-tiptap .ProseMirror .is-text-aligned-center ol {
     text-align: center;
     padding-left: 0;
-  }
+}
 
-  .text-editor-tiptap .ProseMirror .is-text-aligned-right ul,
-  .text-editor-tiptap .ProseMirror .is-text-aligned-right ol {
+.text-editor-tiptap .ProseMirror .is-text-aligned-right ul,
+.text-editor-tiptap .ProseMirror .is-text-aligned-right ol {
     text-align: right;
     padding-left: 0;
-  }
+}
 
-  .text-editor-tiptap .ProseMirror .is-text-aligned-center li,
-  .text-editor-tiptap .ProseMirror .is-text-aligned-right li {
+.text-editor-tiptap .ProseMirror .is-text-aligned-center li,
+.text-editor-tiptap .ProseMirror .is-text-aligned-right li {
     text-align: inherit;
-  }
+}
 
-  /* Vertical alignment helpers */
-  .vertical-align-top .text-editor-tiptap,
-  .vertical-align-center .text-editor-tiptap,
-  .vertical-align-bottom .text-editor-tiptap {
-    height: auto;
-    flex: none;
-    display: block;
-  }
+/* Vertical alignment helpers - updated to maintain full height */
+.vertical-align-top .text-editor-tiptap,
+.vertical-align-center .text-editor-tiptap,
+.vertical-align-bottom .text-editor-tiptap {
+    height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
 
-  .vertical-align-top .text-editor-tiptap .ProseMirror,
-  .vertical-align-center .text-editor-tiptap .ProseMirror,
-  .vertical-align-bottom .text-editor-tiptap .ProseMirror {
-    min-height: unset;
-    max-height: unset;
-    height: auto;
-    display: block;
-  }
+.vertical-align-top .text-editor-tiptap .ProseMirror,
+.vertical-align-center .text-editor-tiptap .ProseMirror,
+.vertical-align-bottom .text-editor-tiptap .ProseMirror {
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
 
-  .vertical-align-center .text-editor-tiptap .ProseMirror {
-    margin-top: auto;
-    margin-bottom: auto;
-  }
+/* Content alignment within the full-height container */
+.vertical-align-top .text-editor-tiptap .ProseMirror {
+    justify-content: flex-start;
+}
 
-  .vertical-align-bottom .text-editor-tiptap .ProseMirror {
-    margin-top: auto;
-    margin-bottom: 0;
-  }
+.vertical-align-center .text-editor-tiptap .ProseMirror {
+    justify-content: center;
+}
+
+.vertical-align-bottom .text-editor-tiptap .ProseMirror {
+    justify-content: flex-end;
+}

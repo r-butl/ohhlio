@@ -7,12 +7,14 @@ import emitter
 const ConfirmButton: React.FC<{ id: string }> = ({ id }) => {
 
     const setActiveEditor = useEditorStore(state => state.setActiveEditor);
-    const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState)
+    const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
+    const setActiveOptionsPanel = useEditorStore(state => state.setActiveOptionsPanel);
 
     const handleConfirm = () => {
         emitter.emit('confirm-edit', { id });
         setActiveEditor(null);
         setButtonHoveredState(false);
+        setActiveOptionsPanel(null);
       }
 
     return (

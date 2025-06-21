@@ -27,11 +27,13 @@ const GridItem: React.FC<GridItemProps> = ({
   const buttonHovered = useEditorStore(state => state.buttonHovered);
 
   const setActiveOptionsPanel = useEditorStore(state => state.setActiveOptionsPanel);
-  const isOptionsPanelOpen = useEditorStore(state => state.activeOptionsPanel == id);
+  const activeOptionsPanel = useEditorStore(state => state.activeOptionsPanel);
 
   const activeEditor = useEditorStore(state => state.activeEditor);
   const isEditing = activeEditor === id;
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
+
+  const mode = useEditorStore(state => state.mode);
 
   // Gets the dimensions of the grid item on change
   useEffect(() => {
@@ -44,20 +46,6 @@ const GridItem: React.FC<GridItemProps> = ({
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Allows the usage of the escape key to leave the editing mode
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isEditing) {
-        setActiveEditor(null);
-        setButtonHoveredState(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleEscapeKey);
-    return () => {
-      window.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [isEditing, setActiveEditor, buttonHovered]);
 
   return (
     <>
@@ -74,7 +62,7 @@ const GridItem: React.FC<GridItemProps> = ({
             gridHeight: dimensions.height
           })}    
         </div>
-        {isHovered && !isEditing && !isOptionsPanelOpen && (
+        {isHovered && (mode === 'edit') && !isEditing && !(activeOptionsPanel === id) && (
 
           <button 
             className="options-toggle-btn"
@@ -88,7 +76,7 @@ const GridItem: React.FC<GridItemProps> = ({
           </button>
         )}
       </div>
-      {isOptionsPanelOpen && (
+      {(activeOptionsPanel === id) && (
         <OptionsPanel
           id={id} 
           parentRef={containerRef}

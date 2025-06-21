@@ -8,11 +8,14 @@ const CancelButton: React.FC<{}> = () => {
 
     const setActiveEditor = useEditorStore(state => state.setActiveEditor);
     const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState)
+    const setActiveOptionsPanel = useEditorStore(state => state.setActiveOptionsPanel);
 
     const handleCancel = () => {
         emitter.emit('cancel-edit');
         setActiveEditor(null);
         setButtonHoveredState(false);
+        setActiveOptionsPanel(null);
+
     }
 
     return (
