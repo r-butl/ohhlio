@@ -38,7 +38,7 @@ const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivEle
     <div
       className="options-panel"
       style={{
-        position: 'fixed',
+        position: 'absolute',
         top: position.top,
         left: position.left,
         zIndex: 2000

@@ -135,8 +135,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       reader.readAsDataURL(file);
 
       // Set this component as the active editor
-      setActiveOptionsPanel(id);
-      setActiveEditor(id);
+      // setActiveOptionsPanel(id);
+      // setActiveEditor(id);
     }
   };
 

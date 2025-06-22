@@ -39,7 +39,7 @@ const Renderer: React.FC<RendererProps> = () => {
         return {
           ...baseLayout,
           minW: 2,  
-          minH: 2,
+          minH: 1,
           maxW: 12,
           maxH: 12,
         };
