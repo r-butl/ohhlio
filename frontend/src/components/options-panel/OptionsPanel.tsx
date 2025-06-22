@@ -51,11 +51,14 @@ const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivEle
             setActivePageIndex(null)
           }} className="back-button" aria-label="Back">←</button>
         )}
-        <button onClick={() => {
-          setActiveEditor(null);
-          setButtonHoveredState(false);
-          setActiveOptionsPanel(null);
-        }} className="close-button" aria-label="Close">×</button>
+        {activePageIndex === null && (
+            <button onClick={() => {
+              setActiveEditor(null);
+              setButtonHoveredState(false);
+              setActiveOptionsPanel(null);
+            }} className="close-button" aria-label="Close">×</button>
+          )
+        }
       </div>
       <div className="panel-content">
         {activePageIndex === null ? (

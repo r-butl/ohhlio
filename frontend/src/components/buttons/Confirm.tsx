@@ -1,7 +1,9 @@
 import React from "react";
 import { useEditorStore } from "../../events/EditorStore";
 import emitter
- from "../../events/EventBus";
+from "../../events/EventBus";
+// import { Button } from "@/components/ui/button";
+
 
 
 const ConfirmButton: React.FC<{ id: string }> = ({ id }) => {
@@ -19,6 +21,7 @@ const ConfirmButton: React.FC<{ id: string }> = ({ id }) => {
 
     return (
         <button onClick={ handleConfirm } className="confirm-button">✓</button>
+
     )
 
 }
