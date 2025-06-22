@@ -17,6 +17,7 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
   // tell the editor that an item is being edited
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
 
+  
   useEffect(() => {
     setActiveEditor(id);
   }, []);

@@ -234,7 +234,7 @@ export const useEditorStore = create<State>((set, get) => ({
       layout: {
         x: 0,
         y: maxY,
-        w: get().defaultItemWidth,     // Inital width and height of the new grid item
+        w: get().defaultItemWidth,     // Initial width and height of the new grid item
         h: get().defaultItemHeight,
         i: id
       }

@@ -5,6 +5,7 @@
   justify-content: center;
   align-items: center;
   border-radius: 4px;
+  position: relative;
 }
 
 .image-upload-options {
@@ -37,8 +38,23 @@
 }
 
 .crop-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.display-container {
   width: 100%;
   height: 100%;
   position: relative;
+  overflow: hidden;
+}
+
+.display-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
