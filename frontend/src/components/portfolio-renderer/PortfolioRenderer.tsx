@@ -38,18 +38,18 @@ const Renderer: React.FC<RendererProps> = () => {
       case 'text':
         return {
           ...baseLayout,
-          minW: 2,  
+          minW: 1,  
           minH: 1,
-          maxW: 12,
-          maxH: 12,
+          maxW: 4,
+          maxH: 4,
         };
       case 'image':
         return {
           ...baseLayout,
-          minW: 2,  
-          minH: 2,  
-          maxW: 12,
-          maxH: 12,
+          minW: 1,  
+          minH: 1,  
+          maxW: 4,
+          maxH: 4,
         };
       default:
         return {

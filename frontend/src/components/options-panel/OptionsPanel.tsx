@@ -4,9 +4,11 @@ import { createPortal } from 'react-dom';
 import './OptionsPanel.css';
 import { useEditorStore } from '../../events/EditorStore';
 import { OPTION_PAGES } from './OptionsPages';
+import { useContentCheck } from '../../hooks/useContentCheck';
 
 const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivElement> }> = ({ id, parentRef }) => {
   const item = useEditorStore(state => state.items[id]);
+  const hasContent = useContentCheck(id);
   const [activePageIndex, setActivePageIndex] = React.useState<number | null>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [positionReady, setPositionReady] = useState(false);
@@ -63,16 +65,18 @@ const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivEle
       <div className="panel-content">
         {activePageIndex === null ? (
           <div className="main-menu">
-            <nav className="options-nav">
-              {pages.map((p, i) => (
-                <button
-                  key={p.label}
-                  onClick={() => setActivePageIndex(i)}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </nav>
+            { hasContent &&
+              <nav className="options-nav">
+                {pages.map((p, i) => (
+                  <button
+                    key={p.label}
+                    onClick={() => setActivePageIndex(i)}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </nav>
+            }
             <button onClick={() => { deleteItem(id); setActiveEditor(null); }} className="delete-button">Delete</button>
           </div>
         ) : (

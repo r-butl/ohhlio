@@ -47,7 +47,9 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const [localContent, setLocalContent] = useState(() => {
     return content && content !== DEFAULT_MESSAGE ? content : DEFAULT_MESSAGE;
   });
-  const setItems = useEditorStore(state => state.setItems);
+  const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
+  const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
+
   const editorRef = useRef<HTMLDivElement>(null!);
 
   // Update localContent when content changes from store (e.g., when entering edit mode)
@@ -134,13 +136,13 @@ const TextEditor: React.FC<TextEditorProps> = ({
       // Calculate total characters, with some buffer for safety
       const maxCharsCalc = Math.floor(charsPerLine * maxLines * 0.9); // 90% of theoretical max for safety
       
-      setItems(draft => {
+      setItemsWithoutHistory(draft => {
         if (draft[id]) {
           draft[id].props.maxChars = maxCharsCalc;
         }
       })
     }
-  }, [gridHeight, gridWidth, fontSize, id, setItems]);
+  }, [gridHeight, gridWidth, fontSize, id, setItemsWithoutHistory]);
 
 
   // Handles bold, italic, and underline commands to the editor
@@ -191,7 +193,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
     const handleConfirm = ({id: editId} : {id: string}) => {
       if (editId === id && editor) {
         console.log('Confirm pressed - saving content:', localContent);
-        setItems(draft => {
+        setItemsWithHistory(draft => {
             if(draft[id]) {
               draft[id].props.content = localContent;
             }
@@ -216,7 +218,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
       emitter.off('confirm-edit', handleConfirm);
       emitter.off('cancel-edit', handleCancel);
     }
-  }, [id, localContent, content, editor, setItems])
+  }, [id, localContent, content, editor, setItemsWithHistory])
 
   // Horizontal Alignment updates
   useEffect(() => {

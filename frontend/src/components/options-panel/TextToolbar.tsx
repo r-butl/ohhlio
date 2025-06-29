@@ -8,7 +8,7 @@ import emitter from '../../events/EventBus';
 
 const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
   const item = useEditorStore(state => state.items[id]);
-  const setItem = useEditorStore(state => state.setItems);
+  const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
 
   if (!item) return null;
   const { fontFamily, fontSize, textAlignHorizontal, textAlignVertical } = item.props
@@ -23,7 +23,7 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
   }, []);
 
   const updateProps = (props: Partial<TextItemProps>) => {
-    setItem(draft => {
+    setItemsWithHistory(draft => {
       if (draft[id]) {
         draft[id].props = { ...draft[id].props, ...props};
       }

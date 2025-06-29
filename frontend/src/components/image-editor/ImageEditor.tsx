@@ -20,7 +20,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
   const setActiveOptionsPanel = useEditorStore(state => state.setActiveOptionsPanel);
-  const setItems = useEditorStore(state => state.setItems);
+  const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   
   // Get item data from store
   const item = useEditorStore(state => state.items[id]);
@@ -119,7 +119,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         setLocalCroppedImage(imageData);
         
         // Save to store immediately when image is uploaded
-        setItems(draft => {
+        setItemsWithHistory(draft => {
           if (draft[id]) {
             draft[id].props = {
               ...draft[id].props,
@@ -150,7 +150,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const handleConfirm = ({ id: editId }: { id: string }) => {
       if (editId === id) {
         console.log('Confirm pressed - saving image data');
-        setItems(draft => {
+        setItemsWithHistory(draft => {
           if (draft[id]) {
             draft[id].props = {
               ...draft[id].props,
@@ -180,7 +180,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       emitter.off('confirm-edit', handleConfirm);
       emitter.off('cancel-edit', handleCancel);
     };
-  }, [id, localCrop, localZoom, localOriginalImage, localCroppedImage, imageProps, setItems, currentAspectRatio]);
+  }, [id, localCrop, localZoom, localOriginalImage, localCroppedImage, imageProps, setItemsWithHistory, currentAspectRatio]);
 
   return (
     <div 
