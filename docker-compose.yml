@@ -1,0 +1,48 @@
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: ohhlio-postgres
+    environment:
+      POSTGRES_DB: "ohhlio"
+      POSTGRES_USER: "ohhlio_user"
+      POSTGRES_PASSWORD: "ohhlio_password"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+  
+  backend:
+    build: ./backend
+    container_name: ohhlio-backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      DATABASE_URL: postgresql://ohhlio_user:ohhlio_password@postgres:5432/ohhlio
+      NODE_ENV: development
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    command: npm run dev
+
+  frontend:
+    build: ./frontend
+    container_name: ohhlio-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:3001
+    depends_on:
+      - backend
+    restart: unless-stopped
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  postgres_data:
