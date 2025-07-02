@@ -40,16 +40,16 @@ const Renderer: React.FC<RendererProps> = () => {
           ...baseLayout,
           minW: 1,  
           minH: 1,
-          maxW: 4,
-          maxH: 4,
+          maxW: 8,
+          maxH: 32,
         };
       case 'image':
         return {
           ...baseLayout,
           minW: 1,  
-          minH: 1,  
-          maxW: 4,
-          maxH: 4,
+          minH: 4,  
+          maxW: 8,
+          maxH: 32,
         };
       default:
         return {
@@ -61,8 +61,6 @@ const Renderer: React.FC<RendererProps> = () => {
   };
 
   const renderItem = (item: typeof items[string]) => {
-    const isEditing = activeEditor === item.id || false;
-    const isEditable = mode === 'edit' && (!activeEditor || activeEditor === item.id);
     const typeSpecificLayout = getTypeSpecificLayout(item.type);
 
     return (

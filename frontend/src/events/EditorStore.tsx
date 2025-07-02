@@ -48,8 +48,8 @@ const LAYOUT_CONFIG = {
   rowHeight: 1600 / 25,
   columnCount: 12,
   defaultItemSize: {
-    w: 3,
-    h: 3
+    w: 4,
+    h: 2
   }
 } as const
 
@@ -99,10 +99,10 @@ export const useEditorStore = create<State>((set, get) => ({
   history: { past: [], future: [] },
   activeEditor: null,
   editorMaxWidth: 1600,
-  gridRowHeight: 1600 / 8,
+  gridRowHeight: 1600 / 32,
   gridColumnCount: 4,
   defaultItemWidth: 1,
-  defaultItemHeight: 1,
+  defaultItemHeight: 4,
   buttonHovered: false,
   activeOptionsPanel: null,
 
