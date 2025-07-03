@@ -1,16 +1,12 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { prisma } from './models/db.js';
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const dotenv = require('dotenv');
+const path = require('path');
+const prisma = require('./models/db');
 
-// ESM equivalent of __dirname and __filename
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { Request, Response, NextFunction } from 'express';
 
 // Load environment variables
 dotenv.config();
@@ -19,8 +15,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Routers
-import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Middleware
 app.use(helmet());
@@ -39,21 +35,21 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
 // Serve static files
-app.use('/uploads', express.static(path.join(dirname(__dirname), 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'OK', message: 'Ohhlio Backend is running!' });
 });
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+  console.error('Express error:', err);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
 // 404 handler
-app.use('/*', (req, res) => {
+app.use('/*', (req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
@@ -76,4 +72,4 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-export { app };
+module.exports = { app };

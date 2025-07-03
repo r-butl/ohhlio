@@ -1,13 +1,13 @@
-import { PrismaClient } from '../generated/prisma/index.js';
+const { PrismaClient } = require('../generated/prisma/index');
 
-declare global {
-  var prisma: PrismaClient | undefined;
+/**
+ * Augment the NodeJS global type to include `prisma`
+ */
+// @ts-ignore
+if (!globalThis.prisma) {
+  // @ts-ignore
+  globalThis.prisma = new PrismaClient();
 }
-
-export const prisma = globalThis.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.prisma = prisma;
-}
-
-export default prisma; 
+// @ts-ignore
+const prisma = globalThis.prisma;
+module.exports = prisma;

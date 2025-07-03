@@ -1,10 +1,10 @@
-import { generateToken } from '../utils/jwt.js';
-import { Request, Response } from 'express';
-import bcrypt from "bcrypt";
-import { prisma } from '../models/db.js';
-import validator from 'validator';
+const generateToken = require('../utils/jwt');
+const bcrypt = require("bcrypt");
+const { prisma } = require('../models/db');
+const validator = require('validator');
+import type { Request, Response } from 'express';
 
-export const register = async (req: Request, res: Response) => {
+const register = async (req: Request, res: Response) => {
     let { username, email, password } = req.body;
 
     // Input validation
@@ -62,7 +62,7 @@ export const register = async (req: Request, res: Response) => {
     }
 }
 
-export const login = async (req: Request, res: Response) => {
+const login = async (req: Request, res: Response) => {
     let { email, password } = req.body;
 
     // Input validation
@@ -98,3 +98,5 @@ export const login = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Login failed' });
     }
 }
+
+module.exports = { register, login };
