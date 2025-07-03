@@ -6,10 +6,8 @@ import FontFamily from '@tiptap/extension-font-family';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 
-import './TextEditor.css';
-import TextToolbarPortal from '../options-panel/TextToolbar';
-import { useEditorStore } from '../../global-state/EditorStore';
-import emitter from '../../global-state/EventBus';
+import { useEditorStore } from '../../../../global-state/EditorStore';
+import emitter from '../../../../global-state/EventBus';
 
 interface TextEditorProps {
   id: string;

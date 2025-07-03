@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { configDefaults } from 'vitest/config'
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from "@tailwindcss/vite"
+import * as path from "path"
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -9,6 +10,11 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   css: {
     modules: {
       localsConvention: 'camelCase'

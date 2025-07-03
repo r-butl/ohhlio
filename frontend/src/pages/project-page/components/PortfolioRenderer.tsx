@@ -4,11 +4,11 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import './PortfolioRenderer.css';
 
-import TextEditor from '../text-editor/TextEditor';
-import ImageEditor from '../image-editor/ImageEditor';
-import GridItem from '../grid-item/GridItem';
+import TextEditor from './text-editor/TextEditor';
+import ImageEditor from './image-editor/ImageEditor';
+import GridItem from './grid-item/GridItem';
 
-import { useEditorStore } from '../../global-state/EditorStore';
+import { useEditorStore } from '../../../global-state/EditorStore';
 
 const ResponsiveGrid = WidthProvider(Responsive);
 

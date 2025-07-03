@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import './ProjectPage.css';
 import Footer from '../../components/footer/Footer';
-import Renderer from '../../components/portfolio-renderer/PortfolioRenderer';
-import SelectionBar from '../../components/selection-bar/SelectionBar';
+import Renderer from './components/PortfolioRenderer';
+import SelectionBar from './components/selection-bar/SelectionBar';
 import NavBar from '../../components/nav-bar/NavBar';
 import { useEditorStore } from '../../global-state/EditorStore';
 
