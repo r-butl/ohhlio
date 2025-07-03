@@ -8,7 +8,7 @@ import TextEditor from '../text-editor/TextEditor';
 import ImageEditor from '../image-editor/ImageEditor';
 import GridItem from '../grid-item/GridItem';
 
-import { useEditorStore } from '../../events/EditorStore';
+import { useEditorStore } from '../../global-state/EditorStore';
 
 const ResponsiveGrid = WidthProvider(Responsive);
 

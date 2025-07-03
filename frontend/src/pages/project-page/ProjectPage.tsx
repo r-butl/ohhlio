@@ -4,7 +4,7 @@ import Footer from '../../components/footer/Footer';
 import Renderer from '../../components/portfolio-renderer/PortfolioRenderer';
 import SelectionBar from '../../components/selection-bar/SelectionBar';
 import NavBar from '../../components/nav-bar/NavBar';
-import { useEditorStore } from '../../events/EditorStore';
+import { useEditorStore } from '../../global-state/EditorStore';
 
 const ProjectPage: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);

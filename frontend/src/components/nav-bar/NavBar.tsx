@@ -1,6 +1,6 @@
 import React from 'react';
 import './NavBar.css';
-import { useEditorStore } from "../../events/EditorStore";
+import { useEditorStore } from "../../global-state/EditorStore";
 
 interface NavBarProps {
     isHomeUser: boolean;  // This will be used to determine if user is the owner

@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './OptionsPanel.css';
-import { useEditorStore, TextItemProps } from '../../events/EditorStore';
+import { useEditorStore, TextItemProps } from '../../global-state/EditorStore';
 import ConfirmButton from '../buttons/Confirm';
 import CancelButton from '../buttons/Cancel';
 
-import emitter from '../../events/EventBus';
+import emitter from '../../global-state/EventBus';
 
 const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
   const item = useEditorStore(state => state.items[id]);

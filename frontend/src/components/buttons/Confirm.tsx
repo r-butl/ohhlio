@@ -1,7 +1,7 @@
 import React from "react";
-import { useEditorStore } from "../../events/EditorStore";
+import { useEditorStore } from "../../global-state/EditorStore";
 import emitter
-from "../../events/EventBus";
+from "../../global-state/EventBus";
 // import { Button } from "@/components/ui/button";
 
 

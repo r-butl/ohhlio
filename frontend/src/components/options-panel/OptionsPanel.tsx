@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './OptionsPanel.css';
-import { useEditorStore } from '../../events/EditorStore';
+import { useEditorStore } from '../../global-state/EditorStore';
 import { OPTION_PAGES } from './OptionsPages';
 import { useContentCheck } from '../../hooks/useContentCheck';
 

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, use } from 'react';
 import './GridItem.css';
 import OptionsPanel from '../options-panel/OptionsPanel';
-import { useEditorStore } from '../../events/EditorStore';
+import { useEditorStore } from '../../global-state/EditorStore';
 
 export interface GridDimensions {
   gridWidth?: number;

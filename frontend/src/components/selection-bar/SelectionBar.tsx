@@ -1,7 +1,7 @@
 // frontend/src/components/selection-bar/SelectionBar.tsx
 import React from 'react';
 import './SelectionBar.css';
-import { useEditorStore } from "../../events/EditorStore";
+import { useEditorStore } from "../../global-state/EditorStore";
 
 interface SelectionBarProps {}
 

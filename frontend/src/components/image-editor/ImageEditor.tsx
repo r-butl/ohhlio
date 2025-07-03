@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import Cropper from 'react-easy-crop';
 import { GridDimensions } from '../grid-item/GridItem';
-import { useEditorStore, ImageItemProps } from '../../events/EditorStore';
-import emitter from '../../events/EventBus';
+import { useEditorStore, ImageItemProps } from '../../global-state/EditorStore';
+import emitter from '../../global-state/EventBus';
 import './ImageEditor.css';
 import { useEditor } from '@tiptap/react';
 
