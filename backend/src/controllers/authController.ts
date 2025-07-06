@@ -1,4 +1,4 @@
-const generateToken = require('../utils/jwt');
+import { generateToken } from '../utils/jwt';
 const bcrypt = require("bcrypt");
 const { prisma } = require('../models/db');
 const validator = require('validator');
@@ -27,13 +27,13 @@ const register = async (req: Request, res: Response) => {
         }
     
         // Check if the email already exists
-        const existingEmail = await prisma.user.findUnique({ where: { email } });
+        const existingEmail = await globalThis.prisma.user.findUnique({ where: { email } });
         if (existingEmail) {
             return res.status(400).json({ message: 'Email already exists' });
         }
 
         // Check if the username already exists
-        const existingUsername = await prisma.user.findUnique({ where: { username } });
+        const existingUsername = await globalThis.prisma.user.findUnique({ where: { username } });
         if (existingUsername) {
             return res.status(400).json({ message: 'Username already exists' });
         }
@@ -54,7 +54,7 @@ const register = async (req: Request, res: Response) => {
 
         // Generate a JWT token
         const token = generateToken(user.id);
-        res.status(201).json({ token });
+        res.status(201).json({ token: token, username: user.username, email: user.email });
 
     } catch (error) {
         console.error('Registration error:', error);
@@ -63,6 +63,7 @@ const register = async (req: Request, res: Response) => {
 }
 
 const login = async (req: Request, res: Response) => {
+    console.log(`Recieved: ${JSON.stringify(req.body)}`);
     let { email, password } = req.body;
 
     // Input validation
@@ -78,9 +79,9 @@ const login = async (req: Request, res: Response) => {
     try {
 
         // Check if the user exists
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await globalThis.prisma.user.findUnique({ where: {email: email}, });
         if (!user) {
-            return res.status(400).json({ message: 'Invalid email or password.' });
+            return res.status(401).json({ message: "User not found" });
         }
 
         // Check if the password is valid
@@ -91,7 +92,7 @@ const login = async (req: Request, res: Response) => {
 
         // Generate a JWT token
         const token = generateToken(user.id);
-        res.status(200).json({ token });
+        res.status(200).json({ token: token, username: user.username, email: user.email });
 
     } catch (error) {
         console.error('Login error:', error);
