@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useEditorStore } from '../global-state/EditorStore';
+import { useEditorStore } from '../context/EditorStore';
 
 export const useContentCheck = ( id: string) => {
     // Checks if the current item contains any content

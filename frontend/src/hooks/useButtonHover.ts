@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useEditorStore } from '../global-state/EditorStore';
+import { useEditorStore } from '../context/EditorStore';
 
 export const useButtonHover = (onButtonHoverChange?: (isHovered: boolean) => void) => {
   const buttonHovered = useEditorStore(state => state.buttonHovered);

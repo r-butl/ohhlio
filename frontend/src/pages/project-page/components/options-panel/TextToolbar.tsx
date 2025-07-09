@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './OptionsPanel.css';
-import { useEditorStore, TextItemProps } from '../../../../global-state/EditorStore';
+import { useEditorStore, TextItemProps } from '../../../../context/EditorStore';
 import ConfirmButton from '../../../../components/buttons/Confirm';
 import CancelButton from '../../../../components/buttons/Cancel';
 

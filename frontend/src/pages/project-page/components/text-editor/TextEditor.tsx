@@ -6,7 +6,7 @@ import FontFamily from '@tiptap/extension-font-family';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 
-import { useEditorStore } from '../../../../global-state/EditorStore';
+import { useEditorStore } from '../../../../context/EditorStore';
 import emitter from '../../../../global-state/EventBus';
 
 interface TextEditorProps {

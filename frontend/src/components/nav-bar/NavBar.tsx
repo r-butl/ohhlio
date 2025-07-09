@@ -1,6 +1,8 @@
 import React from 'react';
 import './NavBar.css';
-import { useEditorStore } from "../../global-state/EditorStore";
+import { useEditorStore } from "../../context/EditorStore";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
 
 interface NavBarProps {
     isHomeUser: boolean;  // This will be used to determine if user is the owner
@@ -14,6 +16,9 @@ const NavBar: React.FC<NavBarProps> = ({ isHomeUser }) => {
     
     // We'll use this to determine if editing is allowed
     const canEdit = isHomeUser;
+    
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     
     return (
         <div className="app-nav-bar">
@@ -31,11 +36,13 @@ const NavBar: React.FC<NavBarProps> = ({ isHomeUser }) => {
                     </button>
                 )}
 
-                <button 
-                    className="button profile"
-                >
-                    Profile
+                {user ? (
+                  <button className="button profile" onClick={logout}>
+                    Logout
                 </button>
+                ) : (
+                  <Link to="/login" className="button profile">Login</Link>
+                )}
             </div>
         </div>
     );

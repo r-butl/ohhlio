@@ -1,16 +1,20 @@
 // frontend/src/App.tsx
 import React from 'react';
-import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ProjectPage from './pages/project-page/ProjectPage';
 import LoginRegister from './pages/login-register/Login';
-      //      <LoginRegister/>
-
+import SidebarLayout from './components/layouts/SidebarLayout';
 
 function App() {
   return (
-    <div className="app">
-      <ProjectPage />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/project" element={<ProjectPage />} />
+        <Route path="/login" element={<LoginRegister />} />
+        <Route path="/test" element={<SidebarLayout />} />
+        {/* Add more routes as needed */}
+      </Routes>
+    </BrowserRouter>
   );
 }
 
