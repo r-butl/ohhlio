@@ -1,9 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 import Footer from '../../components/footer/Footer';
 import Renderer from './components/PortfolioRenderer';
-import SelectionBar from './components/selection-bar/SelectionBar';
-import NavBar from '../../components/nav-bar/NavBar';
+import EditorHeader from '../../components/editor-header/EditorHeader';
 import { useEditorStore } from '../../context/EditorStore';
+
+import SidebarLayout from '../../components/layouts/SidebarLayout';
 
 const ProjectPage: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
@@ -19,24 +20,26 @@ const ProjectPage: React.FC = () => {
   }, [mode]);
 
   return (
+    <SidebarLayout>
       <div className="project-page">
         <header
           ref={headerRef}
           className={`project-header`}
         ></header>
 
-        <NavBar isHomeUser={isHomeUser} />
+        <EditorHeader isHomeUser={isHomeUser} />
 
-        <SelectionBar/>
-
-        <div
-          ref={rendererRef}
-          className={`renderer-container ${mode === 'edit' ? 'shifted' : ''}`}
-        >
-          <Renderer/>
-        </div>
+          <div
+            ref={rendererRef}
+            className={`renderer-container ${mode === 'edit' ? 'shifted' : ''}`}
+          >
+            <Renderer/>
+          </div>
         <Footer></Footer>
       </div>
+
+    </SidebarLayout>
+
 
   );
 };

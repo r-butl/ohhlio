@@ -11,7 +11,6 @@ function App() {
       <Routes>
         <Route path="/project" element={<ProjectPage />} />
         <Route path="/login" element={<LoginRegister />} />
-        <Route path="/test" element={<SidebarLayout />} />
         {/* Add more routes as needed */}
       </Routes>
     </BrowserRouter>
