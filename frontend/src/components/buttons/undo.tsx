@@ -1,10 +1,13 @@
 import { Button } from "@/components/ui/button"
-import { Undo2 } from "lucide-react"
+import { RotateCcw } from "lucide-react"
+import { useEditorStore } from "../../context/EditorStore";
 
-function UndoButton({ onUndo }: { onUndo: () => void }) {
+
+function UndoButton({  }: {}) {
+  const undo = useEditorStore(state => state.undo);
   return (
-    <Button variant="outline" onClick={onUndo}>
-      <Undo2 className="h-2 w-2" />
+    <Button variant="outline" onClick={() => undo()} className='h-8 w-8 aspect-square p-1'>
+      <RotateCcw className="h-2 w-2" />
       <span className="sr-only">Undo</span>
     </Button>
   )

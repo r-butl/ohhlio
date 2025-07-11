@@ -162,9 +162,7 @@ export const useEditorStore = create<State>((set, get) => ({
         }
       })
     }
-
     console.log(`Past: ${history.past.length} Future: ${history.future.length}`)
-
   },
 
   // Actions that should NOT be tracked in history

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import Footer from '../../components/footer/Footer';
-import Renderer from './components/PortfolioRenderer';
-import EditorHeader from '../../components/editor-header/EditorHeader';
+import Renderer from './PortfolioRenderer';
+import EditorHeader from '../../components/EditorHeader';
 import { useEditorStore } from '../../context/EditorStore';
 
 import SidebarLayout from '../../components/layouts/SidebarLayout';

@@ -40,7 +40,6 @@
     padding-top: 0;
 }
 
-/* If there's still a gap, you can try */
 .text-editor-tiptap .ProseMirror > * {
     margin: 0;
     padding: 0;

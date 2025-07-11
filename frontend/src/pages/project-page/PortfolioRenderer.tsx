@@ -2,13 +2,12 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { WidthProvider, Responsive } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import './PortfolioRenderer.css';
 
-import TextEditor from './text-editor/TextEditor';
-import ImageEditor from './image-editor/ImageEditor';
-import GridItem from './grid-item/GridItem';
+import TextEditor from '../../components/text-editor/TextEditor';
+import ImageEditor from '../../components/image-editor/ImageEditor';
+import GridItem from '../../components/grid-item/GridItem';
 
-import { useEditorStore } from '../../../context/EditorStore';
+import { useEditorStore } from '../../context/EditorStore';
 
 const ResponsiveGrid = WidthProvider(Responsive);
 
@@ -17,7 +16,6 @@ interface RendererProps {}
 const Renderer: React.FC<RendererProps> = () => {
 
   const buttonHovered = useEditorStore(state => state.buttonHovered);
-
   const mode = useEditorStore(state => state.mode);
   const activeEditor = useEditorStore(state => state.activeEditor);
   const items = useEditorStore(state => state.items);
