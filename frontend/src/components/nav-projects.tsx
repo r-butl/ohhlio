@@ -25,6 +25,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import AddProjectButton from "@/components/buttons/AddProject"
+
 export function NavProjects({
   projects,
 }: {
@@ -84,10 +86,7 @@ export function NavProjects({
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-          <SidebarMenuButton>
-            <MoreHorizontal />
-            <span>More</span>
-          </SidebarMenuButton>
+          <AddProjectButton />
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>

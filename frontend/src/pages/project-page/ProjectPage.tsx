@@ -22,22 +22,12 @@ const ProjectPage: React.FC = () => {
   return (
     <SidebarLayout>
       <div className="project-page">
-        <header
-          ref={headerRef}
-          className={`project-header`}
-        ></header>
 
         <EditorHeader isHomeUser={isHomeUser} />
-
-          <div
-            ref={rendererRef}
-            className={`renderer-container ${mode === 'edit' ? 'shifted' : ''}`}
-          >
-            <Renderer/>
-          </div>
+        <Renderer/>
         <Footer></Footer>
+      
       </div>
-
     </SidebarLayout>
 
 

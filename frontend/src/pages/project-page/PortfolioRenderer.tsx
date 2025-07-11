@@ -20,53 +20,39 @@ const Renderer: React.FC<RendererProps> = () => {
   const activeEditor = useEditorStore(state => state.activeEditor);
   const items = useEditorStore(state => state.items);
   const updateLayout = useEditorStore(state => state.updateLayout);
-
+  
   const isDraggable = mode === 'edit' && (activeEditor === null) && !buttonHovered;
   const isResizable = mode === 'edit' && !buttonHovered;
 
   const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
 
-  const getTypeSpecificLayout = (type: 'text' | 'image') => {
-    const baseLayout = {
-      maxW: 24,
-      maxH: 24,
-    };
+  const generateLayouts = useCallback(() => {
+    const itemValues = Object.values(items);
+    
+    // Desktop layout uses the user-configured layout directly
+    const desktopLayout = itemValues.map(item => ({ ...item.layout }));
 
-    switch (type) {
-      case 'text':
-        return {
-          ...baseLayout,
-          minW: 1,  
-          minH: 1,
-          maxW: 8,
-          maxH: 32,
-        };
-      case 'image':
-        return {
-          ...baseLayout,
-          minW: 1,  
-          minH: 4,  
-          maxW: 8,
-          maxH: 32,
-        };
-      default:
-        return {
-          ...baseLayout,
-          minW: 1,
-          minH: 1,
-        };
-    }
-  };
+    // Mobile layout stacks everything in a single column
+    const mobileLayout = itemValues.map(item => ({
+      ...item.layout,
+      w: 1, // Force width to 1 column
+      x: 0, // Ensure it's in the first (and only) column
+    }));
+
+    return {
+      lg: desktopLayout,
+      xs: mobileLayout,
+    };
+  }, [items]);
+
 
   const renderItem = (item: typeof items[string]) => {
-    const typeSpecificLayout = getTypeSpecificLayout(item.type);
 
     return (
       <div
         key={item.id}
         data-grid={{
           ...item.layout,
-          ...typeSpecificLayout,
         }}
         className={mode === 'edit' ? 'edit' : ''}
       >
@@ -94,9 +80,9 @@ const Renderer: React.FC<RendererProps> = () => {
     <div style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
       <ResponsiveGrid
         className="layout"
-        layouts={{ lg: Object.values(items).map((item) => ({ ...item.layout })) }}
-        breakpoints={{ lg: 1600, md: 1200, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: gridColumnCount, md: gridColumnCount, sm: gridColumnCount, xs: gridColumnCount, xxs: gridColumnCount }}
+        layouts={generateLayouts()}
+        breakpoints={{ lg: 768, xs: 0 }} // Breakpoint at 768px
+        cols={{ lg: gridColumnCount, xs: 1 }} // Desktop has N columns, mobile has 1
         rowHeight={gridRowHeight}
         isDraggable={isDraggable}
         isResizable={isResizable}

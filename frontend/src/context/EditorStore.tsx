@@ -42,17 +42,6 @@ type Item = {
   props: any
 }
 
-// Layout configuration for renderer
-const LAYOUT_CONFIG = {
-  maxWidth: 1600,
-  rowHeight: 1600 / 25,
-  columnCount: 12,
-  defaultItemSize: {
-    w: 4,
-    h: 2
-  }
-} as const
-
 // State information for the Editor page
 type State = {
   items: Record<string, Item>     // Items in the layout
@@ -101,6 +90,7 @@ export const useEditorStore = create<State>((set, get) => ({
   editorMaxWidth: 800,
   gridRowHeight: 1600 / 32,
   gridColumnCount: 4,
+
   defaultItemWidth: 1,
   defaultItemHeight: 4,
   buttonHovered: false,
@@ -224,7 +214,8 @@ export const useEditorStore = create<State>((set, get) => ({
     
     // Create default props based on item type
     let defaultProps: any = {};
-    
+    let layout_config: any = {};
+
     if (type === 'text') {
       defaultProps = {
         content: "Select <strong>Options &gt; Edit</strong> to add text.",
@@ -238,6 +229,18 @@ export const useEditorStore = create<State>((set, get) => ({
         maxChars: 1000,
         charCount: 0
       };
+      layout_config ={
+        x: 0,
+        y: maxY,
+        w: get().gridColumnCount,
+        h: 1,
+        i: id,
+        minW: get().gridColumnCount,  
+        minH: 1,
+        maxW: get().gridColumnCount,
+        maxH: 40,
+      };
+      
     } else if (type === 'image') {
       defaultProps = {
         originalImage: null,
@@ -246,19 +249,24 @@ export const useEditorStore = create<State>((set, get) => ({
         zoom: 1,
         aspectRatio: 4 / 3
       };
+      layout_config ={
+        x: 0,
+        y: maxY,
+        w: 1,
+        h: 4,
+        i: id,
+        minW: 1,  
+        minH: 4,
+        maxW: get().gridColumnCount,
+        maxH: 40,
+      };
     }
     
     const newItem: Item = {
       id,
       type,
       props: defaultProps,
-      layout: {
-        x: 0,
-        y: maxY,
-        w: get().defaultItemWidth,
-        h: get().defaultItemHeight,
-        i: id
-      }
+      layout: layout_config
     }
 
     get().setItemsWithHistory(draft => {

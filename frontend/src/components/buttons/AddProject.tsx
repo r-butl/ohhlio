@@ -1,12 +1,13 @@
 import { CirclePlus } from "lucide-react";
 import { Button } from "../ui/button";
+import { SidebarMenuButton } from "../ui/sidebar";
 
 function AddProjectButton({}: {}) {
   return (
-    <Button variant="ghost" className='h-8 w-8 aspect-square p-1'>
+    <SidebarMenuButton >
       <CirclePlus />
       <span>Add Project</span>
-    </Button>
+    </SidebarMenuButton>
   )
 }
 
