@@ -7,10 +7,10 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-import UndoButton from "./buttons/undo";
-import RedoButton from "./buttons/redo";
-import PreviewButton from "./buttons/preview";
-import PublishButton from "./buttons/publish";
+import UndoButton from "./buttons/Undo";
+import RedoButton from "./buttons/Redo";
+import PreviewButton from "./buttons/Preview";
+import PublishButton from "./buttons/Publish";
 import AddContentButton from "./buttons/AddContentItem";
 
 interface EditorHeaderProps {

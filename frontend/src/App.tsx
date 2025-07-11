@@ -9,6 +9,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<ProjectPage />} />
         <Route path="/project" element={<ProjectPage />} />
         <Route path="/login" element={<LoginRegister />} />
         {/* Add more routes as needed */}
