@@ -3,6 +3,8 @@ import {
   MoreHorizontal,
   Share,
   Trash2,
+  House,
+  StickyNote,
   type LucideIcon,
 } from "lucide-react"
 
@@ -38,11 +40,17 @@ export function NavProjects({
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarMenu>
+        <SidebarMenuButton asChild>
+              <a href={"/"}>
+                <House/>
+                <span>Home</span>
+              </a>
+            </SidebarMenuButton>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
-                <item.icon />
+                <StickyNote className="h-4 w-2"/>
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>

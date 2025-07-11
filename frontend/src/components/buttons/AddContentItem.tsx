@@ -35,7 +35,7 @@ function AddContentButton({}: {}) {
             Add Text
             <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => addItem('text')}>
+          <DropdownMenuItem onClick={() => addItem('image')}>
             Add Image
             <DropdownMenuShortcut>⌘I</DropdownMenuShortcut>
           </DropdownMenuItem>

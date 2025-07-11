@@ -98,7 +98,7 @@ export const useEditorStore = create<State>((set, get) => ({
   mode: 'edit',
   history: { past: [], future: [] },
   activeEditor: null,
-  editorMaxWidth: 1600,
+  editorMaxWidth: 800,
   gridRowHeight: 1600 / 32,
   gridColumnCount: 4,
   defaultItemWidth: 1,
