@@ -19,15 +19,21 @@ interface EditorHeaderProps {
 
 const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
     const navigate = useNavigate();
+    const mode = useEditorStore(state => state.mode);
 
     return (
         <div className="editor-header">
             <div className="flex w-full items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     <SidebarTrigger />
-                    <UndoButton />
-                    <RedoButton />
-                    <AddContentButton />
+                    {mode === "edit" && (
+                        <>
+                            <UndoButton />
+                            <RedoButton />
+                            <AddContentButton />
+                        </>
+                    )}
+
                 </div>
                 <div className="flex items-center gap-2">
                     <PreviewButton isHomeUser={isHomeUser} />

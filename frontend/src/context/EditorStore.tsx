@@ -72,7 +72,6 @@ type State = {
                           //   when certain buttons on the component are hovered over them
   setButtonHoveredState: (state: boolean) => void;
 
-
   // Grid item interaction (text/image/ect content) 
   setItemsWithHistory: (fn: (draft: Record<string, Item>) => void) => void
   setItemsWithoutHistory: (fn: (draft: Record<string, Item>) => void) => void

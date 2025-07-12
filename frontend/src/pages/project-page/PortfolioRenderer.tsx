@@ -19,12 +19,25 @@ const Renderer: React.FC<RendererProps> = () => {
   const mode = useEditorStore(state => state.mode);
   const activeEditor = useEditorStore(state => state.activeEditor);
   const items = useEditorStore(state => state.items);
-  const updateLayout = useEditorStore(state => state.updateLayout);
+  const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   
   const isDraggable = mode === 'edit' && (activeEditor === null) && !buttonHovered;
   const isResizable = mode === 'edit' && !buttonHovered;
 
   const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
+
+  const handleLayoutChange = (layout: any[]) => {
+    if (mode === 'edit') {
+      console.log('Updating layout in editor store from user interaction');
+      setItemsWithHistory(draft => {
+        layout.forEach(layoutItem => {
+          if (draft[layoutItem.i]) {
+            draft[layoutItem.i].layout = layoutItem;
+          }
+        });
+      });
+    }
+  };
 
   const generateLayouts = useCallback(() => {
     const itemValues = Object.values(items);
@@ -44,7 +57,6 @@ const Renderer: React.FC<RendererProps> = () => {
       xs: mobileLayout,
     };
   }, [items]);
-
 
   const renderItem = (item: typeof items[string]) => {
 
@@ -81,13 +93,14 @@ const Renderer: React.FC<RendererProps> = () => {
       <ResponsiveGrid
         className="layout"
         layouts={generateLayouts()}
-        breakpoints={{ lg: 768, xs: 0 }} // Breakpoint at 768px
-        cols={{ lg: gridColumnCount, xs: 1 }} // Desktop has N columns, mobile has 1
+        breakpoints={{ lg: 768, xs: 0 }} 
+        cols={{ lg: gridColumnCount, xs: 1 }}
         rowHeight={gridRowHeight}
         isDraggable={isDraggable}
         isResizable={isResizable}
         resizeHandles={['sw', 'se']}
-        onLayoutChange={updateLayout}
+        onDragStop={handleLayoutChange}
+        onResizeStop={handleLayoutChange}
         margin={[5, 5]}
         containerPadding={[1, 1]}
         compactType="vertical"

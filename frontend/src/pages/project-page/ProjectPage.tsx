@@ -29,8 +29,6 @@ const ProjectPage: React.FC = () => {
       
       </div>
     </SidebarLayout>
-
-
   );
 };
 
