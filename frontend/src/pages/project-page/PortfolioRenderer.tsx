@@ -66,7 +66,6 @@ const Renderer: React.FC<RendererProps> = () => {
         data-grid={{
           ...item.layout,
         }}
-        className={mode === 'edit' ? 'edit' : ''}
       >
         <GridItem
           id={item.id}

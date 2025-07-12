@@ -57,8 +57,6 @@ type State = {
   editorMaxWidth: number          // Width of the renderer content on the portfolio
   gridRowHeight: number           // Height in pixels of each row of the grid
   gridColumnCount: number         // Number of columns that will fit within the renderer
-  defaultItemWidth: number
-  defaultItemHeight: number
 
   // History interaction
   undo: () => void
@@ -87,11 +85,9 @@ export const useEditorStore = create<State>((set, get) => ({
   history: { past: [], future: [] },
   activeEditor: null,
   editorMaxWidth: 800,
-  gridRowHeight: 1600 / 32,
+  gridRowHeight: 1,
   gridColumnCount: 4,
 
-  defaultItemWidth: 1,
-  defaultItemHeight: 4,
   buttonHovered: false,
   activeOptionsPanel: null,
 
@@ -232,10 +228,10 @@ export const useEditorStore = create<State>((set, get) => ({
         x: 0,
         y: maxY,
         w: get().gridColumnCount,
-        h: 1,
+        h: 10,
         i: id,
         minW: get().gridColumnCount,  
-        minH: 1,
+        minH: 10,
         maxW: get().gridColumnCount,
         maxH: 40,
       };
@@ -252,10 +248,10 @@ export const useEditorStore = create<State>((set, get) => ({
         x: 0,
         y: maxY,
         w: 1,
-        h: 4,
+        h: 30,
         i: id,
         minW: 1,  
-        minH: 4,
+        minH: 30,
         maxW: get().gridColumnCount,
         maxH: 40,
       };

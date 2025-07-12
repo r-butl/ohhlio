@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, use } from 'react';
 import './GridItem.css';
 import OptionsPanel from '../options-panel/OptionsPanel';
 import { useEditorStore } from '../../context/EditorStore';
+import { cn } from '../../lib/utils';
 
 export interface GridDimensions {
   gridWidth?: number;
@@ -51,7 +52,10 @@ const GridItem: React.FC<GridItemProps> = ({
     <>
       <div 
         ref={containerRef}
-        className="grid-item"
+        className={cn(
+          "grid-item transition-shadow duration-300 ",
+          {"shadow-[0px_0px_20px_-10px_rgba(0,0,0,0.3)]": mode === 'edit'}
+        )}
         data-item-id={id}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
