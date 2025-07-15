@@ -22,7 +22,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
     const mode = useEditorStore(state => state.mode);
 
     return (
-        <div className="editor-header">
+        <div className="editor-header pt-2 pl-2 pr-2 pb-2">
             <div className="flex w-full items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     <SidebarTrigger />
