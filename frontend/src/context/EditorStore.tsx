@@ -48,6 +48,7 @@ type State = {
   mode: 'edit' | 'display'        // Mode of the editor
   activeEditor: string | null     // ID of the current item being edited
   activeOptionsPanel: string | null // ID of the current option panel that is open
+  projectId: string | null;       // The ID of the current project being edited
 
   history: {                      // History of all actions in the editor
     past: { patches: Patch[]; inversePatches: Patch[] }[]
@@ -66,6 +67,7 @@ type State = {
   toggleEditorMode: () => void
   setActiveEditor: (id: string | null) => void
   setActiveOptionsPanel: (id: string | null) => void;
+  setProjectId: (id: string | null) => void;
   buttonHovered: boolean  // Used for controlling the resize and draggability of the grid items
                           //   when certain buttons on the component are hovered over them
   setButtonHoveredState: (state: boolean) => void;
@@ -84,6 +86,7 @@ export const useEditorStore = create<State>((set, get) => ({
   mode: 'edit',
   history: { past: [], future: [] },
   activeEditor: null,
+  projectId: null,
   editorMaxWidth: 800,
   gridRowHeight: 1,
   gridColumnCount: 4,
@@ -94,6 +97,10 @@ export const useEditorStore = create<State>((set, get) => ({
   // Toggle the button hovered state
   setButtonHoveredState: (state: boolean) => {
     set(({ buttonHovered: state}))
+  },
+
+  setProjectId: (id: string | null) => {
+    set({ projectId: id });
   },
 
   // Toggle the option panel opened 

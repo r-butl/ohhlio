@@ -1,12 +1,13 @@
 import { CirclePlus } from "lucide-react";
-import { Button } from "../ui/button";
 import { SidebarMenuButton } from "../ui/sidebar";
 
-function AddProjectButton({}: {}) {
+function AddProjectButton() {
   return (
-    <SidebarMenuButton >
-      <CirclePlus />
-      <span>Add Project</span>
+    <SidebarMenuButton asChild>
+      <a href="/project">
+        <CirclePlus />
+        <span>Add Project</span>
+      </a>
     </SidebarMenuButton>
   )
 }

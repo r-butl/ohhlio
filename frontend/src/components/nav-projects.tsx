@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Folder,
   MoreHorizontal,
@@ -5,16 +7,14 @@ import {
   Trash2,
   House,
   StickyNote,
-  type LucideIcon,
-} from "lucide-react"
-
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -23,37 +23,71 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { getProjects, deleteProject } from '@/services/projectService';
+import { toast } from 'sonner';
+import AddProjectButton from "@/components/buttons/AddProject";
 
-import AddProjectButton from "@/components/buttons/AddProject"
+interface Project {
+  id: string;
+  title: string;
+}
 
-export function NavProjects({
-  projects,
-}: {
-  projects: {
-    name: string
-    url: string
-    icon: LucideIcon
-  }[]
-}) {
-  const { isMobile } = useSidebar()
+export function NavProjects() {
+  const { isMobile } = useSidebar();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const navigate = useNavigate();
+
+  const fetchProjects = async () => {
+    try {
+      const fetchedProjects = await getProjects();
+      setProjects(fetchedProjects);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Could not fetch projects";
+      toast.error(errorMessage);
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleDelete = async (projectId: string) => {
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      try {
+        toast.loading("Deleting project...");
+        await deleteProject(projectId);
+        await fetchProjects(); // Refetch projects to update the list
+        toast.dismiss();
+        toast.success("Project deleted successfully.");
+        // Optional: Navigate away if the current project is deleted
+        // navigate('/project'); 
+      } catch (error) {
+        toast.dismiss();
+        const errorMessage = error instanceof Error ? error.message : "Failed to delete project";
+        toast.error(errorMessage);
+        console.error(error);
+      }
+    }
+  };
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarMenu>
         <SidebarMenuButton asChild>
-              <a href={"/"}>
-                <House/>
-                <span>Home</span>
-              </a>
-            </SidebarMenuButton>
-        {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <a href={"/"}>
+            <House />
+            <span>Home</span>
+          </a>
+        </SidebarMenuButton>
+        {projects.map((project) => (
+          <SidebarMenuItem key={project.id}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <StickyNote className="h-4 w-2"/>
-                <span>{item.name}</span>
+              <a href={`/project/${project.id}`}>
+                <StickyNote className="h-4 w-2" />
+                <span>{project.title}</span>
               </a>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -68,7 +102,7 @@ export function NavProjects({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate(`/project/${project.id}`)}>
                   <Folder className="text-muted-foreground" />
                   <span>View Project</span>
                 </DropdownMenuItem>
@@ -77,7 +111,7 @@ export function NavProjects({
                   <span>Share Project</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDelete(project.id)}>
                   <Trash2 className="text-muted-foreground" />
                   <span>Delete Project</span>
                 </DropdownMenuItem>
@@ -90,5 +124,5 @@ export function NavProjects({
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }
