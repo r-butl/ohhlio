@@ -1,11 +1,18 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
+export const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
 export const generateToken = (userId: string) => {
-    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '1h' });
+    return token;
 };
 
-export const verifyToken = (token: string) => {
-    return jwt.verify(token, JWT_SECRET);
+export interface DecodedToken extends JwtPayload {
+    userId: string;
+}
+
+
+export const verifyToken = (token: string): DecodedToken => {
+    const userId = jwt.verify(token, JWT_SECRET) as DecodedToken;
+    return userId;
 };

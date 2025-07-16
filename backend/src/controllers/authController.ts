@@ -53,7 +53,7 @@ const register = async (req: Request, res: Response) => {
         });
 
         // Generate a JWT token
-        const token = generateToken(user.id);
+         const token = generateToken(user.id);
         res.status(201).json({ token: token, username: user.username, email: user.email });
 
     } catch (error) {
@@ -63,7 +63,6 @@ const register = async (req: Request, res: Response) => {
 }
 
 const login = async (req: Request, res: Response) => {
-    console.log(`Recieved: ${JSON.stringify(req.body)}`);
     let { email, password } = req.body;
 
     // Input validation
@@ -80,6 +79,8 @@ const login = async (req: Request, res: Response) => {
 
         // Check if the user exists
         const user = await globalThis.prisma.user.findUnique({ where: {email: email}, });
+        console.log(`Found user`);
+        console.log(user)
         if (!user) {
             return res.status(401).json({ message: "User not found" });
         }
