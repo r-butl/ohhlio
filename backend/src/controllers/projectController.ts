@@ -1,5 +1,5 @@
 import { Response } from 'express';
-const { prisma } = require('../models/db');
+const prisma = require('../models/db');
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
 // Get all projects for the logged-in user
@@ -15,6 +15,7 @@ export const getProjects = async (req: AuthenticatedRequest, res: Response): Pro
       where: { userId },
       orderBy: { updatedAt: 'desc' },
     });
+
     res.json(projects);
   } catch (error) {
     console.error('Error fetching projects:', error);
