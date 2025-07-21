@@ -15,9 +15,9 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Routers
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-const projectRoutes = require('./routes/projectRoutes');
+const authRoutes = require('../api/authRoutes');
+const userRoutes = require('../api/userRoutes');
+const projectRoutes = require('../api/projectRoutes');
 
 // Middleware
 app.use(helmet());

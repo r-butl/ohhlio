@@ -5,8 +5,8 @@ import {
   getProjectById,
   updateProject,
   deleteProject,
-} from '../controllers/projectController';
-import { protect } from '../middleware/authMiddleware';
+} from '../src/controllers/projectController';
+import { protect } from '../src/middleware/authMiddleware';
 
 const router = Router();
 
