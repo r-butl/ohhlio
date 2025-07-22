@@ -83,7 +83,7 @@ type State = {
 
 export const useEditorStore = create<State>((set, get) => ({
   items: {},
-  mode: 'edit',
+  mode: 'display',
   history: { past: [], future: [] },
   activeEditor: null,
   projectId: null,

@@ -1,21 +1,27 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Button } from "@/components/ui/button";
 import { useEditorStore } from '@/context/EditorStore';
 import { createProject, updateProject } from '@/services/projectService';
 import { toast } from 'sonner';
+import { UserContext } from '@/context/UserContext';
 
 const PublishButton: React.FC = () => {
+
+    const userContext = useContext(UserContext);
+    if (!userContext) {
+        throw new Error('PublishButton must be used within a UserProvider');
+    }
+    const { fetchProjects } = userContext;
+    const setProjectId = useEditorStore(state => (state.setProjectId));
 
 
     const handlePublish = async () => {
 
-        const { projectId, items, setProjectId } = useEditorStore(state => ({
-            projectId: state.projectId,
-            items: state.items,
-            setProjectId: state.setProjectId,
-        }));
+        const projectId = useEditorStore.getState().projectId;
+        const items = useEditorStore.getState().items;
 
         if (!projectId) {
+
             // This is a new project, so we need a title.
             const title = prompt("Please enter a title for your new project:");
             if (!title) {
@@ -34,6 +40,10 @@ const PublishButton: React.FC = () => {
                 toast.error(`Failed to publish: ${errorMessage}`);
                 console.error(error);
             }
+            
+            fetchProjects();
+
+            
         } else {
             // This is an existing project, just save the changes.
             try {

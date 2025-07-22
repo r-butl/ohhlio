@@ -1,5 +1,7 @@
 const API_URL = 'http://localhost:3001/api/projects';
 
+import { useUser } from "@/context/UserContext";
+
 // Helper function to get the auth token from localStorage
 const getAuthToken = () => {
     return localStorage.getItem('token');
@@ -126,6 +128,34 @@ export const deleteProject = async (id: string) => {
     // DELETE requests might not return a body, so we check for that
     if (response.status === 204) {
         return { message: 'Project deleted successfully' };
+    }
+
+    return response.json();
+};
+
+// Get all public projects (for browsing)
+export const getPublicProjects = async () => {
+    const response = await fetch(`${API_URL}/public`, {
+        method: 'GET',
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch public projects');
+    }
+
+    return response.json();
+};
+
+// Get a public project by ID (no authentication required)
+export const getPublicProjectById = async (id: string) => {
+    const response = await fetch(`${API_URL}/public/${id}`, {
+        method: 'GET',
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch public project');
     }
 
     return response.json();

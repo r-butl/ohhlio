@@ -25,14 +25,12 @@ const GridItem: React.FC<GridItemProps> = ({
   const containerRef = useRef<HTMLDivElement>(null!);
 
   const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
-  const buttonHovered = useEditorStore(state => state.buttonHovered);
 
   const setActiveOptionsPanel = useEditorStore(state => state.setActiveOptionsPanel);
   const activeOptionsPanel = useEditorStore(state => state.activeOptionsPanel);
 
   const activeEditor = useEditorStore(state => state.activeEditor);
   const isEditing = activeEditor === id;
-  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
 
   const mode = useEditorStore(state => state.mode);
 

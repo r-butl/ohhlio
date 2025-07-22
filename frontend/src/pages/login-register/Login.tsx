@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Add this import
+import { useNavigate } from 'react-router-dom';
 import { LoginForm } from '@/components/login-form';
 import { useAuth } from "@/context/AuthContext";
 
 const API_URL = 'http://localhost:3001/api/auth';
 
 const LoginRegister: React.FC = () => {
-  const navigate = useNavigate(); // Add this hook
+  const navigate = useNavigate();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -29,9 +29,10 @@ const LoginRegister: React.FC = () => {
         body: JSON.stringify(body),
       });
       const data = await res.json();
+
       if (res.ok) {
         setMessage('Success!');
-        console.log(data);
+        // Only need to call login - UserContext will automatically sync
         login(data.token, { email: data.email, username: data.username });
         navigate('/project');
       } else {

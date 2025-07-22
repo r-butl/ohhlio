@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Folder,
@@ -24,45 +24,33 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getProjects, deleteProject } from '@/services/projectService';
+import { deleteProject } from '@/services/projectService';
 import { toast } from 'sonner';
 import AddProjectButton from "@/components/buttons/AddProject";
-
-interface Project {
-  id: string;
-  title: string;
-}
+import { UserContext } from "@/context/UserContext";
+import { useContext } from 'react';
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
-  const [projects, setProjects] = useState<Project[]>([]);
   const navigate = useNavigate();
+  const userContext = useContext(UserContext);
 
-  const fetchProjects = async () => {
-    try {
-      const fetchedProjects = await getProjects();
-      setProjects(fetchedProjects);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Could not fetch projects";
-      toast.error(errorMessage);
-      console.error(error);
-    }
-  };
+  if (!userContext) {
+    throw new Error('NavProjects must be used within a UserProvider');
+  }
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+  const { projects, fetchProjects } = userContext;
 
   const handleDelete = async (projectId: string) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
         toast.loading("Deleting project...");
         await deleteProject(projectId);
-        await fetchProjects(); // Refetch projects to update the list
+        await fetchProjects(); 
         toast.dismiss();
         toast.success("Project deleted successfully.");
+
         // Optional: Navigate away if the current project is deleted
-        // navigate('/project'); 
       } catch (error) {
         toast.dismiss();
         const errorMessage = error instanceof Error ? error.message : "Failed to delete project";
@@ -82,7 +70,7 @@ export function NavProjects() {
             <span>Home</span>
           </a>
         </SidebarMenuButton>
-        {projects.map((project) => (
+        {projects.map((project: any) => (
           <SidebarMenuItem key={project.id}>
             <SidebarMenuButton asChild>
               <a href={`/project/${project.id}`}>

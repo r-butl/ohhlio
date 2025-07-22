@@ -5,8 +5,13 @@ import { useEditorStore } from "../../context/EditorStore";
 
 function UndoButton({  }: {}) {
   const undo = useEditorStore(state => state.undo);
+  const pastLength = useEditorStore(state => state.history.past.length);
   return (
-    <Button variant="outline" onClick={() => undo()} className='h-8 w-8 aspect-square p-1'>
+    <Button 
+      variant="outline" 
+      onClick={() => undo()} 
+      className='h-8 w-8 aspect-square p-1'
+      disabled={pastLength === 0}>
       <RotateCcw className="h-2 w-2" />
       <span className="sr-only">Undo</span>
     </Button>

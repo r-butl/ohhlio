@@ -74,7 +74,6 @@ function SidebarProvider({
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value;
-      console.log("Sidebar open state updated:", openState); // Log state update
       if (setOpenProp) {
         setOpenProp(openState);
       } else {
@@ -90,7 +89,6 @@ function SidebarProvider({
   const setOpenMobile = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openMobileState = typeof value === "function" ? value(openMobile) : value;
-      console.log("Sidebar mobile open state updated:", openMobileState); // Log mobile state update
       _setOpenMobile(openMobileState);
     },
     [openMobile]
@@ -120,10 +118,6 @@ function SidebarProvider({
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed"
-
-  React.useEffect(() => {
-    console.log(`Sidebar data-state changed to: ${state}`);
-  }, [state]);
 
   const contextValue = React.useMemo<SidebarContextProps>(
     () => ({
@@ -282,7 +276,6 @@ function SidebarTrigger({
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
-        console.log("Sidebar trigger clicked")
       }}
       {...props}
     >
