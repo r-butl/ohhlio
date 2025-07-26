@@ -18,6 +18,15 @@ const PORT = process.env.PORT || 3001;
 const authRoutes = require('../api/authRoutes');
 const userRoutes = require('../api/userRoutes');
 const projectRoutes = require('../api/projectRoutes');
+const assetRoutes = require('../api/assetRoutes');
+
+// Serve static files with CORS headers (before helmet middleware)
+app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
 
 // Middleware
 app.use(helmet());
@@ -35,9 +44,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
-
-// Serve static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/assets', assetRoutes);
 
 // Routes
 app.get('/api/health', (req: Request, res: Response) => {

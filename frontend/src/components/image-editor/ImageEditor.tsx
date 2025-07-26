@@ -3,6 +3,7 @@ import Cropper from 'react-easy-crop';
 import { GridDimensions } from '../grid-item/GridItem';
 import { useEditorStore, ImageItemProps } from '../../context/EditorStore';
 import emitter from '../../global-state/EventBus';
+import { applyCropToImage } from '../../utils/imageUtils';
 import './ImageEditor.css';
 import { useEditor } from '@tiptap/react';
 
@@ -32,6 +33,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   
   // Provide default values if item doesn't exist or props are incomplete
   const defaultImageProps: ImageItemProps = useMemo(() => ({
+    assetId: null,
     originalImage: null,
     croppedImage: null,
     crop: { x: 0, y: 0 },
@@ -50,7 +52,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [localCrop, setLocalCrop] = useState(imageProps.crop);
   const [localZoom, setLocalZoom] = useState(imageProps.zoom);
   const [localOriginalImage, setLocalOriginalImage] = useState(imageProps.originalImage);
-  const [localCroppedImage, setLocalCroppedImage] = useState(imageProps.croppedImage);
+  const [displayImage, setDisplayImage] = useState<string | null>(null);
   
   const editorRef = useRef<HTMLDivElement>(null!);
 
@@ -60,54 +62,57 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       setLocalCrop({ x: 0, y: 0 }); // Reset crop position to center
       setLocalZoom(imageProps.zoom);
       setLocalOriginalImage(imageProps.originalImage);
-      setLocalCroppedImage(imageProps.croppedImage);
     }
-  }, [isEditing, imageProps.zoom, imageProps.originalImage, imageProps.croppedImage]);
+  }, [isEditing, imageProps.zoom, imageProps.originalImage]);
+
+  // Sync local state with store props when assets are loaded
+  useEffect(() => {
+    setLocalOriginalImage(imageProps.originalImage);
+    setDisplayImage(imageProps.originalImage);
+  }, [imageProps.originalImage]);
+
+  // Apply crop settings to original image when needed
+  const applyCropSettings = useCallback(async () => {
+    if (imageProps.originalImage && imageProps.cropSettings) {
+      try {
+        const croppedImage = await applyCropToImage(
+          imageProps.originalImage,
+          imageProps.cropSettings
+        );
+        setDisplayImage(croppedImage);
+      } catch (error) {
+        console.error('Failed to apply crop settings:', error);
+        setDisplayImage(imageProps.originalImage);
+      }
+    } else if (imageProps.originalImage) {
+      // If no crop settings, just set the original image
+      setDisplayImage(imageProps.originalImage);
+    }
+  }, [imageProps.originalImage, imageProps.cropSettings]);
+
+  // Apply crop settings when original image or crop settings change
+  useEffect(() => {
+    applyCropSettings();
+  }, [applyCropSettings]);
 
   const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
     console.log('Crop complete:', { croppedArea, croppedAreaPixels });
     
     if (localOriginalImage) {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = () => {
-        if (ctx) {
-          // Set canvas size to the cropped area size
-          canvas.width = croppedAreaPixels.width;
-          canvas.height = croppedAreaPixels.height;
-          
-          // Clear the canvas
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          
-          // Draw the cropped portion of the image
-          ctx.drawImage(
-            img,
-            croppedAreaPixels.x,
-            croppedAreaPixels.y,
-            croppedAreaPixels.width,
-            croppedAreaPixels.height,
-            0,
-            0,
-            croppedAreaPixels.width,
-            croppedAreaPixels.height
-          );
-          
-          // Convert to data URL and update state
-          const croppedImageData = canvas.toDataURL('image/jpeg', 0.9);
-          console.log('Cropped image created:', croppedImageData.substring(0, 50) + '...');
-          setLocalCroppedImage(croppedImageData);
+      // Save crop settings for later application
+      setItemsWithHistory(draft => {
+        if (draft[id]) {
+          draft[id].props.cropSettings = {
+            x: croppedAreaPixels.x,
+            y: croppedAreaPixels.y,
+            width: croppedAreaPixels.width,
+            height: croppedAreaPixels.height,
+            zoom: localZoom
+          };
         }
-      };
-      
-      img.onerror = (error) => {
-        console.error('Error loading image for cropping:', error);
-      };
-      
-      img.src = localOriginalImage;
+      });
     }
-  }, [localOriginalImage]);
+  }, [localOriginalImage, localZoom, setItemsWithHistory, id]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -116,7 +121,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       reader.onload = () => {
         const imageData = reader.result as string;
         setLocalOriginalImage(imageData);
-        setLocalCroppedImage(imageData);
         
         // Save to store immediately when image is uploaded
         setItemsWithHistory(draft => {
@@ -124,7 +128,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
             draft[id].props = {
               ...draft[id].props,
               originalImage: imageData,
-              croppedImage: imageData,
               crop: { x: 0, y: 0 },
               zoom: 1,
               aspectRatio: currentAspectRatio
@@ -155,7 +158,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
             draft[id].props = {
               ...draft[id].props,
               originalImage: localOriginalImage,
-              croppedImage: localCroppedImage,
               crop: localCrop,
               zoom: localZoom,
               aspectRatio: currentAspectRatio
@@ -170,7 +172,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       setLocalCrop(imageProps.crop);
       setLocalZoom(imageProps.zoom);
       setLocalOriginalImage(imageProps.originalImage);
-      setLocalCroppedImage(imageProps.croppedImage);
     };
 
     emitter.on('confirm-edit', handleConfirm);
@@ -180,7 +181,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       emitter.off('confirm-edit', handleConfirm);
       emitter.off('cancel-edit', handleCancel);
     };
-  }, [id, localCrop, localZoom, localOriginalImage, localCroppedImage, imageProps, setItemsWithHistory, currentAspectRatio]);
+  }, [id, localCrop, localZoom, localOriginalImage, imageProps, setItemsWithHistory, currentAspectRatio]);
 
   return (
     <div 
@@ -237,7 +238,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       ) : (
         <div className="display-container">
           <img 
-            src={localCroppedImage || localOriginalImage || ''} 
+            src={displayImage || localOriginalImage || ''} 
             alt="Cropped" 
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />

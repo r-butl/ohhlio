@@ -93,6 +93,8 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response): P
   const { title, description, items, isPublic } = req.body;
   const userId = req.user?.id;
 
+  console.log(`${items}`)
+
   if (!userId) {
     res.status(401).json({ message: 'Not authenticated' });
     return;
@@ -140,6 +142,8 @@ export const deleteProject = async (req: AuthenticatedRequest, res: Response): P
   }
 
   try {
+
+    // Find the project
     const project = await prisma.project.findUnique({
         where: { id },
     });
@@ -154,11 +158,25 @@ export const deleteProject = async (req: AuthenticatedRequest, res: Response): P
         return;
     }
 
+    // Delete all of the assets associated with the project
+    const projectAssets = await prisma.asset.findMany({
+        where: { projectId: id }
+    })
+
+    if (projectAssets.length > 0) {
+      for (const asset of projectAssets) {
+        await prisma.asset.delete({
+          where: { id: asset.id }
+        })
+      }
+    }
+
+    // Delete the project itself
     await prisma.project.delete({
       where: { id },
     });
 
-    res.status(204).send(); // No content
+    res.status(204).send(); 
   } catch (error) {
     console.error(`Error deleting project ${id}:`, error);
     res.status(500).json({ message: 'Error deleting project' });

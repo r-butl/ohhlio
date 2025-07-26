@@ -3,11 +3,11 @@ import { WidthProvider, Responsive } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-import TextEditor from '../../components/text-editor/TextEditor';
-import ImageEditor from '../../components/image-editor/ImageEditor';
-import GridItem from '../../components/grid-item/GridItem';
+import TextEditor from './text-editor/TextEditor';
+import ImageEditor from './image-editor/ImageEditor';
+import GridItem from './grid-item/GridItem';
 
-import { useEditorStore } from '../../context/EditorStore';
+import { useEditorStore } from '../context/EditorStore';
 
 const ResponsiveGrid = WidthProvider(Responsive);
 

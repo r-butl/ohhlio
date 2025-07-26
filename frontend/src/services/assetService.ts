@@ -1,0 +1,77 @@
+const API_URL = 'http://localhost:3001/api/assets';
+
+// Helper function to get the auth token from localStorage
+const getAuthToken = () => {
+    return localStorage.getItem('token');
+};
+
+// Upload a file and return asset data
+export const uploadAsset = async (file: File, projectId?: string) => {
+    const token = getAuthToken();
+    if (!token) {
+        throw new Error('No authentication token found');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    if (projectId) {
+        formData.append('projectId', projectId);
+    }
+
+    const response = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload file');
+    }
+
+    return response.json();
+};
+
+// Get asset by ID
+export const getAssetById = async (id: string) => {
+    const token = getAuthToken();
+    if (!token) {
+        throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_URL}/${id}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch asset');
+    }
+
+    return response.json();
+};
+
+// Delete asset
+export const deleteAsset = async (id: string): Promise<void> => {
+    const token = getAuthToken();
+    if (!token) {
+        throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete asset');
+    }
+}; 

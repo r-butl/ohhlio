@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Button } from "@/components/ui/button";
 import { useEditorStore } from '@/context/EditorStore';
-import { createProject, updateProject } from '@/services/projectService';
+import { createProject, updateProject, processProjectItems } from '@/services/projectService';
 import { toast } from 'sonner';
 import { UserContext } from '@/context/UserContext';
 
@@ -29,9 +29,18 @@ const PublishButton: React.FC = () => {
                 return;
             }
             try {
-                toast.loading("Publishing new project...");
-                const newProject = await createProject({ title, items });
+                toast.loading("Processing assets and publishing new project...");
+                
+                // First, create the project to get an ID
+                const newProject = await createProject({ title, items: {} });
                 setProjectId(newProject.id);
+                
+                // Then process and upload assets
+                const processedItems = await processProjectItems(items, newProject.id);
+                
+                // Finally, update the project with processed items
+                await updateProject(newProject.id, { items: processedItems });
+                
                 toast.dismiss();
                 toast.success("Project published successfully!");
             } catch (error) {
@@ -47,8 +56,14 @@ const PublishButton: React.FC = () => {
         } else {
             // This is an existing project, just save the changes.
             try {
-                toast.loading("Updating project...");
-                await updateProject(projectId, { items });
+                toast.loading("Processing assets and updating project...");
+                
+                // Process and upload any new assets
+                const processedItems = await processProjectItems(items, projectId);
+                
+                // Update the project with processed items
+                await updateProject(projectId, { items: processedItems });
+                
                 toast.dismiss();
                 toast.success("Project updated successfully!");
             } catch (error) {

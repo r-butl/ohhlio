@@ -1,6 +1,7 @@
 // HistoryStore.ts
 import { create } from 'zustand'
 import { produce, enablePatches, applyPatches, Patch } from 'immer'
+import { getAssetById } from '../services/assetService'
 
 enablePatches()
 
@@ -18,11 +19,19 @@ export type TextItemProps = {
 }
 
 export type ImageItemProps = {
-  originalImage: string | null;
-  croppedImage: string | null;
+  assetId: string | null;  // Reference to uploaded asset
+  originalImage: string | null;  // Keep for preview/fallback
   crop: { x: number; y: number };
   zoom: number;
   aspectRatio: number;
+  isUploading?: boolean;  // Track upload state
+  cropSettings?: {  // Store crop parameters for dynamic application
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    zoom: number;
+  };
 }
 
 // Layout configuration for 1 item
@@ -79,6 +88,9 @@ type State = {
   addItem: (type: 'text' | 'image') => void
   deleteItem: (id: string) => void
   updateLayout: (layout: any[]) => void
+  
+  // Asset loading
+  loadAssetsForItems: () => Promise<void>
 }
 
 export const useEditorStore = create<State>((set, get) => ({
@@ -245,11 +257,12 @@ export const useEditorStore = create<State>((set, get) => ({
       
     } else if (type === 'image') {
       defaultProps = {
+        assetId: null,
         originalImage: null,
-        croppedImage: null,
         crop: { x: 0, y: 0 },
         zoom: 1,
-        aspectRatio: 4 / 3
+        aspectRatio: 4 / 3,
+        isUploading: false
       };
       layout_config ={
         x: 0,
@@ -290,5 +303,30 @@ export const useEditorStore = create<State>((set, get) => ({
           draft[layoutItem.i].layout = layoutItem
         }
       })
-    })
+    }),
+
+  // Asset loading
+  loadAssetsForItems: async () => {
+    const items = get().items;
+    
+    for (const itemId in items) {
+      const item = items[itemId];
+      
+      if (item.type === 'image' && item.props.assetId && !item.props.originalImage) {
+        try {
+          const asset = await getAssetById(item.props.assetId);
+
+          if (asset) {
+            const assetUrl = `http://localhost:3001${asset.filePath}`;
+            get().setItemsWithoutHistory(draft => {
+              draft[itemId].props.originalImage = assetUrl;
+            });
+          }
+        } catch (error) {
+          console.error(`Failed to load asset for item ${itemId}:`, error);
+        }
+      } else {
+      }
+    }
+  }
 }))
