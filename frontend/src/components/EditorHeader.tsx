@@ -3,9 +3,10 @@ import { useEditorStore } from "../context/EditorStore";
 import { useNavigate, Link } from "react-router-dom";
 
 import {
-  SidebarTrigger,
   useSidebar
 } from "@/components/ui/sidebar";
+
+import PreviewButton from "@/components/buttons/Preview";
 
 import UndoButton from "./buttons/Undo";
 import RedoButton from "./buttons/Redo";
@@ -17,7 +18,6 @@ interface EditorHeaderProps {
 }
 
 const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
-    const navigate = useNavigate();
     const mode = useEditorStore(state => state.mode);
     const sidebarOpen = useSidebar().open;
     const setEditorMode = useEditorStore(state => state.setEditorMode);
@@ -46,7 +46,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
 
                 </div>
                 <div className="flex items-center gap-2">
-                    <SidebarTrigger />
+                    <PreviewButton isHomeUser={isHomeUser} />
                     <PublishButton />
                 </div>
             </div>
