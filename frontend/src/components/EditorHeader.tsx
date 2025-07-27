@@ -1,10 +1,10 @@
 import React from 'react';
 import { useEditorStore } from "../context/EditorStore";
-import { useAuth } from "@/context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
 import {
   SidebarTrigger,
+  useSidebar
 } from "@/components/ui/sidebar";
 
 import UndoButton from "./buttons/Undo";
@@ -12,7 +12,6 @@ import RedoButton from "./buttons/Redo";
 import PreviewButton from "./buttons/Preview";
 import PublishButton from "./buttons/Publish";
 import AddContentButton from "./buttons/AddContentItem";
-import FileUploadBox from './FileUploadBox';
 
 interface EditorHeaderProps {
     isHomeUser: boolean;  // This will be used to determine if user is the owner
@@ -21,7 +20,17 @@ interface EditorHeaderProps {
 const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
     const navigate = useNavigate();
     const mode = useEditorStore(state => state.mode);
-    
+    const sidebarOpen = useSidebar().open;
+    const setEditorMode = useEditorStore(state => state.setEditorMode);
+
+    React.useEffect(() => {
+        if (sidebarOpen) {
+            setEditorMode('edit');
+        } else {
+            setEditorMode('display');
+        }
+    }, [sidebarOpen, setEditorMode]);
+
 
     return (
         <div className="editor-header pt-2 pl-2 pr-2 pb-2">
@@ -38,9 +47,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
 
                 </div>
                 <div className="flex items-center gap-2">
-                    <PreviewButton isHomeUser={isHomeUser} />
                     <PublishButton />
-                    
                 </div>
             </div>
         </div>

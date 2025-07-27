@@ -5,7 +5,6 @@ import { useEditorStore, ImageItemProps } from '../../context/EditorStore';
 import emitter from '../../global-state/EventBus';
 import { applyCropToImage } from '../../utils/imageUtils';
 import './ImageEditor.css';
-import { useEditor } from '@tiptap/react';
 
 interface ImageEditorProps extends GridDimensions {
   id: string;
@@ -18,7 +17,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 }) => {
   // EditorStore stuff
   const isEditing = useEditorStore(state => state.activeEditor === id);
-  const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
   const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   
   // Get item data from store
@@ -112,36 +110,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     }
   }, [localOriginalImage, localZoom, setItemsWithHistory, id]);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const imageData = reader.result as string;
-        setLocalOriginalImage(imageData);
-        
-        // Save to store immediately when image is uploaded
-        setItemsWithHistory(draft => {
-          if (draft[id]) {
-            draft[id].props = {
-              ...draft[id].props,
-              originalImage: imageData,
-              crop: { x: 0, y: 0 },
-              zoom: 1,
-              aspectRatio: currentAspectRatio
-            };
-          }
-        });
-      };
-      reader.readAsDataURL(file);
-
-      // Set this component as the active editor
-      // setActiveOptionsPanel(id);
-      // setActiveEditor(id);
-    }
-  };
-
-
   // Listen for confirm/cancel events
   useEffect(() => {
     const handleConfirm = ({ id: editId }: { id: string }) => {
@@ -182,39 +150,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       className="image-editor" 
       style={{ width: gridWidth, height: gridHeight }}
     >
-      {!localOriginalImage ? (
-        <div className="image-upload-options">
-          <div className="upload-button-container">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="image-upload-input"
-              id={`image-upload-${id}`}
-              onMouseEnter={() => setButtonHoveredState(true)}
-              onMouseLeave={() => setButtonHoveredState(false)}
-            />
-            <label 
-              htmlFor={`image-upload-${id}`}
-              className="upload-button"
-              onMouseEnter={() => setButtonHoveredState(true)}
-              onMouseLeave={() => setButtonHoveredState(false)}
-            >
-              Upload Image
-            </label>
-          </div>
-          <button 
-            className="gallery-button"
-            onMouseEnter={() => setButtonHoveredState(true)}
-            onMouseLeave={() => setButtonHoveredState(false)}
-          >
-            Choose from Gallery
-          </button>
-        </div>
-      ) : isEditing ? (
+      {isEditing ? (
         <div className="crop-container" ref={editorRef}>
           <Cropper
-            image={localOriginalImage}
+            image={localOriginalImage || undefined}
             crop={localCrop}
             zoom={localZoom}
             aspect={currentAspectRatio}

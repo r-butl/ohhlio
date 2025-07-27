@@ -74,7 +74,7 @@ type State = {
   redo: () => void
 
   // Editor interaction
-  toggleEditorMode: () => void
+  setEditorMode: (mode: 'edit' | 'display') => void
   setActiveEditor: (id: string | null) => void
   setActiveOptionsPanel: (id: string | null) => void;
   setFileUploadSelected: (state: boolean) => void;
@@ -132,10 +132,8 @@ export const useEditorStore = create<State>((set, get) => ({
   },
 
   // Toggles the state of the editor
-  toggleEditorMode: () => {
-    const { mode } = get();
-    console.log(`Toggling editor mode: ${mode}`);
-    set(state => ({ mode: state.mode === 'edit' ? 'display' : 'edit' }))
+  setEditorMode: (mode: 'edit' | 'display') => {
+    set({ mode });
   },
 
   // Sets which grid item is actively editing

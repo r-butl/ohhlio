@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/sidebar";
 import { deleteProject } from '@/services/projectService';
 import { toast } from 'sonner';
-import AddProjectButton from "@/components/buttons/AddProject";
 import { UserContext } from "@/context/UserContext";
 import { useContext } from 'react';
 
@@ -62,7 +61,7 @@ export function NavProjects() {
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>My Projects</SidebarGroupLabel>
       <SidebarMenu>
         <SidebarMenuButton asChild>
           <a href={"/"}>
@@ -107,9 +106,6 @@ export function NavProjects() {
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
-          <AddProjectButton />
-        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
   );

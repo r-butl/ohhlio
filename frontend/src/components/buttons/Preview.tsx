@@ -9,7 +9,7 @@ interface PreviewButtonProps {
 const PreviewButton: React.FC<PreviewButtonProps> = ({ isHomeUser }) => {
     const mode = useEditorStore(state => state.mode);
     const canEdit = isHomeUser;
-    const toggleEditorMode = useEditorStore(state => state.toggleEditorMode);
+    const setEditorMode = useEditorStore(state => state.setEditorMode);
     const activeEditor = useEditorStore(state => state.activeEditor);
 
     return (
@@ -17,7 +17,9 @@ const PreviewButton: React.FC<PreviewButtonProps> = ({ isHomeUser }) => {
             {canEdit && (
                 <Button
                     variant="outline" 
-                    onClick={toggleEditorMode}
+                    onClick={() => {
+                        setEditorMode(mode === 'edit' ? 'display': 'edit')
+                    }}
                     disabled={activeEditor !== null}
                 >
                     {mode === 'edit' ? 'Preview' : 'Edit'}

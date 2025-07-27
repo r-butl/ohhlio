@@ -12,9 +12,9 @@ import {
   SquareTerminal,
 } from "lucide-react"
 
+import AddProjectButton from "@/components/buttons/AddProject";
 import { NavProjects } from "@/components/editor-sidebar/nav-projects"
 import { NavSecondary } from "@/components/editor-sidebar/nav-secondary"
-import { NavUser } from "@/components/editor-sidebar/nav-user"
 import {
   Sidebar,
   SidebarContent,
@@ -65,6 +65,8 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" {...props}>
+
+      {/* Project Header */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -82,12 +84,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       
+      {/* Project Nav */}
       <SidebarContent>
         <NavProjects />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
+
+      {/* Add Projects button */}
       <SidebarFooter>
-        <NavUser user={data.user} />
+          <AddProjectButton />
       </SidebarFooter>
     </Sidebar>
   )
