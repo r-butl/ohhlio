@@ -1,6 +1,6 @@
-import { uploadAsset, getAssetById } from './assetService';
-
 const API_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/projects` : 'http://localhost:3001/api/projects';
+
+import { processProjectAssets } from "./assetService";
 
 const getAuthToken = () => {
     return localStorage.getItem('token');
@@ -31,13 +31,19 @@ export const createProject = async (projectData: { title: string; description?: 
 };
 
 // Update an existing project
-export const updateProject = async (id: string, projectData: Partial<{ title: string; description?: string; items: any; isPublic?: boolean }>) => {
+export const updateProject = async (projectId: string, projectData: Partial<{ title: string; description?: string; items: any; isPublic?: boolean }>) => {
     const token = getAuthToken();
     if (!token) {
         throw new Error('No authentication token found');
     }
 
-    const response = await fetch(`${API_URL}/${id}`, {
+    // First, upload the items
+    const processedItems = await processProjectAssets(projectData.items, projectId);
+
+    projectData.items = processedItems;
+
+    // Update the project
+    const response = await fetch(`${API_URL}/${projectId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -153,40 +159,5 @@ export const getPublicProjectById = async (id: string) => {
     return response.json();
 };
 
-// Process project items: upload assets and replace with asset IDs
-export const processProjectItems = async (items: any, projectId?: string) => {
-    // Deep copy to avoid immutability issues with Immer
-    const processedItems = JSON.parse(JSON.stringify(items));
-    
-    for (const [itemId, item] of Object.entries(processedItems)) {
-        const typedItem = item as any;
-        if (typedItem.type === 'image' && typedItem.props.originalImage && !typedItem.props.assetId) {
-            try {
-                // Convert base64 to file
-                const base64Data = typedItem.props.originalImage;
-                const response = await fetch(base64Data);
-                const blob = await response.blob();
-
-                // This needs to be updated
-                const file = new File([blob], `image-${itemId}.jpg`, { type: 'image/jpeg' });
-                
-                // Upload file
-                const asset = await uploadAsset(file, projectId);
-                
-                // Update item with asset ID
-                processedItems[itemId].props.assetId = asset.id;
-                processedItems[itemId].props.isUploading = false;
-                
-                // Keep originalImage for preview, but remove from props to reduce size
-                delete processedItems[itemId].props.originalImage;
-            } catch (error) {
-                console.error('Failed to upload asset:', error);
-                processedItems[itemId].props.isUploading = false;
-            }
-        }
-    }
-    
-    return processedItems;
-};
 
  

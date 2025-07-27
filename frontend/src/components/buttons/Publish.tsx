@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import { Button } from "@/components/ui/button";
 import { useEditorStore } from '@/context/EditorStore';
-import { createProject, updateProject, processProjectItems } from '@/services/projectService';
+import { createProject, updateProject } from '@/services/projectService';
+import { processProjectAssets } from '@/services/assetService';
 import { toast } from 'sonner';
 import { UserContext } from '@/context/UserContext';
 
@@ -55,11 +56,8 @@ const PublishButton: React.FC = () => {
                 const newProject = await createProject({ title, items: {} });
                 setProjectId(newProject.id);
                 
-                // Then process and upload assets
-                const processedItems = await processProjectItems(filteredItems, newProject.id);
-                
-                // Finally, update the project with processed items
-                await updateProject(newProject.id, { items: processedItems });
+                // update the project with the items
+                await updateProject(newProject.id, { items: filteredItems });
                 
                 toast.dismiss();
                 toast.success("Project published successfully!");
@@ -78,11 +76,8 @@ const PublishButton: React.FC = () => {
             try {
                 toast.loading("Processing assets and updating project...");
                 
-                // Process and upload any new assets
-                const processedItems = await processProjectItems(filteredItems, projectId);
-                
-                // Update the project with processed items
-                await updateProject(projectId, { items: processedItems });
+                // update the project with the items
+                await updateProject(projectId, { items: filteredItems });
                 
                 toast.dismiss();
                 toast.success("Project updated successfully!");

@@ -5,6 +5,42 @@ const getAuthToken = () => {
     return localStorage.getItem('token');
 };
 
+// Process project items: upload assets and replace with asset IDs
+export const processProjectAssets = async (items: any, projectId?: string) => {
+    // Deep copy to avoid immutability issues with Immer
+    const processedItems = JSON.parse(JSON.stringify(items));
+    
+    for (const [itemId, item] of Object.entries(processedItems)) {
+        const typedItem = item as any;
+        if (typedItem.type === 'image' && typedItem.props.originalImage && !typedItem.props.assetId) {
+            try {
+                // Convert base64 to file
+                const base64Data = typedItem.props.originalImage;
+                const mimeType = base64Data.split(',')[0].split(':')[1].split(';')[0];
+                const response = await fetch(base64Data);
+                const blob = await response.blob();
+
+                // Create file with proper MIME type
+                const file = new File([blob], `image-${itemId}`, { type: mimeType });
+                
+                // Upload file
+                const asset = await uploadAsset(file, projectId);
+                
+                // Update item with asset ID
+                processedItems[itemId].props.assetId = asset.id;
+                processedItems[itemId].props.isUploading = false;
+                
+            } catch (error) {
+                console.error('Failed to upload asset:', error);
+                processedItems[itemId].props.isUploading = false;
+            }
+        }
+    }
+    
+    return processedItems;
+};
+
+
 // Upload a file and return asset data
 export const uploadAsset = async (file: File, projectId?: string) => {
     const token = getAuthToken();

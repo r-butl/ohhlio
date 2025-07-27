@@ -351,6 +351,7 @@ export const useEditorStore = create<State>((set, get) => ({
       }
       
       try {
+        console.log(`Using asset id ${item.props.assetId}`);
         const asset = await getAssetById(item.props.assetId);
         
         if (asset) {
