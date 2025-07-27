@@ -37,6 +37,5 @@ Uploaded files are stored in the configured upload directory with unique filenam
 ## Setup
 
 1. Install dependencies: `npm install`
-2. Copy `.env.example` to `.env` and configure
-3. Run database migrations: `npx prisma migrate dev`
-4. Start the server: `npm run dev` 
+2. Run database migrations: `npx prisma migrate dev`
+3. Start the server: `npm run dev` 
