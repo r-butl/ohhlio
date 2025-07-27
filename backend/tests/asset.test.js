@@ -15,8 +15,6 @@ jest.mock('../src/models/db', () => ({
 
 const { uploadAsset, getAssetById, deleteAsset } = require('../src/controllers/assetController');
 
-
-
 jest.mock('multer', () => {
   const multer = jest.fn(() => {
     return {
@@ -58,21 +56,21 @@ describe('Asset Controller Tests', () => {
   let mockRes;
   let mockNext;
 
-           beforeEach(() => {
-           // Reset mocks
-           jest.clearAllMocks();
-           
-           // Mock fs.existsSync to return true for test-uploads directory
-           fs.existsSync.mockImplementation((path) => {
-             if (path === './test-uploads') return true;
-             if (path.includes('test-uploads')) return true;
-             return false;
-           });
-           
-           // Mock fs.createReadStream to return a readable stream
-           fs.createReadStream.mockReturnValue({
-             pipe: jest.fn(),
-           });
+    beforeEach(() => {
+    // Reset mocks
+    jest.clearAllMocks();
+    
+    // Mock fs.existsSync to return true for test-uploads directory
+    fs.existsSync.mockImplementation((path) => {
+        if (path === './test-uploads') return true;
+        if (path.includes('test-uploads')) return true;
+        return false;
+    });
+    
+    // Mock fs.createReadStream to return a readable stream
+    fs.createReadStream.mockReturnValue({
+        pipe: jest.fn(),
+    });
 
     // Mock request
     mockReq = {
@@ -156,34 +154,34 @@ describe('Asset Controller Tests', () => {
     });
   });
 
-           describe('getAssetById', () => {
-           it('should successfully retrieve an asset', async () => {
-             const mockAsset = {
-               id: 'test-asset-id',
-               filename: 'test-image.jpg',
-               filePath: '123e4567-e89b-12d3-a456-426614174000-test-image.jpg',
-               mimeType: 'image/jpeg',
-               userId: 'test-user-id',
-             };
-       
-             const { asset } = require('../src/models/db');
-             asset.findUnique.mockResolvedValue(mockAsset);
-       
-             // Mock fs.existsSync to return true for the specific file
-             fs.existsSync.mockImplementation((path) => {
-               if (path.includes('123e4567-e89b-12d3-a456-426614174000-test-image.jpg')) return true;
-               return false;
-             });
-       
-             await getAssetById(mockReq, mockRes);
-       
-             expect(asset.findUnique).toHaveBeenCalledWith({
-               where: { id: 'test-asset-id' },
-             });
-       
-             expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'image/jpeg');
-             expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Disposition', 'inline; filename="test-image.jpg"');
-           });
+    describe('getAssetById', () => {
+    it('should successfully retrieve an asset', async () => {
+        const mockAsset = {
+        id: 'test-asset-id',
+        filename: 'test-image.jpg',
+        filePath: '123e4567-e89b-12d3-a456-426614174000-test-image.jpg',
+        mimeType: 'image/jpeg',
+        userId: 'test-user-id',
+        };
+
+        const { asset } = require('../src/models/db');
+        asset.findUnique.mockResolvedValue(mockAsset);
+
+        // Mock fs.existsSync to return true for the specific file
+        fs.existsSync.mockImplementation((path) => {
+        if (path.includes('123e4567-e89b-12d3-a456-426614174000-test-image.jpg')) return true;
+        return false;
+        });
+
+        await getAssetById(mockReq, mockRes);
+
+        expect(asset.findUnique).toHaveBeenCalledWith({
+        where: { id: 'test-asset-id' },
+        });
+
+        expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'image/jpeg');
+        expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Disposition', 'inline; filename="test-image.jpg"');
+    });
 
     it('should return 404 when asset is not found', async () => {
       const { asset } = require('../src/models/db');
@@ -210,26 +208,26 @@ describe('Asset Controller Tests', () => {
       expect(mockRes.json).toHaveBeenCalledWith({ message: 'Not authorized to access this asset' });
     });
 
-               it('should return 404 when file does not exist on disk', async () => {
-             const mockAsset = {
-               id: 'test-asset-id',
-               filename: 'test-image.jpg',
-               filePath: 'non-existent-file.jpg',
-               mimeType: 'image/jpeg',
-               userId: 'test-user-id',
-             };
-       
-             const { asset } = require('../src/models/db');
-             asset.findUnique.mockResolvedValue(mockAsset);
-       
-             // Mock fs.existsSync to return false for non-existent file
-             fs.existsSync.mockReturnValue(false);
-       
-             await getAssetById(mockReq, mockRes);
-       
-             expect(mockRes.status).toHaveBeenCalledWith(404);
-             expect(mockRes.json).toHaveBeenCalledWith({ message: 'File not found on disk' });
-           });
+    it('should return 404 when file does not exist on disk', async () => {
+        const mockAsset = {
+        id: 'test-asset-id',
+        filename: 'test-image.jpg',
+        filePath: 'non-existent-file.jpg',
+        mimeType: 'image/jpeg',
+        userId: 'test-user-id',
+        };
+
+        const { asset } = require('../src/models/db');
+        asset.findUnique.mockResolvedValue(mockAsset);
+
+        // Mock fs.existsSync to return false for non-existent file
+        fs.existsSync.mockReturnValue(false);
+
+        await getAssetById(mockReq, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(404);
+        expect(mockRes.json).toHaveBeenCalledWith({ message: 'File not found on disk' });
+    });
   });
 
            describe('deleteAsset', () => {

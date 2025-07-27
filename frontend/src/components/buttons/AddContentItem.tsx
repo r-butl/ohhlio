@@ -5,13 +5,7 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuPortal,
-    DropdownMenuSeparator,
     DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
 
@@ -19,7 +13,8 @@ import { useEditorStore } from "../../context/EditorStore";
 
 function AddContentButton({}: {}) {
 
-    const addItem = useEditorStore(state => state.addItem);
+    const addTextBox = useEditorStore(state => state.addTextBox);
+    const setFileUploadSelected = useEditorStore(state => state.setFileUploadSelected);
 
   return (
     <DropdownMenu>
@@ -31,11 +26,11 @@ function AddContentButton({}: {}) {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => addItem('text')}>
+          <DropdownMenuItem onClick={() => addTextBox()}>
             Add Text
             <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => addItem('image')}>
+          <DropdownMenuItem onClick={() => {setFileUploadSelected(true)}}>
             Add Image
             <DropdownMenuShortcut>⌘I</DropdownMenuShortcut>
           </DropdownMenuItem>

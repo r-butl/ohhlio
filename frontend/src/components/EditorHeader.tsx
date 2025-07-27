@@ -12,6 +12,7 @@ import RedoButton from "./buttons/Redo";
 import PreviewButton from "./buttons/Preview";
 import PublishButton from "./buttons/Publish";
 import AddContentButton from "./buttons/AddContentItem";
+import FileUploadBox from './FileUploadBox';
 
 interface EditorHeaderProps {
     isHomeUser: boolean;  // This will be used to determine if user is the owner
@@ -20,6 +21,7 @@ interface EditorHeaderProps {
 const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
     const navigate = useNavigate();
     const mode = useEditorStore(state => state.mode);
+    
 
     return (
         <div className="editor-header pt-2 pl-2 pr-2 pb-2">

@@ -58,6 +58,7 @@ type State = {
   activeEditor: string | null     // ID of the current item being edited
   activeOptionsPanel: string | null // ID of the current option panel that is open
   projectId: string | null;       // The ID of the current project being edited
+  fileUploadSelected: boolean;
 
   history: {                      // History of all actions in the editor
     past: { patches: Patch[]; inversePatches: Patch[] }[]
@@ -76,6 +77,7 @@ type State = {
   toggleEditorMode: () => void
   setActiveEditor: (id: string | null) => void
   setActiveOptionsPanel: (id: string | null) => void;
+  setFileUploadSelected: (state: boolean) => void;
   setProjectId: (id: string | null) => void;
   buttonHovered: boolean  // Used for controlling the resize and draggability of the grid items
                           //   when certain buttons on the component are hovered over them
@@ -85,7 +87,8 @@ type State = {
   setItemsWithHistory: (fn: (draft: Record<string, Item>) => void) => void
   setItemsWithoutHistory: (fn: (draft: Record<string, Item>) => void) => void
   
-  addItem: (type: 'text' | 'image') => void
+  addTextBox: () => void
+  addImage: (image: string) => void
   deleteItem: (id: string) => void
   updateLayout: (layout: any[]) => void
   
@@ -105,6 +108,14 @@ export const useEditorStore = create<State>((set, get) => ({
 
   buttonHovered: false,
   activeOptionsPanel: null,
+  fileUploadSelected: false,
+
+  // Toggle the fileUploadSelected boolea
+  setFileUploadSelected: (state: boolean) => {
+    set(({ fileUploadSelected: state}));
+    const fileUploadState = get();
+    console.log(`File upload state ${fileUploadState}`);
+  },
 
   // Toggle the button hovered state
   setButtonHoveredState: (state: boolean) => {
@@ -214,9 +225,56 @@ export const useEditorStore = create<State>((set, get) => ({
     })
   },
 
-  // Adds an item to the grid
-  addItem: (type) => {
-    console.log(`Adding item: ${type}`);
+  addTextBox: () => {
+    console.log(`Adding text box`);
+    const { items } = get()
+    const id = String(Date.now())
+    
+    const maxY = Object.values(items).reduce(
+      (max, item) => Math.max(max, item.layout.y + item.layout.h), 
+      0
+    )
+
+    let defaultProps = {
+      content: "Select <strong>Options &gt; Edit</strong> to add text.",
+      fontSize: 16,
+      fontFamily: 'Arial',
+      textAlignVertical: 'center' as const,
+      textAlignHorizontal: 'left' as const,
+      isBold: false,
+      isItalic: false,
+      isUnderline: false,
+      maxChars: 1000,
+      charCount: 0
+    };
+
+    let layout_config ={
+      x: 0,
+      y: maxY,
+      w: get().gridColumnCount,
+      h: 10,
+      i: id,
+      minW: get().gridColumnCount,  
+      minH: 10,
+      maxW: get().gridColumnCount,
+      maxH: 40,
+    };
+
+    const newItem: Item = {
+      id,
+      type: 'text',
+      props: defaultProps,
+      layout: layout_config
+    }
+
+    get().setItemsWithHistory(draft => {
+      draft[id] = newItem
+    })
+
+  },
+
+  addImage: (image) => {
+    console.log(`Adding image item.`);
 
     const { items } = get()
     const id = String(Date.now())
@@ -230,56 +288,31 @@ export const useEditorStore = create<State>((set, get) => ({
     let defaultProps: any = {};
     let layout_config: any = {};
 
-    if (type === 'text') {        // Text type
-      defaultProps = {
-        content: "Select <strong>Options &gt; Edit</strong> to add text.",
-        fontSize: 16,
-        fontFamily: 'Arial',
-        textAlignVertical: 'center' as const,
-        textAlignHorizontal: 'left' as const,
-        isBold: false,
-        isItalic: false,
-        isUnderline: false,
-        maxChars: 1000,
-        charCount: 0
-      };
-      layout_config ={
-        x: 0,
-        y: maxY,
-        w: get().gridColumnCount,
-        h: 10,
-        i: id,
-        minW: get().gridColumnCount,  
-        minH: 10,
-        maxW: get().gridColumnCount,
-        maxH: 40,
-      };
-      
-    } else if (type === 'image') {    // Image Type
-      defaultProps = {
-        assetId: null,
-        originalImage: null,
-        crop: { x: 0, y: 0 },
-        zoom: 1,
-        aspectRatio: 4 / 3,
-        isUploading: false
-      };
-      layout_config ={
-        x: 0,
-        y: maxY,
-        w: 1,
-        h: 30,
-        i: id,
-        minW: 1,  
-        minH: 30,
-        maxW: get().gridColumnCount,
-        maxH: 40,
-      };
-    }
+    defaultProps = {
+      assetId: null,
+      originalImage: image,
+      crop: { x: 0, y: 0 },
+      zoom: 1,
+      aspectRatio: 4 / 3,
+      isUploading: false
+    };
+
+    layout_config ={
+      x: 0,
+      y: maxY,
+      w: 1,
+      h: 30,
+      i: id,
+      minW: 1,  
+      minH: 30,
+      maxW: get().gridColumnCount,
+      maxH: 40,
+    };
+    
     
     const newItem: Item = {
       id,
-      type,
+      type: 'image',
       props: defaultProps,
       layout: layout_config
     }
@@ -311,47 +344,26 @@ export const useEditorStore = create<State>((set, get) => ({
     
     for (const itemId in items) {
       const item = items[itemId];
-
-      // Skip if text type
-      if (item.props.type === 'text') continue;
       
-      // Skip if no assetId
-      if (!item.props.assetId) continue;
-      
-      // Skip if already loaded (has originalImage or assetUrl)
-      if (item.props.originalImage || item.props.assetUrl) {
-        console.log(`Asset already loaded for item ${itemId}, skipping...`);
-        continue;
-      }
-      
-      // Skip if currently uploading
-      if (item.props.isUploading) {
-        console.log(`Asset currently uploading for item ${itemId}, skipping...`);
+      // Skip if no assetId or already loaded
+      if (!item.props.assetId || item.props.originalImage || item.props.assetUrl) {
         continue;
       }
       
       try {
-        console.log(`Loading asset ${item.props.assetId} for item ${itemId}...`);
         const asset = await getAssetById(item.props.assetId);
-
+        
         if (asset) {
-          // asset is now a blob URL
           get().setItemsWithoutHistory(draft => {
-            // Store in appropriate property based on item type
             if (item.type === 'image') {
               draft[itemId].props.originalImage = asset;
             } else {
               draft[itemId].props.assetUrl = asset;
             }
           });
-          console.log(`Successfully loaded asset for item ${itemId}`);
         }
       } catch (error) {
         console.error(`Failed to load asset for item ${itemId}:`, error);
-        // Optionally mark as failed to prevent retrying
-        get().setItemsWithoutHistory(draft => {
-          draft[itemId].props.loadError = true;
-        });
       }
     }
   }

@@ -77,8 +77,8 @@ const Renderer: React.FC<RendererProps> = () => {
             />
           ) : (
             <ImageEditor
-            id={item.id}
-            {...item.props}
+              id={item.id}
+              {...item.props}
             />
           )}
         </GridItem>

@@ -19,8 +19,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   // EditorStore stuff
   const isEditing = useEditorStore(state => state.activeEditor === id);
   const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
-  const setActiveEditor = useEditorStore(state => state.setActiveEditor);
-  const setActiveOptionsPanel = useEditorStore(state => state.setActiveOptionsPanel);
   const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   
   // Get item data from store
@@ -143,10 +141,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     }
   };
 
-  const handleGallerySelect = () => {
-    // Implement gallery selection logic
-    console.log('Gallery selection clicked');
-  };
 
   // Listen for confirm/cancel events
   useEffect(() => {

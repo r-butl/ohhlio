@@ -5,6 +5,8 @@ import ProjectPage from './pages/ProjectPage';
 import LoginRegister from './pages/login-register/Login';
 import { UserProvider } from './context/UserContext';
 import { PublicProjectsProvider } from './context/PublicProjectsContext';
+import FileUploadBox from '@/components/FileUploadBox';
+
 import { Toaster } from 'sonner';
 
 function App() {
@@ -12,6 +14,7 @@ function App() {
     <UserProvider>
       {/* <PublicProjectsProvider> */}
         <BrowserRouter>
+          <FileUploadBox />
           <Toaster />
           <Routes>
             <Route path="/project" element={<ProjectPage />} />
