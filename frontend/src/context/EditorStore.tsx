@@ -274,13 +274,43 @@ export const useEditorStore = create<State>((set, get) => ({
   addImage: (image) => {
     console.log(`Adding image item.`);
 
-    const { items } = get()
+    const { items, gridColumnCount } = get()
     const id = String(Date.now())
     
-    const maxY = Object.values(items).reduce(
-      (max, item) => Math.max(max, item.layout.y + item.layout.h), 
-      0
-    )
+    // Find the next available position in a grid pattern
+    const findNextPosition = () => {
+      const existingItems = Object.values(items);
+      
+      if (existingItems.length === 0) {
+        return { x: 0, y: 0 };
+      }
+      
+      // Find the highest Y coordinate
+      const maxY = Math.max(...existingItems.map(item => item.layout.y + item.layout.h));
+      
+      // Find items at the current row (maxY)
+      const itemsAtCurrentRow = existingItems.filter(item => 
+        item.layout.y < maxY && item.layout.y + item.layout.h >= maxY
+      );
+      
+      // Check if there's space in the current row
+      const usedXPositions = itemsAtCurrentRow.map(item => item.layout.x);
+      let nextX = 0;
+      
+      while (usedXPositions.includes(nextX)) {
+        nextX++;
+      }
+      
+      // If we can fit in current row, use it
+      if (nextX < gridColumnCount) {
+        return { x: nextX, y: maxY };
+      }
+      
+      // Otherwise, start a new row
+      return { x: 0, y: maxY };
+    };
+    
+    const position = findNextPosition();
     
     // Create default props based on item type
     let defaultProps: any = {};
@@ -296,14 +326,14 @@ export const useEditorStore = create<State>((set, get) => ({
     };
 
     layout_config ={
-      x: 0,
-      y: maxY,
+      x: position.x,
+      y: position.y,
       w: 1,
       h: 30,
       i: id,
       minW: 1,  
       minH: 30,
-      maxW: get().gridColumnCount,
+      maxW: gridColumnCount,
       maxH: 40,
     };
     

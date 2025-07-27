@@ -62,6 +62,7 @@ const ProjectPage: React.FC = () => {
     <SidebarLayout>
       <div className="project-page">
         <EditorHeader isHomeUser={isHomeUser} />
+        
         <Renderer />
         <Footer />
       </div>

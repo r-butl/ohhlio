@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
 import { Button } from "@/components/ui/button";
 import { useEditorStore } from '@/context/EditorStore';
-import { createProject, updateProject } from '@/services/projectService';
-import { processProjectAssets } from '@/services/assetService';
+import { createProject, updateProject, getProjects } from '@/services/projectService';
 import { toast } from 'sonner';
 import { UserContext } from '@/context/UserContext';
 
@@ -48,6 +47,22 @@ const PublishButton: React.FC = () => {
             if (!title) {
                 toast.error("A project title is required to publish.");
                 return;
+            }
+
+            // Check if title already exists for this user
+            try {
+                const existingProjects = await getProjects();
+                const titleExists = existingProjects.some((project: any) => 
+                    project.title.toLowerCase().trim() === title.toLowerCase().trim()
+                );
+                
+                if (titleExists) {
+                    toast.error("A project with this title already exists. Please choose a different title.");
+                    return;
+                }
+            } catch (error) {
+                console.error("Failed to check existing projects:", error);
+                // Continue with creation even if we can't verify uniqueness
             }
             try {
                 toast.loading("Processing assets and publishing new project...");

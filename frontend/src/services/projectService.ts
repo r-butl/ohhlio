@@ -37,9 +37,8 @@ export const updateProject = async (projectId: string, projectData: Partial<{ ti
         throw new Error('No authentication token found');
     }
 
-    // First, upload the items
+    // Upload images to backend when updating project
     const processedItems = await processProjectAssets(projectData.items, projectId);
-
     projectData.items = processedItems;
 
     // Update the project

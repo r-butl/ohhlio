@@ -9,7 +9,6 @@ import {
 
 import UndoButton from "./buttons/Undo";
 import RedoButton from "./buttons/Redo";
-import PreviewButton from "./buttons/Preview";
 import PublishButton from "./buttons/Publish";
 import AddContentButton from "./buttons/AddContentItem";
 
@@ -36,7 +35,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
         <div className="editor-header pt-2 pl-2 pr-2 pb-2">
             <div className="flex w-full items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                    <SidebarTrigger />
+                    
                     {mode === "edit" && (
                         <>
                             <UndoButton />
@@ -47,6 +46,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
 
                 </div>
                 <div className="flex items-center gap-2">
+                    <SidebarTrigger />
                     <PublishButton />
                 </div>
             </div>

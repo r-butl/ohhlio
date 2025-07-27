@@ -9,7 +9,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, X, FileImage } from "lucide-react";
+import { Upload, X, FileImage, AlertTriangle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const FileUploadBox: React.FC = () => {
     const fileUploadSelected = useEditorStore(state => state.fileUploadSelected);
@@ -19,6 +25,8 @@ const FileUploadBox: React.FC = () => {
     const [files, setFiles] = useState<File[]>([]);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = Array.from(event.target.files || []);
@@ -32,10 +40,23 @@ const FileUploadBox: React.FC = () => {
     const handleUpload = () => {
         if (files.length === 0) return;
         
+        // Filter out files that are too large
+        const validFiles = files.filter(file => file.size <= MAX_FILE_SIZE);
+        const invalidFiles = files.filter(file => file.size > MAX_FILE_SIZE);
+        
+        if (invalidFiles.length > 0) {
+            alert(`${invalidFiles.length} file(s) are too large and will be skipped.`);
+        }
+        
+        if (validFiles.length === 0) {
+            alert('No valid files to upload.');
+            return;
+        }
+        
         setUploading(true);
 
-        // Add an image item for each selected file
-        files.forEach((file) => {
+        // Add an image item for each valid file
+        validFiles.forEach((file) => {
             const reader = new FileReader();
             reader.onload = () => {
                 const imageData = reader.result as string;
@@ -51,7 +72,8 @@ const FileUploadBox: React.FC = () => {
     };
 
     return (
-        <Dialog open={fileUploadSelected} onOpenChange={setFileUploadSelected}>
+        <TooltipProvider>
+            <Dialog open={fileUploadSelected} onOpenChange={setFileUploadSelected}>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>File Upload</DialogTitle>
@@ -90,23 +112,43 @@ const FileUploadBox: React.FC = () => {
                             <h4 className="font-medium">Selected Files ({files.length})</h4>
                             <div className="max-h-48 overflow-y-auto">
                                 <div className="grid grid-cols-2 gap-2">
-                                    {files.map((file, index) => (
-                                        <Card key={index} className="p-2">
-                                            <CardContent className="p-2 flex items-center justify-between">
-                                                <div className="flex items-center space-x-2">
-                                                    <FileImage className="w-4 h-4" />
-                                                    <span className="text-sm truncate">{file.name}</span>
-                                                </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => removeFile(index)}
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </Button>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
+                                    {files.map((file, index) => {
+                                        const isTooLarge = file.size > MAX_FILE_SIZE;
+                                        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                                        
+                                        return (
+                                            <Card key={index} className={`p-2 ${isTooLarge ? 'border-red-500 bg-red-50' : ''}`}>
+                                                <CardContent className="p-2 flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <FileImage className="w-4 h-4" />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm truncate">{file.name}</span>
+                                                            <span className="text-xs text-gray-500">{fileSizeMB}MB</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-1">
+                                                        {isTooLarge && (
+                                                            <Tooltip>
+                                                                <TooltipTrigger>
+                                                                    <AlertTriangle className="w-4 h-4 text-red-500" />
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>File too large (max 10MB)</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        )}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => removeFile(index)}
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    })}
                                 </div>
                             </div>
                             <Button 
@@ -123,6 +165,7 @@ const FileUploadBox: React.FC = () => {
                 </div>
             </DialogContent>
         </Dialog>
+        </TooltipProvider>
     )
 };
 

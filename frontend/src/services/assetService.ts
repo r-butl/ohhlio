@@ -20,8 +20,14 @@ export const processProjectAssets = async (items: any, projectId?: string) => {
                 const response = await fetch(base64Data);
                 const blob = await response.blob();
 
-                // Create file with proper MIME type
+                // Create file with proper MIME type and size check
                 const file = new File([blob], `image-${itemId}`, { type: mimeType });
+                
+                // Check file size before upload
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    console.warn(`File ${itemId} is too large (${(file.size / 1024 / 1024).toFixed(1)}MB), skipping upload`);
+                    continue;
+                }
                 
                 // Upload file
                 const asset = await uploadAsset(file, projectId);
@@ -29,6 +35,10 @@ export const processProjectAssets = async (items: any, projectId?: string) => {
                 // Update item with asset ID
                 processedItems[itemId].props.assetId = asset.id;
                 processedItems[itemId].props.isUploading = false;
+                
+                // Remove base64 data after successful upload to reduce payload size
+                delete processedItems[itemId].props.originalImage;
+                processedItems[itemId].props.isUploaded = true;
                 
             } catch (error) {
                 console.error('Failed to upload asset:', error);
