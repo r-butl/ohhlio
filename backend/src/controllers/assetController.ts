@@ -9,7 +9,7 @@ import { AuthenticatedRequest } from '../middleware/authMiddleware';
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads');
+    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -139,7 +139,8 @@ export const getAssetById = async (req: AuthenticatedRequest, res: Response): Pr
     }
 
     // Serve the actual file
-    const filePath = path.join(__dirname, '../uploads', asset.filePath);
+    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
+    const filePath = path.join(uploadDir, asset.filePath);
     
     console.log(`Looking for file at: ${filePath}`);
     console.log(`Asset filePath: ${asset.filePath}`);
@@ -147,7 +148,7 @@ export const getAssetById = async (req: AuthenticatedRequest, res: Response): Pr
     console.log(`Resolved path: ${path.resolve(filePath)}`);
     
     // Check if uploads directory exists
-    const uploadsDir = path.join(__dirname, '../uploads');
+    const uploadsDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
     console.log(`Uploads directory: ${uploadsDir}`);
     console.log(`Uploads directory exists: ${fs.existsSync(uploadsDir)}`);
     
@@ -204,7 +205,8 @@ export const deleteAsset = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     // Delete the file from disk
-    const filePath = path.join(__dirname, '../uploads', asset.filePath);
+    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
+    const filePath = path.join(uploadDir, asset.filePath);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }

@@ -1,4 +1,6 @@
 import { Response } from 'express';
+import path from 'path';
+import fs from 'fs';
 const prisma = require('../models/db');
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
@@ -87,6 +89,76 @@ export const createProject = async (req: AuthenticatedRequest, res: Response): P
   }
 };
 
+
+const deleteAsset = async (assetId: string) => {
+  try {
+    const asset = await prisma.asset.findUnique({
+      where: { id: assetId }
+    });
+
+    if (!asset) {
+      console.log(`Asset ${assetId} not found in database`);
+      return;
+    }
+
+    // Delete the file from disk
+    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
+    const filePath = path.join(uploadDir, asset.filePath);
+    
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      console.log(`Deleted file: ${filePath}`);
+    } else {
+      console.log(`File not found on disk: ${filePath}`);
+    }
+
+    // Delete the database entry
+    await prisma.asset.delete({
+      where: { id: assetId }
+    });
+    
+    console.log(`Deleted asset ${assetId} from database`);
+  } catch (error) {
+    console.error(`Error deleting asset ${assetId}:`, error);
+  }
+}
+
+// Helper function to find and delete orphaned assets
+const cleanupOrphanedAssets = async (projectId: string, oldItems: any, newItems: any) => {
+  try {
+    // Extract asset IDs from old items
+    const oldAssetIds = new Set<string>();
+    Object.values(oldItems).forEach((item: any) => {
+      if (item.props && item.props.assetId) {
+        oldAssetIds.add(item.props.assetId);
+      }
+    });
+
+    // Extract asset IDs from new items
+    const newAssetIds = new Set<string>();
+    Object.values(newItems).forEach((item: any) => {
+      if (item.props && item.props.assetId) {
+        newAssetIds.add(item.props.assetId);
+      }
+    });
+
+    // Find orphaned assets (in old but not in new)
+    const orphanedAssetIds = Array.from(oldAssetIds).filter(id => !newAssetIds.has(id));
+    
+    console.log(`Found ${orphanedAssetIds.length} orphaned assets to delete`);
+
+    // Delete orphaned assets
+    for (const assetId of orphanedAssetIds) {
+      await deleteAsset(assetId);
+    }
+
+    return orphanedAssetIds.length;
+  } catch (error) {
+    console.error('Error cleaning up orphaned assets:', error);
+    return 0;
+  }
+};
+
 // Update an existing project
 export const updateProject = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { id } = req.params;
@@ -115,6 +187,14 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response): P
       return;
     }
 
+    // Clean up orphaned assets before updating
+    const oldItems = project.items || {};
+    const deletedCount = await cleanupOrphanedAssets(id, oldItems, items);
+    
+    if (deletedCount > 0) {
+      console.log(`Cleaned up ${deletedCount} orphaned assets for project ${id}`);
+    }
+
     const updatedProject = await prisma.project.update({
       where: { id },
       data: {
@@ -130,6 +210,7 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response): P
     res.status(500).json({ message: 'Error updating project' });
   }
 };
+
 
 // Delete a project
 export const deleteProject = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -165,9 +246,7 @@ export const deleteProject = async (req: AuthenticatedRequest, res: Response): P
 
     if (projectAssets.length > 0) {
       for (const asset of projectAssets) {
-        await prisma.asset.delete({
-          where: { id: asset.id }
-        })
+        await deleteAsset(asset.id);
       }
     }
 

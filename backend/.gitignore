@@ -6,4 +6,8 @@ node_modules
 
 /generated/prisma
 
+# Ignore uploaded files
+/uploads/
 /uploads/*
+src/uploads/
+src/uploads/*
