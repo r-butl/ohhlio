@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3001/api/assets';
+const API_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/assets` : 'http://localhost:3001/api/assets';
 
 // Helper function to get the auth token from localStorage
 const getAuthToken = () => {
@@ -36,6 +36,7 @@ export const uploadAsset = async (file: File, projectId?: string) => {
 
 // Get asset by ID
 export const getAssetById = async (id: string) => {
+    console.log(`Attempting to grab ${id}`);
     const token = getAuthToken();
     if (!token) {
         throw new Error('No authentication token found');
@@ -53,7 +54,14 @@ export const getAssetById = async (id: string) => {
         throw new Error(errorData.message || 'Failed to fetch asset');
     }
 
-    return response.json();
+    // Get the file as a blob
+    const blob = await response.blob();
+    
+    // Create a blob URL for the file
+    const blobUrl = URL.createObjectURL(blob);
+    
+    console.log('Success grabbing item.');
+    return blobUrl;
 };
 
 // Delete asset

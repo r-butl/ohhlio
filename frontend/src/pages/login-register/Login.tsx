@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LoginForm } from '@/components/login-form';
+import { LoginForm } from '@/components/LoginForm';
 import { useAuth } from "@/context/AuthContext";
 
 const API_URL = 'http://localhost:3001/api/auth';

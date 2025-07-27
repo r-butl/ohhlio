@@ -1,6 +1,6 @@
 import { uploadAsset, getAssetById } from './assetService';
 
-const API_URL = 'http://localhost:3001/api/projects';
+const API_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/projects` : 'http://localhost:3001/api/projects';
 
 const getAuthToken = () => {
     return localStorage.getItem('token');
@@ -166,6 +166,8 @@ export const processProjectItems = async (items: any, projectId?: string) => {
                 const base64Data = typedItem.props.originalImage;
                 const response = await fetch(base64Data);
                 const blob = await response.blob();
+
+                // This needs to be updated
                 const file = new File([blob], `image-${itemId}.jpg`, { type: 'image/jpeg' });
                 
                 // Upload file
@@ -177,7 +179,6 @@ export const processProjectItems = async (items: any, projectId?: string) => {
                 
                 // Keep originalImage for preview, but remove from props to reduce size
                 delete processedItems[itemId].props.originalImage;
-                delete processedItems[itemId].props.croppedImage;
             } catch (error) {
                 console.error('Failed to upload asset:', error);
                 processedItems[itemId].props.isUploading = false;
@@ -188,30 +189,4 @@ export const processProjectItems = async (items: any, projectId?: string) => {
     return processedItems;
 };
 
-// Load assets for project items
-export const loadProjectAssets = async (items: any, projectId: string) => {
-    try {
-        const processedItems = { ...items };
-        
-        for (const [itemId, item] of Object.entries(processedItems)) {
-            const typedItem = item as any;
-            console.log(`Grabbing asset: ${typedItem.props.assetId}}`)
-
-            if (typedItem.type === 'image' && typedItem.props.assetId) {
-                try {
-                    const asset = await getAssetById(typedItem.props.assetId);
-
-                    processedItems[itemId].props.assetUrl = `http://localhost:3001${asset.filePath}`;
-
-                } catch (error) {
-                    console.error(`Failed to load asset ${typedItem.props.assetId}:`, error);
-                }
-            }
-        }
-        
-        return processedItems;
-    } catch (error) {
-        console.error('Failed to load project assets:', error);
-        return items;
-    }
-}; 
+ 

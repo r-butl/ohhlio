@@ -230,7 +230,7 @@ export const useEditorStore = create<State>((set, get) => ({
     let defaultProps: any = {};
     let layout_config: any = {};
 
-    if (type === 'text') {
+    if (type === 'text') {        // Text type
       defaultProps = {
         content: "Select <strong>Options &gt; Edit</strong> to add text.",
         fontSize: 16,
@@ -255,7 +255,7 @@ export const useEditorStore = create<State>((set, get) => ({
         maxH: 40,
       };
       
-    } else if (type === 'image') {
+    } else if (type === 'image') {    // Image Type
       defaultProps = {
         assetId: null,
         originalImage: null,
@@ -305,27 +305,53 @@ export const useEditorStore = create<State>((set, get) => ({
       })
     }),
 
-  // Asset loading
+  // Loads the assets using their id that is found in the project map
   loadAssetsForItems: async () => {
     const items = get().items;
     
     for (const itemId in items) {
       const item = items[itemId];
-      
-      if (item.type === 'image' && item.props.assetId && !item.props.originalImage) {
-        try {
-          const asset = await getAssetById(item.props.assetId);
 
-          if (asset) {
-            const assetUrl = `http://localhost:3001${asset.filePath}`;
-            get().setItemsWithoutHistory(draft => {
-              draft[itemId].props.originalImage = assetUrl;
-            });
-          }
-        } catch (error) {
-          console.error(`Failed to load asset for item ${itemId}:`, error);
+      // Skip if text type
+      if (item.props.type === 'text') continue;
+      
+      // Skip if no assetId
+      if (!item.props.assetId) continue;
+      
+      // Skip if already loaded (has originalImage or assetUrl)
+      if (item.props.originalImage || item.props.assetUrl) {
+        console.log(`Asset already loaded for item ${itemId}, skipping...`);
+        continue;
+      }
+      
+      // Skip if currently uploading
+      if (item.props.isUploading) {
+        console.log(`Asset currently uploading for item ${itemId}, skipping...`);
+        continue;
+      }
+      
+      try {
+        console.log(`Loading asset ${item.props.assetId} for item ${itemId}...`);
+        const asset = await getAssetById(item.props.assetId);
+
+        if (asset) {
+          // asset is now a blob URL
+          get().setItemsWithoutHistory(draft => {
+            // Store in appropriate property based on item type
+            if (item.type === 'image') {
+              draft[itemId].props.originalImage = asset;
+            } else {
+              draft[itemId].props.assetUrl = asset;
+            }
+          });
+          console.log(`Successfully loaded asset for item ${itemId}`);
         }
-      } else {
+      } catch (error) {
+        console.error(`Failed to load asset for item ${itemId}:`, error);
+        // Optionally mark as failed to prevent retrying
+        get().setItemsWithoutHistory(draft => {
+          draft[itemId].props.loadError = true;
+        });
       }
     }
   }

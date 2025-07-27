@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Footer from '../components/footer/Footer';
-import Renderer from '../components/PortfolioRenderer';
+import Renderer from '../components/EditorGrid';
 import EditorHeader from '../components/EditorHeader';
 import { useEditorStore } from '../context/EditorStore';
 import { getProjectById } from '@/services/projectService';

@@ -27,11 +27,25 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    // Support multiple file types
+    const allowedTypes = [
+      // Images
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+      // Documents
+      'application/pdf', 'text/plain', 'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      // Videos
+      'video/mp4', 'video/webm', 'video/ogg',
+      // Audio
+      'audio/mpeg', 'audio/wav', 'audio/ogg',
+      // Archives
+      'application/zip', 'application/x-rar-compressed'
+    ];
+    
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only images are allowed.'));
+      cb(new Error(`Invalid file type: ${file.mimetype}. Allowed types: ${allowedTypes.join(', ')}`));
     }
   }
 });
@@ -58,14 +72,26 @@ export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Pro
 
     try {
       const { projectId } = req.body;
+
+      console.log(`Writing file with name ${req.file.filename}`);
       
+      // Determine asset type based on MIME type
+      const getAssetType = (mimeType: string): string => {
+        if (mimeType.startsWith('image/')) return 'image';
+        if (mimeType.startsWith('video/')) return 'video';
+        if (mimeType.startsWith('audio/')) return 'audio';
+        if (mimeType.startsWith('application/pdf') || mimeType.startsWith('text/') || mimeType.includes('word')) return 'document';
+        if (mimeType.includes('zip') || mimeType.includes('rar')) return 'archive';
+        return 'other';
+      };
+
       const asset = await prisma.asset.create({
         data: {
           filename: req.file.originalname,
-          filePath: `/uploads/${req.file.filename}`,
+          filePath: req.file.filename,
           mimeType: req.file.mimetype,
           fileSize: req.file.size,
-          type: 'image',
+          type: getAssetType(req.file.mimetype),
           userId,
           projectId: projectId || null,
         },
@@ -112,7 +138,40 @@ export const getAssetById = async (req: AuthenticatedRequest, res: Response): Pr
       return;
     }
 
-    res.json(asset);
+    // Serve the actual file
+    const filePath = path.join(__dirname, '../uploads', asset.filePath);
+    
+    console.log(`Looking for file at: ${filePath}`);
+    console.log(`Asset filePath: ${asset.filePath}`);
+    console.log(`__dirname: ${__dirname}`);
+    console.log(`Resolved path: ${path.resolve(filePath)}`);
+    
+    // Check if uploads directory exists
+    const uploadsDir = path.join(__dirname, '../uploads');
+    console.log(`Uploads directory: ${uploadsDir}`);
+    console.log(`Uploads directory exists: ${fs.existsSync(uploadsDir)}`);
+    
+    // List files in uploads directory
+    if (fs.existsSync(uploadsDir)) {
+      const files = fs.readdirSync(uploadsDir);
+      console.log(`Files in uploads directory: ${files.join(', ')}`);
+    }
+    
+    if (!fs.existsSync(filePath)) {
+      res.status(404).json({ message: 'File not found on disk' });
+      return;
+    }
+
+    // Set appropriate headers
+    res.setHeader('Content-Type', asset.mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${asset.filename}"`);
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
   } catch (error) {
     console.error(`Error fetching asset ${id}:`, error);
     res.status(500).json({ message: 'Error fetching asset' });
@@ -145,7 +204,7 @@ export const deleteAsset = async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     // Delete the file from disk
-    const filePath = path.join(__dirname, '..', asset.filePath);
+    const filePath = path.join(__dirname, '../uploads', asset.filePath);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }

@@ -20,6 +20,26 @@ const PublishButton: React.FC = () => {
         const projectId = useEditorStore.getState().projectId;
         const items = useEditorStore.getState().items;
 
+        // Filter out empty items
+        const filteredItems = Object.fromEntries(
+            Object.entries(items).filter(([itemId, item]) => {
+                // Keep text items that have content
+                if (item.type === 'text') {
+                    return item.props.content && item.props.content.trim() !== '';
+                }
+                
+                // Keep image items that have assetId or originalImage
+                if (item.type === 'image') {
+                    return item.props.assetId || item.props.originalImage;
+                }
+                
+                // Keep other item types that have assetId or assetUrl
+                return item.props.assetId || item.props.assetUrl;
+            })
+        );
+
+        console.log(`Filtered ${Object.keys(items).length - Object.keys(filteredItems).length} empty items`);
+
         if (!projectId) {
 
             // This is a new project, so we need a title.
@@ -36,7 +56,7 @@ const PublishButton: React.FC = () => {
                 setProjectId(newProject.id);
                 
                 // Then process and upload assets
-                const processedItems = await processProjectItems(items, newProject.id);
+                const processedItems = await processProjectItems(filteredItems, newProject.id);
                 
                 // Finally, update the project with processed items
                 await updateProject(newProject.id, { items: processedItems });
@@ -59,7 +79,7 @@ const PublishButton: React.FC = () => {
                 toast.loading("Processing assets and updating project...");
                 
                 // Process and upload any new assets
-                const processedItems = await processProjectItems(items, projectId);
+                const processedItems = await processProjectItems(filteredItems, projectId);
                 
                 // Update the project with processed items
                 await updateProject(projectId, { items: processedItems });
