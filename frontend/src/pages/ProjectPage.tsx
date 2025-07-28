@@ -6,20 +6,30 @@ import EditorHeader from '../components/EditorHeader';
 import { useEditorStore } from '../context/EditorStore';
 import { getProjectById } from '@/services/projectService';
 import { toast } from 'sonner';
+import { useUserContext } from '@/context/UserContext';
 
 import SidebarLayout from '../components/layouts/SidebarLayout';
 
 const ProjectPage: React.FC = () => {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { username, projectId } = useParams<{ username: string; projectId?: string }>();
   const mode = useEditorStore(state => state.mode);
   const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
   const setProjectId = useEditorStore(state => state.setProjectId);
   const loadAssetsForItems = useEditorStore(state => state.loadAssetsForItems);
-  const isHomeUser = true;
+  
+  // Check if current user is the owner of this page
+  const { user } = useUserContext();
+  const isHomeUser = user.username === username;
 
   // Effect to load project data when the component mounts or projectId changes
   useEffect(() => {
     const loadProject = async () => {
+      // Check if user is authorized to access this page
+      if (!isHomeUser) {
+        toast.error('You are not authorized to access this page');
+        return;
+      }
+
       if (projectId) {
         try {
           toast.loading('Loading project...');
@@ -49,7 +59,7 @@ const ProjectPage: React.FC = () => {
     };
 
     loadProject();
-  }, [projectId, setItemsWithoutHistory, setProjectId]);
+  }, [projectId, setItemsWithoutHistory, setProjectId, isHomeUser]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) =>
