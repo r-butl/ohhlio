@@ -170,11 +170,28 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         </div>
       ) : (
         <div className="display-container">
-          <img 
-            src={displayImage || localOriginalImage || ''} 
-            alt="Cropped" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          {(displayImage || localOriginalImage) ? (
+            <img 
+              src={displayImage || localOriginalImage || undefined} 
+              alt="Cropped" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <div 
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                backgroundColor: '#f5f5f5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#999',
+                fontSize: '14px'
+              }}
+            >
+              Loading image...
+            </div>
+          )}
         </div>
       )}
     </div>

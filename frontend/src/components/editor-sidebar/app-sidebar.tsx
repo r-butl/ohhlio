@@ -14,7 +14,7 @@ import {
 
 import AddProjectButton from "@/components/buttons/AddProject";
 import { NavProjects } from "@/components/editor-sidebar/nav-projects"
-import { NavSecondary } from "@/components/editor-sidebar/nav-secondary"
+import { NavUser } from "@/components/editor-sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -24,64 +24,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useUserContext } from "@/context/UserContext";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+  const user = useUserContext().user;
+
   return (
     <Sidebar variant="inset" {...props}>
 
       {/* Project Header */}
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Ohhlio</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <NavUser user={{
+          name: user.username,
+          email: user.email,
+          avatar: ""
+        }} />
       </SidebarHeader>
       
       {/* Project Nav */}
