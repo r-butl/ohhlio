@@ -1,15 +1,15 @@
 import React, { useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import Footer from '../components/footer/Footer';
-import Renderer from '../components/EditorGrid';
-import EditorHeader from '../components/EditorHeader';
-import { useEditorStore } from '../context/EditorStore';
+import Footer from '../../components/footer/Footer';
+import Renderer from '../../components/dashboard/EditorGrid';
+import EditorHeader from '../../components/dashboard/EditorHeader';
+import { useEditorStore } from '../../context/EditorStore';
 import { getProjectById } from '@/services/projectService';
 import { toast } from 'sonner';
 
-import SidebarLayout from '../components/layouts/SidebarLayout';
+import SidebarLayout from '../../components/layouts/SidebarLayout';
 
-const ProjectPage: React.FC = () => {
+const ProjectEditor: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const mode = useEditorStore(state => state.mode);
   const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
@@ -70,4 +70,4 @@ const ProjectPage: React.FC = () => {
   );
 };
 
-export default ProjectPage;
+export default ProjectEditor;

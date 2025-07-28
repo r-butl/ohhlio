@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEditorStore } from "../context/EditorStore";
+import { useEditorStore } from "../../context/EditorStore";
 import { useNavigate, Link } from "react-router-dom";
 
 import {
@@ -8,10 +8,10 @@ import {
 
 import PreviewButton from "@/components/buttons/Preview";
 
-import UndoButton from "./buttons/Undo";
-import RedoButton from "./buttons/Redo";
-import PublishButton from "./buttons/Publish";
-import AddContentButton from "./buttons/AddContentItem";
+import UndoButton from "../buttons/Undo";
+import RedoButton from "../buttons/Redo";
+import PublishButton from "../buttons/Publish";
+import AddContentButton from "../buttons/AddContentItem";
 
 interface EditorHeaderProps {
     isHomeUser: boolean;  // This will be used to determine if user is the owner

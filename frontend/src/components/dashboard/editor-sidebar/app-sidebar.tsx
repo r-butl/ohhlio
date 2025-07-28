@@ -13,8 +13,8 @@ import {
 } from "lucide-react"
 
 import AddProjectButton from "@/components/buttons/AddProject";
-import { NavProjects } from "@/components/editor-sidebar/nav-projects"
-import { NavUser } from "@/components/editor-sidebar/nav-user";
+import { NavProjects } from "@/components/dashboard/editor-sidebar/nav-projects"
+import { NavUser } from "@/components/dashboard/editor-sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,

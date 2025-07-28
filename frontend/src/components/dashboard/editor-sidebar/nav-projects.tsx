@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Folder,
   MoreHorizontal,
@@ -32,6 +32,7 @@ import { useContext } from 'react';
 export function NavProjects() {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
+  const location = useLocation();
   const userContext = useContext(UserContext);
 
   if (!userContext) {
@@ -39,6 +40,14 @@ export function NavProjects() {
   }
 
   const { projects, fetchProjects } = userContext;
+
+  // Determine if we're on the homepage
+  const isHomeSelected = location.pathname === '/project' || location.pathname === '/';
+  
+  // Determine if a specific project is selected
+  const isProjectSelected = (projectId: string) => {
+    return location.pathname === `/project/${projectId}`;
+  };
 
   const handleDelete = async (projectId: string) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
@@ -63,15 +72,23 @@ export function NavProjects() {
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>My Projects</SidebarGroupLabel>
       <SidebarMenu>
-        <SidebarMenuButton asChild>
-          <a href={"/"}>
-            <House />
-            <span>Home</span>
-          </a>
-        </SidebarMenuButton>
+        <SidebarMenuItem>
+          <SidebarMenuButton 
+            asChild 
+            className={isHomeSelected ? "bg-accent text-accent-foreground" : ""}
+          >
+            <a href={"/"}>
+              <House />
+              <span>Home</span>
+            </a>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
         {projects.map((project: any) => (
           <SidebarMenuItem key={project.id}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton 
+              asChild
+              className={isProjectSelected(project.id) ? "bg-accent text-accent-foreground" : ""}
+            >
               <a href={`/project/${project.id}`}>
                 <StickyNote className="h-4 w-2" />
                 <span>{project.title}</span>

@@ -374,7 +374,7 @@ export const useEditorStore = create<State>((set, get) => ({
       const item = items[itemId];
       
       // Skip if no assetId or already loaded
-      if (!item.props.assetId || item.props.originalImage || item.props.assetUrl) {
+      if (!item.props.assetId) {
         continue;
       }
       

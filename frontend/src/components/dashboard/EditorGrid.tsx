@@ -7,7 +7,7 @@ import TextEditor from './text-editor/TextEditor';
 import ImageEditor from './image-editor/ImageEditor';
 import GridItem from './grid-item/GridItem';
 
-import { useEditorStore } from '../context/EditorStore';
+import { useEditorStore } from '../../context/EditorStore';
 
 const ResponsiveGrid = WidthProvider(Responsive);
 
