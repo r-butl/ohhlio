@@ -31,12 +31,18 @@ app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
 
 // Middleware
 app.use(helmet());
+
+// CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] 
-    : ['http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
+    ? [process.env.FRONTEND_URL || 'https://ohhlio.vercel.app'] 
+    : [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// File uploading
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
