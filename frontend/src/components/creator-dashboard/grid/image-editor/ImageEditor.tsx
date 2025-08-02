@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import Cropper from 'react-easy-crop';
 import { GridDimensions } from '../grid-item/GridItem';
-import { useEditorStore, ImageItemProps } from '../../context/EditorStore';
-import emitter from '../../global-state/EventBus';
-import { applyCropToImage } from '../../utils/imageUtils';
+import { useEditorStore, ImageItemProps } from '@/context/EditorStore';
+import emitter from '@/global-state/EventBus';
+import { applyCropToImage } from '@/utils/imageUtils';
 import './ImageEditor.css';
 
 interface ImageEditorProps extends GridDimensions {
@@ -170,11 +170,28 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         </div>
       ) : (
         <div className="display-container">
-          <img 
-            src={displayImage || localOriginalImage || ''} 
-            alt="Cropped" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          {(displayImage || localOriginalImage) ? (
+            <img 
+              src={displayImage || localOriginalImage || undefined} 
+              alt="Cropped" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <div 
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                backgroundColor: '#f5f5f5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#999',
+                fontSize: '14px'
+              }}
+            >
+              Loading image...
+            </div>
+          )}
         </div>
       )}
     </div>

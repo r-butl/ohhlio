@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/projects` : 'http://localhost:3001/api/projects';
+import { getAPIURL } from '@/utils/APIutils';
+
+const API_URL = getAPIURL("projects");
 
 import { processProjectAssets } from "./assetService";
 
@@ -130,33 +132,6 @@ export const deleteProject = async (id: string) => {
     return response.json();
 };
 
-// Get all public projects (for browsing)
-export const getPublicProjects = async () => {
-    const response = await fetch(`${API_URL}/public`, {
-        method: 'GET',
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch public projects');
-    }
-
-    return response.json();
-};
-
-// Get a public project by ID (no authentication required)
-export const getPublicProjectById = async (id: string) => {
-    const response = await fetch(`${API_URL}/public/${id}`, {
-        method: 'GET',
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch public project');
-    }
-
-    return response.json();
-};
 
 
  

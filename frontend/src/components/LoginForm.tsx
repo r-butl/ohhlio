@@ -1,33 +1,68 @@
 import * as React from "react"
-
+import { useState } from 'react';
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+import { useAuth } from "@/context/AuthContext";
+import { getAPIURL } from '@/utils/APIutils';
+
+const API_URL = getAPIURL("auth");
+
 interface LoginFormProps extends React.ComponentPropsWithoutRef<"form"> {
-  email: string
-  setEmail: (value: string) => void
-  password: string
-  setPassword: (value: string) => void
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
-  message: string
+  toRegister: () => void
+  onSuccess: () => void
 }
 
 export function LoginForm({
   className,
-  email,
-  setEmail,
-  password,
-  setPassword,
-  onSubmit,
-  message,
+  toRegister,
+  onSuccess,
   ...props
 }: LoginFormProps) {
+
+  const { login } = useAuth();
+  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage('');
+    
+    const endpoint = '/login';
+    const body: any = { email, password };
+    
+    try {
+      const res = await fetch(`${API_URL}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage('Success!');
+        // Only need to call login - UserContext will automatically sync
+        login(data.token, { email: data.email, username: data.username });
+
+        // Let the parent panel know that the operation was successful
+        onSuccess();
+
+      } else {
+        setMessage(data.message || 'Error');
+      }
+    } catch (err) {
+      setMessage('Network error');
+    }
+  };
+
+  
   return (
     <form
       className={cn("flex flex-col gap-6", className)}
-      onSubmit={onSubmit}
+      onSubmit={handleLoginSubmit}
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center">
@@ -89,9 +124,9 @@ export function LoginForm({
       </div>
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
-        <a href="#" className="underline underline-offset-4">
+        <Button variant="link" className="p-0 h-auto text-sm" onClick={toRegister}>
           Sign up
-        </a>
+        </Button>
       </div>
     </form>
   )

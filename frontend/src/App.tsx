@@ -1,11 +1,10 @@
 // frontend/src/App.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import ProjectPage from './pages/ProjectPage';
-import LoginRegister from './pages/login-register/Login';
-import { UserProvider } from './context/UserContext';
-import { PublicProjectsProvider } from './context/PublicProjectsContext';
-import FileUploadBox from '@/components/FileUploadBox';
+import ProjectEditor from '@/pages/CreatorDashboard';
+import LoginRegister from '@/pages/Login';
+import { UserProvider } from '@/context/UserContext';
+import FileUploadBox from '@/components/creator-dashboard/FileUploadBox';
 
 import { Toaster } from 'sonner';
 
@@ -17,8 +16,9 @@ function App() {
           <FileUploadBox />
           <Toaster />
           <Routes>
-            <Route path="/project" element={<ProjectPage />} />
-            <Route path="/project/:projectId" element={<ProjectPage />} />
+
+            <Route path="/project" element={<ProjectEditor />} />
+            <Route path="/project/:projectId" element={<ProjectEditor />} />
             <Route path="/" element={<LoginRegister />} />
             {/* Add more routes as needed */}
           </Routes>

@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { useEditorStore } from '../../context/EditorStore';
+import { useEditorStore } from '@/context/EditorStore';
 import './OptionsPanel.css';
-import ConfirmButton from '../../components/buttons/Confirm';
-import CancelButton from '../../components/buttons/Cancel';
+import ConfirmButton from '@/components/buttons/Confirm';
+import CancelButton from '@/components/buttons/Cancel';
 
 
 const ImageToolbar: React.FC<{ id: string }> = ({ id }) => {

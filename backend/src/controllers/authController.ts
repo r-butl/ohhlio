@@ -1,6 +1,6 @@
 import { generateToken } from '../utils/jwt';
 const bcrypt = require("bcrypt");
-const { prisma } = require('../models/db');
+const prisma = require('../models/db');
 const validator = require('validator');
 import type { Request, Response } from 'express';
 
@@ -27,21 +27,21 @@ const register = async (req: Request, res: Response) => {
         }
     
         // Check if the email already exists
-        const existingEmail = await globalThis.prisma.user.findUnique({ where: { email } });
+        const existingEmail = await prisma.user.findUnique({ where: { email } });
         if (existingEmail) {
             return res.status(400).json({ message: 'Email already exists' });
         }
 
         // Check if the username already exists
-        const existingUsername = await globalThis.prisma.user.findUnique({ where: { username } });
+        const existingUsername = await prisma.user.findUnique({ where: { username } });
         if (existingUsername) {
             return res.status(400).json({ message: 'Username already exists' });
         }
 
-        // Check if the password is at least 8 characters long
+        // Check if the password is valid
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
         if (!passwordRegex.test(password)) {
-            return res.status(400).json({ message: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character' });
+            return res.status(400).json({ message: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.' });
         }
 
         // Hash the password
@@ -52,13 +52,17 @@ const register = async (req: Request, res: Response) => {
             data: { username, email, password: hashedPassword },
         });
 
+        if (!user) {
+            res.status(400).json({ message: "User creation failed."})
+        }
+
         // Generate a JWT token
-         const token = generateToken(user.id);
+        const token = generateToken(user.id);
         res.status(201).json({ token: token, username: user.username, email: user.email });
 
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ message: 'Registration failed' });
+        res.status(500).json({ message: `Registration failed: ${error}` });
     }
 }
 
@@ -78,7 +82,7 @@ const login = async (req: Request, res: Response) => {
     try {
 
         // Check if the user exists
-        const user = await globalThis.prisma.user.findUnique({ where: {email: email}, });
+        const user = await prisma.user.findUnique({ where: {email: email}, });
         console.log(`Found user`);
         console.log(user)
         if (!user) {

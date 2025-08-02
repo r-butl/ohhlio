@@ -31,12 +31,18 @@ app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
 
 // Middleware
 app.use(helmet());
+
+// CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] 
-    : ['http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
+    ? [process.env.FRONTEND_URL || 'https://ohhlio.vercel.app'] 
+    : [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// File uploading
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -74,12 +80,18 @@ app.use('/*', (req: Request, res: Response) => {
 
 // Only start the server if not in test mode
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
     try {
-      prisma.$connect();
+      // Connect to database
+      await prisma.$connect();
       console.log('✅ Database connected successfully');
+      
+      // Test database connection
+      console.log('🔄 Testing database connection...');
+      await prisma.$executeRaw`SELECT 1`;
+      console.log('✅ Database connection successful');
+      
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
       console.log('🔍 Console logging is working!');
     } catch (error) {
       console.error('❌ Database connection failed:', error);
