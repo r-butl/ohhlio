@@ -41,6 +41,10 @@ type Layout = {
   w: number
   h: number
   i: string
+  minW?: number
+  maxW?: number
+  minH?: number
+  maxH?: number
 }
 
 // Type definition for 1 item
@@ -51,9 +55,19 @@ type Item = {
   props: any
 }
 
+// Project Header
+type ProjectHeader = {
+  title?: string
+  description?: string
+  headerPhotoId?: string | null;
+}
+
 // State information for the Editor page
 type State = {
+
+  projectHeader: ProjectHeader    // Project header
   items: Record<string, Item>     // Items in the layout
+
   mode: 'edit' | 'display'        // Mode of the editor
   activeEditor: string | null     // ID of the current item being edited
   activeOptionsPanel: string | null // ID of the current option panel that is open
@@ -97,6 +111,7 @@ type State = {
 }
 
 export const useEditorStore = create<State>((set, get) => ({
+  projectHeader: {},
   items: {},
   mode: 'display',
   history: { past: [], future: [] },
@@ -334,7 +349,7 @@ export const useEditorStore = create<State>((set, get) => ({
       minW: 1,  
       minH: 30,
       maxW: gridColumnCount,
-      maxH: 40,
+      maxH: 200,
     };
     
     

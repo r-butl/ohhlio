@@ -7,13 +7,13 @@ import TextEditor from './text-editor/TextEditor';
 import ImageEditor from './image-editor/ImageEditor';
 import GridItem from './grid-item/GridItem';
 
-import { useEditorStore } from '../../context/EditorStore';
+import { useEditorStore } from '../../../context/EditorStore';
 
 const ResponsiveGrid = WidthProvider(Responsive);
 
 interface RendererProps {}
 
-const Renderer: React.FC<RendererProps> = () => {
+const EditorGrid: React.FC<RendererProps> = () => {
 
   const buttonHovered = useEditorStore(state => state.buttonHovered);
   const mode = useEditorStore(state => state.mode);
@@ -65,6 +65,10 @@ const Renderer: React.FC<RendererProps> = () => {
         key={item.id}
         data-grid={{
           ...item.layout,
+          minW: item.layout.minW || 1,
+          maxW: item.layout.maxW || gridColumnCount,
+          minH: item.layout.minH || 1,
+          maxH: item.layout.maxH || 100,
         }}
       >
         <GridItem
@@ -107,8 +111,14 @@ const Renderer: React.FC<RendererProps> = () => {
       >
         {Object.values(items).map(renderItem)}
       </ResponsiveGrid>
+      <footer>
+            <div
+                className='space'
+                style={{height: '200px'}}>
+            </div>
+      </footer>
     </div>
   );
 };
 
-export default Renderer;
+export default EditorGrid;

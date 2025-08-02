@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import Cropper from 'react-easy-crop';
 import { GridDimensions } from '../grid-item/GridItem';
-import { useEditorStore, ImageItemProps } from '../../../context/EditorStore';
-import emitter from '../../../global-state/EventBus';
-import { applyCropToImage } from '../../../utils/imageUtils';
+import { useEditorStore, ImageItemProps } from '@/context/EditorStore';
+import emitter from '@/global-state/EventBus';
+import { applyCropToImage } from '@/utils/imageUtils';
 import './ImageEditor.css';
 
 interface ImageEditorProps extends GridDimensions {

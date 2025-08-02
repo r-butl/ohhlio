@@ -13,16 +13,13 @@ import {
 } from "lucide-react"
 
 import AddProjectButton from "@/components/buttons/AddProject";
-import { NavProjects } from "@/components/dashboard/editor-sidebar/nav-projects"
-import { NavUser } from "@/components/dashboard/editor-sidebar/nav-user";
+import { NavProjects } from "@/components/creator-dashboard/editor-sidebar/nav-projects"
+import { NavUser } from "@/components/creator-dashboard/editor-sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useUserContext } from "@/context/UserContext";
 
