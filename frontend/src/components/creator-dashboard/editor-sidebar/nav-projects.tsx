@@ -41,12 +41,15 @@ export function NavProjects() {
 
   const { projects, fetchProjects } = userContext;
 
+  // Get username from user context
+  const { user } = userContext;
+  
   // Determine if we're on the homepage
-  const isHomeSelected = location.pathname === '/project' || location.pathname === '/';
+  const isHomeSelected = location.pathname === `/${user.username}/project` || location.pathname === '/';
   
   // Determine if a specific project is selected
   const isProjectSelected = (projectId: string) => {
-    return location.pathname === `/project/${projectId}`;
+    return location.pathname === `/${user.username}/project/${projectId}`;
   };
 
   const handleDelete = async (projectId: string) => {
@@ -57,6 +60,7 @@ export function NavProjects() {
         await fetchProjects(); 
         toast.dismiss();
         toast.success("Project deleted successfully.");
+        navigate(`/${user.username}/project`)
 
         // Optional: Navigate away if the current project is deleted
       } catch (error) {
@@ -77,7 +81,7 @@ export function NavProjects() {
             asChild 
             className={isHomeSelected ? "bg-accent text-accent-foreground" : ""}
           >
-            <a href={"/"}>
+                          <a href={`/${user.username}/project`}>
               <House />
               <span>Home</span>
             </a>
@@ -89,7 +93,7 @@ export function NavProjects() {
               asChild
               className={isProjectSelected(project.id) ? "bg-accent text-accent-foreground" : ""}
             >
-              <a href={`/project/${project.id}`}>
+              <a href={`/${user.username}/project/${project.id}`}>
                 <StickyNote className="h-4 w-2" />
                 <span>{project.title}</span>
               </a>
@@ -106,7 +110,7 @@ export function NavProjects() {
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem onClick={() => navigate(`/project/${project.id}`)}>
+                <DropdownMenuItem onClick={() => navigate(`/${user.username}/project/${project.id}`)}>
                   <Folder className="text-muted-foreground" />
                   <span>View Project</span>
                 </DropdownMenuItem>

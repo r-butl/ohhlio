@@ -1,6 +1,5 @@
 import React from 'react';
 import { useEditorStore } from "../../context/EditorStore";
-import { useNavigate, Link } from "react-router-dom";
 
 import {
   useSidebar

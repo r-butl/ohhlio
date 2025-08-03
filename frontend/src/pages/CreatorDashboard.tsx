@@ -19,10 +19,17 @@ const CreatorDashboard: React.FC = () => {
   // Check if current user is the owner of this page
   const { user } = useUserContext();
   const isHomeUser = user.username === username;
+  console.log(`${user.username} ${username}`)
 
   // Effect to load project data when the component mounts or projectId changes
   useEffect(() => {
     const loadProject = async () => {
+      // Wait for user data to be loaded before checking authorization
+      if (!user.username) {
+        console.log('User data not loaded yet, waiting...');
+        return;
+      }
+
       // Check if user is authorized to access this page
       if (!isHomeUser) {
         toast.error('You are not authorized to access this page');
@@ -58,7 +65,7 @@ const CreatorDashboard: React.FC = () => {
     };
 
     loadProject();
-  }, [projectId, setItemsWithoutHistory, setProjectId, isHomeUser]);
+  }, [projectId,  setProjectId, isHomeUser, user.username]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) =>

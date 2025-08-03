@@ -4,14 +4,16 @@ import { useEditorStore } from '@/context/EditorStore';
 import { createProject, updateProject, getProjects } from '@/services/projectService';
 import { toast } from 'sonner';
 import { UserContext } from '@/context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const PublishButton: React.FC = () => {
 
     const userContext = useContext(UserContext);
+    const navigate = useNavigate();
     if (!userContext) {
         throw new Error('PublishButton must be used within a UserProvider');
     }
-    const { fetchProjects } = userContext;
+    const { fetchProjects, user } = userContext;
     const setProjectId = useEditorStore(state => (state.setProjectId));
 
 
@@ -73,6 +75,9 @@ const PublishButton: React.FC = () => {
                 
                 // update the project with the items
                 await updateProject(newProject.id, { items: filteredItems });
+
+                // Navigate to the project's page
+                navigate(`/${user.username}/project/${newProject.id}`);
                 
                 toast.dismiss();
                 toast.success("Project published successfully!");

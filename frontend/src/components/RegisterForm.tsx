@@ -13,7 +13,7 @@ const API_URL = getAPIURL("auth");
 
 interface RegisterFormProps extends React.ComponentPropsWithoutRef<"form"> {
     toLogin: () => void
-    onSuccess: () => void
+    onSuccess: (username?: string) => void
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
@@ -55,7 +55,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             login(data.token, { email: data.email, username: data.username });
             
             // Let the parent panel know that the operation was successful
-            onSuccess();
+            onSuccess(data.username);
           } else {
             console.log(`${data.message}`)
             setMessage(data.message || 'Error');

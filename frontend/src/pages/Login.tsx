@@ -12,8 +12,12 @@ const LoginRegister: React.FC = () => {
     setMode(mode === 'register' ? 'login' : 'register');
   }
 
-  const handleSuccess = () => {
-    navigate('/project')
+  const handleSuccess = (username?: string) => {
+    if (username) {
+      navigate(`/${username}/project`)
+    } else {
+      navigate('/project')
+    }
   }
 
   return (

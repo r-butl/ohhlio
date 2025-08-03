@@ -17,8 +17,9 @@ function App() {
           <Toaster />
           <Routes>
 
+            <Route path="/:username/project" element={<ProjectEditor />} />
+            <Route path="/:username/project/:projectId" element={<ProjectEditor />} />
             <Route path="/project" element={<ProjectEditor />} />
-            <Route path="/project/:projectId" element={<ProjectEditor />} />
             <Route path="/" element={<LoginRegister />} />
             {/* Add more routes as needed */}
           </Routes>

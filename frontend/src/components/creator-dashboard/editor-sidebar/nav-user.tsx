@@ -57,10 +57,7 @@ export function NavUser({
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">ohhlio.com/{user.name}</span>
               </div>
-<<<<<<< HEAD:frontend/src/components/editor-sidebar/nav-user.tsx
-=======
               <ChevronDown className="ml-auto size-4" />
->>>>>>> login-deployment:frontend/src/components/creator-dashboard/editor-sidebar/nav-user.tsx
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
