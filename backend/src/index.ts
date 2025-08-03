@@ -64,7 +64,15 @@ app.use('/api/assets', assetRoutes);
 
 // Routes
 app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ status: 'OK', message: 'Ohhlio Backend is running!' });
+  res.json({ 
+    status: 'OK', 
+    message: 'Ohhlio Backend is running!',
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      FRONTEND_URL: process.env.FRONTEND_URL,
+      PORT: process.env.PORT
+    }
+  });
 });
 
 // Error handling middleware
