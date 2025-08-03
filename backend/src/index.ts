@@ -34,9 +34,7 @@ app.use(helmet());
 
 // CORS
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL || 'https://ohhlio.vercel.app'] 
-    : [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000'],
+  origin: process.env.FRONTEND_URL,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -62,17 +60,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/assets', assetRoutes);
 
-// Routes
+// Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'Ohhlio Backend is running!',
-    env: {
-      NODE_ENV: process.env.NODE_ENV,
-      FRONTEND_URL: process.env.FRONTEND_URL,
-      PORT: process.env.PORT
-    }
-  });
+  res.json({ status: 'OK', message: 'Ohhlio Backend is running!' });
 });
 
 // Error handling middleware
