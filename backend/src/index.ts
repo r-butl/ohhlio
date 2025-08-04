@@ -32,13 +32,27 @@ app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
 // Middleware
 app.use(helmet());
 
-// CORS
+// CORS configuration
+const ALLOWED_ORIGIN = process.env.NODE_ENV === 'production'
+  ? process.env.FRONTEND_URL || 'https://ohhlio.vercel.app'
+  : '*';
+
+// CORS middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: ALLOWED_ORIGIN,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Handle preflight requests explicitly
+app.options('*', (req: Request, res: Response) => {
+  res.header('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.status(200).end();
+});
 
 // File uploading
 app.use(morgan('combined'));
