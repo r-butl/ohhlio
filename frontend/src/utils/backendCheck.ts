@@ -11,17 +11,15 @@ export const checkBackendConnectivity = async (): Promise<BackendStatus> => {
   const baseURL = getAPIURL('').replace('/api', ''); // Get base URL without /api
   
   try {
-    // Test basic connectivity
-    const pingResponse = await fetch(`${baseURL}/api/ping`);
-    const isConnected = pingResponse.ok;
-    
-    // Test CORS
-    const corsResponse = await fetch(`${baseURL}/api/cors-test`);
-    const corsWorking = corsResponse.ok;
-    
-    // Test health endpoint
+    // Test health endpoint (this exists)
     const healthResponse = await fetch(`${baseURL}/api/health`);
     const healthStatus = healthResponse.ok ? 'ok' : 'error';
+    
+    // Test basic connectivity using health endpoint
+    const isConnected = healthResponse.ok;
+    
+    // Test CORS using health endpoint
+    const corsWorking = healthResponse.ok;
     
     return {
       isConnected,
