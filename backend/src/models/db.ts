@@ -10,7 +10,15 @@ declare global {
 // @ts-ignore
 if (!globalThis.prisma) {
   // @ts-ignore
-  globalThis.prisma = new PrismaClient();
+  globalThis.prisma = new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
+    // Add connection pooling for serverless
+    log: ['query', 'info', 'warn', 'error'],
+  });
   
   // Test query when database loads
   async function testConnection() {
