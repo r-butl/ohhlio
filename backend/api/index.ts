@@ -7,7 +7,7 @@ export default async function handler(req: any, res: any) {
     'http://localhost:5173',
     'http://localhost:3000',
     'https://ohhlio.vercel.app',
-    'https://ohhlio-frontend.vercel.app'
+    'https://ohhlio.netlify.app'
   ];
   
   const origin = req.headers.origin;
