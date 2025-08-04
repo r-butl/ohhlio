@@ -1,13 +1,10 @@
 export const getAPIURL = ( endpoint: string ) => {
-    // Force localhost for development, use env var for production
-    const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
-    // const API_URL = isDevelopment 
-    //     ? `http://localhost:3001/api/${endpoint}`
-    //     : import.meta.env.VITE_API_URL 
-    //         ? `${import.meta.env.VITE_API_URL}/${endpoint}` 
-    //         : `https://ohhlio.vercel.app/api/${endpoint}`;
-
-    const API_URL = `${import.meta.env.VITE_API_URL}/${endpoint}`;
+    // Get base URL and remove trailing slash if present
+    const baseURL = import.meta.env.VITE_API_URL 
+        ? import.meta.env.VITE_API_URL.replace(/\/$/, '') // Remove trailing slash
+        : 'https://ohhlio.vercel.app/api';
+    
+    const API_URL = `${baseURL}/${endpoint}`;
     
     // Debug logging
     console.log('🔧 API URL Debug:', {

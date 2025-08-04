@@ -10,10 +10,10 @@ import { testBackendEndpoints } from '@/utils/backendCheck';
 import { Toaster } from 'sonner';
 
 function App() {
-  useEffect(() => {
-    // Test backend connectivity when app loads
-    testBackendEndpoints();
-  }, []);
+  // useEffect(() => {
+  //   // Test backend connectivity when app loads
+  //   testBackendEndpoints();
+  // }, []);
 
   return (
     <UserProvider>
