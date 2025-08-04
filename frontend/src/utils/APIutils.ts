@@ -13,7 +13,7 @@ export const getAPIURL = ( endpoint: string ) => {
         finalURL: API_URL,
         isDev: import.meta.env.DEV,
         hostname: window.location.hostname,
-        isDevelopment
+        isDevelopment: import.meta.env.DEV || window.location.hostname === 'localhost'
     });
     
     return API_URL
