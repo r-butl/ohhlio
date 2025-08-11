@@ -1,54 +1,8 @@
 import { Response } from 'express';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 const prisma = require('../models/db');
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${uuidv4()}-${file.originalname}`;
-    cb(null, uniqueName);
-  }
-});
-
-const upload = multer({
-  storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    // Support multiple file types
-    const allowedTypes = [
-      // Images
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-      // Documents
-      'application/pdf', 'text/plain', 'application/msword', 
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      // Videos
-      'video/mp4', 'video/webm', 'video/ogg',
-      // Audio
-      'audio/mpeg', 'audio/wav', 'audio/ogg',
-      // Archives
-      'application/zip', 'application/x-rar-compressed'
-    ];
-    
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error(`Invalid file type: ${file.mimetype}. Allowed types: ${allowedTypes.join(', ')}`));
-    }
-  }
-});
+import { upload, uploadFileToS3, deleteFileFromS3 } from '../services/s3Service';
 
 // Upload a single file
 export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -73,7 +27,11 @@ export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Pro
     try {
       const { projectId } = req.body;
 
-      console.log(`Writing file with name ${req.file.filename}`);
+      // Generate unique S3 key
+      const key = `users/${userId}/${uuidv4()}-${req.file.originalname}`;
+      
+      // Upload to S3
+      const s3Url = await uploadFileToS3(req.file, key);
       
       // Determine asset type based on MIME type
       const getAssetType = (mimeType: string): string => {
@@ -88,7 +46,7 @@ export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Pro
       const asset = await prisma.asset.create({
         data: {
           filename: req.file.originalname,
-          filePath: req.file.filename,
+          filePath: s3Url, // Store S3 URL instead of local path
           mimeType: req.file.mimetype,
           fileSize: req.file.size,
           type: getAssetType(req.file.mimetype),
@@ -100,7 +58,7 @@ export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Pro
       res.status(201).json({
         id: asset.id,
         filename: asset.filename,
-        filePath: asset.filePath,
+        filePath: asset.filePath, // This is now the S3 URL
         mimeType: asset.mimeType,
         fileSize: asset.fileSize,
         type: asset.type,
@@ -138,41 +96,15 @@ export const getAssetById = async (req: AuthenticatedRequest, res: Response): Pr
       return;
     }
 
-    // Serve the actual file
-    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
-    const filePath = path.join(uploadDir, asset.filePath);
-    
-    console.log(`Looking for file at: ${filePath}`);
-    console.log(`Asset filePath: ${asset.filePath}`);
-    console.log(`__dirname: ${__dirname}`);
-    console.log(`Resolved path: ${path.resolve(filePath)}`);
-    
-    // Check if uploads directory exists
-    const uploadsDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
-    console.log(`Uploads directory: ${uploadsDir}`);
-    console.log(`Uploads directory exists: ${fs.existsSync(uploadsDir)}`);
-    
-    // List files in uploads directory
-    if (fs.existsSync(uploadsDir)) {
-      const files = fs.readdirSync(uploadsDir);
-      console.log(`Files in uploads directory: ${files.join(', ')}`);
-    }
-    
-    if (!fs.existsSync(filePath)) {
-      res.status(404).json({ message: 'File not found on disk' });
-      return;
-    }
-
-    // Set appropriate headers
-    res.setHeader('Content-Type', asset.mimeType);
-    res.setHeader('Content-Disposition', `inline; filename="${asset.filename}"`);
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
-    // Stream the file
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.pipe(res);
+    // Return the S3 URL directly
+    res.json({
+      id: asset.id,
+      filename: asset.filename,
+      filePath: asset.filePath, // This is the S3 URL
+      mimeType: asset.mimeType,
+      fileSize: asset.fileSize,
+      type: asset.type,
+    });
   } catch (error) {
     console.error(`Error fetching asset ${id}:`, error);
     res.status(500).json({ message: 'Error fetching asset' });
@@ -204,12 +136,12 @@ export const deleteAsset = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
 
-    // Delete the file from disk
-    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
-    const filePath = path.join(uploadDir, asset.filePath);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    // Extract S3 key from URL
+    const s3Url = asset.filePath;
+    const key = s3Url.split('.com/')[1]; // Extract key from S3 URL
+    
+    // Delete from S3
+    await deleteFileFromS3(key);
 
     // Delete from database
     await prisma.asset.delete({
