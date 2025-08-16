@@ -22,7 +22,8 @@ export const uploadFileToS3 = async (file: Express.Multer.File, key: string) => 
 
   try {
     await s3Client.send(command);
-    return `https://${BUCKET_NAME}.s3.amazonaws.com/${key}`;
+    // Return the S3 key instead of public URL for private access
+    return key;
   } catch (error) {
     console.error('S3 upload error:', error);
     throw new Error('Failed to upload file to S3');
@@ -43,15 +44,14 @@ export const deleteFileFromS3 = async (key: string) => {
   }
 };
 
-export const getSignedUploadUrl = async (key: string, contentType: string) => {
-  const command = new PutObjectCommand({
+export const getSignedDownloadUrl = async (key: string, expiresIn: number = 3600) => {
+  const command = new GetObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
-    ContentType: contentType,
   });
 
   try {
-    return await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    return await getSignedUrl(s3Client, command, { expiresIn });
   } catch (error) {
     console.error('S3 signed URL error:', error);
     throw new Error('Failed to generate signed URL');

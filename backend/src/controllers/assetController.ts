@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 const prisma = require('../models/db');
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
-import { upload, uploadFileToS3, deleteFileFromS3 } from '../services/s3Service';
+import { upload, uploadFileToS3, deleteFileFromS3, getSignedDownloadUrl } from '../services/s3Service';
 
 // Upload a single file
 export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -30,8 +30,11 @@ export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Pro
       // Generate unique S3 key
       const key = `users/${userId}/${uuidv4()}-${req.file.originalname}`;
       
-      // Upload to S3
-      const s3Url = await uploadFileToS3(req.file, key);
+      // Upload to S3 and get the key
+      const s3Key = await uploadFileToS3(req.file, key);
+      
+      // Generate signed URL for immediate access
+      const signedUrl = await getSignedDownloadUrl(s3Key);
       
       // Determine asset type based on MIME type
       const getAssetType = (mimeType: string): string => {
@@ -46,7 +49,7 @@ export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Pro
       const asset = await prisma.asset.create({
         data: {
           filename: req.file.originalname,
-          filePath: s3Url, // Store S3 URL instead of local path
+          filePath: s3Key, // Store S3 key instead of URL
           mimeType: req.file.mimetype,
           fileSize: req.file.size,
           type: getAssetType(req.file.mimetype),
@@ -58,7 +61,7 @@ export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Pro
       res.status(201).json({
         id: asset.id,
         filename: asset.filename,
-        filePath: asset.filePath, // This is now the S3 URL
+        filePath: signedUrl, // Return signed URL for immediate access
         mimeType: asset.mimeType,
         fileSize: asset.fileSize,
         type: asset.type,
@@ -96,11 +99,13 @@ export const getAssetById = async (req: AuthenticatedRequest, res: Response): Pr
       return;
     }
 
-    // Return the S3 URL directly
+    // Generate signed URL for the asset
+    const signedUrl = await getSignedDownloadUrl(asset.filePath);
+
     res.json({
       id: asset.id,
       filename: asset.filename,
-      filePath: asset.filePath, // This is the S3 URL
+      filePath: signedUrl, // Return signed URL
       mimeType: asset.mimeType,
       fileSize: asset.fileSize,
       type: asset.type,
@@ -136,12 +141,11 @@ export const deleteAsset = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
 
-    // Extract S3 key from URL
-    const s3Url = asset.filePath;
-    const key = s3Url.split('.com/')[1]; // Extract key from S3 URL
+    // The filePath now contains the S3 key directly
+    const s3Key = asset.filePath;
     
     // Delete from S3
-    await deleteFileFromS3(key);
+    await deleteFileFromS3(s3Key);
 
     // Delete from database
     await prisma.asset.delete({
