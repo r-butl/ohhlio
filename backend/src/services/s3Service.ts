@@ -18,7 +18,6 @@ export const uploadFileToS3 = async (file: Express.Multer.File, key: string) => 
     Key: key,
     Body: file.buffer,
     ContentType: file.mimetype,
-    ACL: 'public-read',
   });
 
   try {
