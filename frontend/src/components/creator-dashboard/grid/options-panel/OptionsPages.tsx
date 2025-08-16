@@ -14,6 +14,6 @@ export const OPTION_PAGES: Record<string, PageEntry[]> = {
     { label: 'Edit', component:  TextToolbar},
   ],
   image: [
-    { label: 'Crop', component: ImageToolbar },
+    { label: 'Edit', component: ImageToolbar },
   ],
 };

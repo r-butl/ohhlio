@@ -44,6 +44,9 @@ export function NavProjects() {
   // Get username from user context
   const { user } = userContext;
   
+  // Determine if we're on the profile page
+  const isProfileSelected = location.pathname === `/${user.username}`;
+  
   // Determine if we're on the homepage
   const isHomeSelected = location.pathname === `/${user.username}/project` || location.pathname === '/';
   
@@ -78,25 +81,21 @@ export function NavProjects() {
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton 
-            asChild 
-            className={isHomeSelected ? "bg-accent text-accent-foreground" : ""}
+            onClick={() => navigate(`/${user.username}`)}
+            className={isProfileSelected ? "selected" : ""}
           >
-                          <a href={`/${user.username}/project`}>
-              <House />
-              <span>Home</span>
-            </a>
+            <House />
+            <span>Profile</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
         {projects.map((project: any) => (
           <SidebarMenuItem key={project.id}>
             <SidebarMenuButton 
-              asChild
-              className={isProjectSelected(project.id) ? "bg-accent text-accent-foreground" : ""}
+              onClick={() => navigate(`/${user.username}/project/${project.id}`)}
+              className={isProjectSelected(project.id) ? "selected" : ""}
             >
-              <a href={`/${user.username}/project/${project.id}`}>
-                <StickyNote className="h-4 w-2" />
-                <span>{project.title}</span>
-              </a>
+              <StickyNote className="h-4 w-2" />
+              <span>{project.title}</span>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -21,17 +21,9 @@ export type TextItemProps = {
 export type ImageItemProps = {
   assetId: string | null;  // Reference to uploaded asset
   originalImage: string | null;  // Keep for preview/fallback
-  crop: { x: number; y: number };
   zoom: number;
   aspectRatio: number;
   isUploading?: boolean;  // Track upload state
-  cropSettings?: {  // Store crop parameters for dynamic application
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    zoom: number;
-  };
 }
 
 // Layout configuration for 1 item
@@ -334,7 +326,6 @@ export const useEditorStore = create<State>((set, get) => ({
     defaultProps = {
       assetId: null,
       originalImage: image,
-      crop: { x: 0, y: 0 },
       zoom: 1,
       aspectRatio: 4 / 3,
       isUploading: false

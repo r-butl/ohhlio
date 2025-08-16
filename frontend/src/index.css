@@ -32,6 +32,8 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
+    --selected: 240 5.9% 10%;
+    --selected-foreground: 0 0% 98%;
   }
 
   .dark {
@@ -62,6 +64,8 @@
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 98%;
     --sidebar-primary-foreground: 240 5.9% 10%;
+    --selected: 240 3.7% 15.9%;
+    --selected-foreground: 0 0% 98%;
   }
 }
 
@@ -71,5 +75,12 @@
   }
   body {
     @apply bg-background text-foreground m-0;
+  }
+}
+
+@layer utilities {
+  .selected {
+    background-color: hsl(var(--selected));
+    color: hsl(var(--selected-foreground));
   }
 }

@@ -1,39 +1,31 @@
 import * as React from "react"
-import {
-  Frame,
-  LifeBuoy,
-  Map,
-  PieChart,
-  Send,
-} from "lucide-react"
 
 import AddProjectButton from "@/components/buttons/AddProject";
 import { NavProjects } from "@/components/editor-sidebar/nav-projects"
-import { NavUser } from "./nav-user";
-
+import { NavUser } from "@/components/editor-sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar"
-
 import { useUserContext } from "@/context/UserContext";
+
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
-  const { user } = useUserContext();
+  const user = useUserContext().user;
 
   return (
     <Sidebar variant="inset" {...props}>
 
       {/* Project Header */}
       <SidebarHeader>
-        <NavUser user={{ 
+        <NavUser user={{
           name: user.username,
-          email:  user.email,
-          avatar: "/avatars/shadcn.jpg"
-          }}/>
+          email: user.email,
+          avatar: ""
+        }} />
       </SidebarHeader>
       
       {/* Project Nav */}
