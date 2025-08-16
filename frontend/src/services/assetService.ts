@@ -102,14 +102,11 @@ export const getAssetById = async (id: string) => {
         throw new Error(errorData.message || 'Failed to fetch asset');
     }
 
-    // Get the file as a blob
-    const blob = await response.blob();
-    
-    // Create a blob URL for the file
-    const blobUrl = URL.createObjectURL(blob);
+    // Get the asset data with signed URL
+    const assetData = await response.json();
     
     console.log('Success grabbing item.');
-    return blobUrl;
+    return assetData.filePath; // Return the signed URL
 };
 
 // Delete asset
