@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Folder,
@@ -7,6 +6,7 @@ import {
   Trash2,
   House,
   StickyNote,
+  Plus,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -63,7 +63,7 @@ export function NavProjects() {
         await fetchProjects(); 
         toast.dismiss();
         toast.success("Project deleted successfully.");
-        navigate(`/${user.username}/project`)
+        navigate(`/${user.username}`)
 
         // Optional: Navigate away if the current project is deleted
       } catch (error) {
@@ -76,57 +76,60 @@ export function NavProjects() {
   };
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>My Projects</SidebarGroupLabel>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton 
-            onClick={() => navigate(`/${user.username}`)}
-            className={isProfileSelected ? "selected" : ""}
-          >
-            <House />
-            <span>Profile</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        {projects.map((project: any) => (
-          <SidebarMenuItem key={project.id}>
+    <>
+      <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+        <SidebarGroupLabel>My Projects</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
             <SidebarMenuButton 
-              onClick={() => navigate(`/${user.username}/project/${project.id}`)}
-              className={isProjectSelected(project.id) ? "selected" : ""}
+              onClick={() => navigate(`/${user.username}`)}
+              className={isProfileSelected ? "selected" : ""}
             >
-              <StickyNote className="h-4 w-2" />
-              <span>{project.title}</span>
+              <House />
+              <span>Profile</span>
             </SidebarMenuButton>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover>
-                  <MoreHorizontal />
-                  <span className="sr-only">More</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-48"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
-              >
-                <DropdownMenuItem onClick={() => navigate(`/${user.username}/project/${project.id}`)}>
-                  <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Share className="text-muted-foreground" />
-                  <span>Share Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleDelete(project.id)}>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete Project</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
-    </SidebarGroup>
+          {projects.map((project: any) => (
+            <SidebarMenuItem key={project.id}>
+              <SidebarMenuButton 
+                onClick={() => navigate(`/${user.username}/project/${project.id}`)}
+                className={isProjectSelected(project.id) ? "selected" : ""}
+              >
+                <StickyNote className="h-4 w-2" />
+                <span>{project.title}</span>
+              </SidebarMenuButton>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuAction showOnHover>
+                    <MoreHorizontal />
+                    <span className="sr-only">More</span>
+                  </SidebarMenuAction>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-48"
+                  side={isMobile ? "bottom" : "right"}
+                  align={isMobile ? "end" : "start"}
+                >
+                  <DropdownMenuItem onClick={() => navigate(`/${user.username}/project/${project.id}`)}>
+                    <Folder className="text-muted-foreground" />
+                    <span>View Project</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Share className="text-muted-foreground" />
+                    <span>Share Project</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleDelete(project.id)}>
+                    <Trash2 className="text-muted-foreground" />
+                    <span>Delete Project</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroup>
+    
+    </>
   );
 }

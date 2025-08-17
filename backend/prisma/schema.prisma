@@ -12,7 +12,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -30,12 +29,14 @@ model Project {
   id          String   @id @default(cuid())
   title       String
   description String?
+  headerPhotoId String? @unique
   userId      String
   isPublic    Boolean  @default(false)
   items       Json
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headerPhoto Asset?   @relation("ProjectHeaderPhoto", fields: [headerPhotoId], references: [id])
 }
 
 model Asset {
@@ -49,4 +50,5 @@ model Asset {
   projectId String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headerForProject Project? @relation("ProjectHeaderPhoto")
 }

@@ -2,6 +2,10 @@ import { getAPIURL } from '@/utils/APIutils';
 
 const API_URL = getAPIURL("assets");
 
+// Simple in-memory cache for assets
+const assetCache = new Map<string, { data: string; timestamp: number }>();
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+
 // Helper function to get the auth token from localStorage
 const getAuthToken = () => {
     return localStorage.getItem('token');
@@ -12,42 +16,60 @@ export const processProjectAssets = async (items: any, projectId?: string) => {
     // Deep copy to avoid immutability issues with Immer
     const processedItems = JSON.parse(JSON.stringify(items));
     
+    // Collect all upload promises
+    const uploadPromises: Promise<{ itemId: string; asset: any } | null>[] = [];
+    
     for (const [itemId, item] of Object.entries(processedItems)) {
         const typedItem = item as any;
         if (typedItem.type === 'image' && typedItem.props.originalImage && !typedItem.props.assetId) {
-            try {
-                // Convert base64 to file
-                const base64Data = typedItem.props.originalImage;
-                const mimeType = base64Data.split(',')[0].split(':')[1].split(';')[0];
-                const response = await fetch(base64Data);
-                const blob = await response.blob();
+            // Create upload promise for this item
+            const uploadPromise = (async () => {
+                try {
+                    // Convert base64 to file
+                    const base64Data = typedItem.props.originalImage;
+                    const mimeType = base64Data.split(',')[0].split(':')[1].split(';')[0];
+                    const response = await fetch(base64Data);
+                    const blob = await response.blob();
 
-                // Create file with proper MIME type and size check
-                const file = new File([blob], `image-${itemId}`, { type: mimeType });
-                
-                // Check file size before upload
-                if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                    console.warn(`File ${itemId} is too large (${(file.size / 1024 / 1024).toFixed(1)}MB), skipping upload`);
-                    continue;
+                    // Create file with proper MIME type and size check
+                    const file = new File([blob], `image-${itemId}`, { type: mimeType });
+                    
+                    // Check file size before upload
+                    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                        console.warn(`File ${itemId} is too large (${(file.size / 1024 / 1024).toFixed(1)}MB), skipping upload`);
+                        return null;
+                    }
+                    
+                    // Upload file
+                    const asset = await uploadAsset(file, projectId);
+                    
+                    return { itemId, asset };
+                    
+                } catch (error) {
+                    console.error(`Failed to upload asset for item ${itemId}:`, error);
+                    return null;
                 }
-                
-                // Upload file
-                const asset = await uploadAsset(file, projectId);
-                
-                // Update item with asset ID
-                processedItems[itemId].props.assetId = asset.id;
-                processedItems[itemId].props.isUploading = false;
-                
-                // Remove base64 data after successful upload to reduce payload size
-                delete processedItems[itemId].props.originalImage;
-                processedItems[itemId].props.isUploaded = true;
-                
-            } catch (error) {
-                console.error('Failed to upload asset:', error);
-                processedItems[itemId].props.isUploading = false;
-            }
+            })();
+            
+            uploadPromises.push(uploadPromise);
         }
     }
+    
+    // Wait for all uploads to complete in parallel
+    const results = await Promise.all(uploadPromises);
+    
+    // Update processed items with results
+    results.forEach(result => {
+        if (result) {
+            const { itemId, asset } = result;
+            processedItems[itemId].props.assetId = asset.id;
+            processedItems[itemId].props.isUploading = false;
+            
+            // Remove base64 data after successful upload to reduce payload size
+            delete processedItems[itemId].props.originalImage;
+            processedItems[itemId].props.isUploaded = true;
+        }
+    });
     
     return processedItems;
 };
@@ -85,6 +107,14 @@ export const uploadAsset = async (file: File, projectId?: string) => {
 // Get asset by ID
 export const getAssetById = async (id: string) => {
     console.log(`Attempting to grab ${id}`);
+    
+    // Check cache first
+    const cached = assetCache.get(id);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        console.log(`Cache hit for asset ${id}`);
+        return cached.data;
+    }
+    
     const token = getAuthToken();
     if (!token) {
         throw new Error('No authentication token found');
@@ -105,7 +135,13 @@ export const getAssetById = async (id: string) => {
     // Get the asset data with signed URL
     const assetData = await response.json();
     
-    console.log('Success grabbing item.');
+    // Cache the result
+    assetCache.set(id, {
+        data: assetData.filePath,
+        timestamp: Date.now()
+    });
+    
+    console.log(`Success grabbing item ${id} and caching it.`);
     return assetData.filePath; // Return the signed URL
 };
 
@@ -127,4 +163,21 @@ export const deleteAsset = async (id: string): Promise<void> => {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to delete asset');
     }
+    
+    // Remove from cache if it exists
+    assetCache.delete(id);
+};
+
+// Clear the asset cache
+export const clearAssetCache = () => {
+    assetCache.clear();
+    console.log('Asset cache cleared');
+};
+
+// Get cache statistics
+export const getCacheStats = () => {
+    return {
+        size: assetCache.size,
+        entries: Array.from(assetCache.keys())
+    };
 }; 

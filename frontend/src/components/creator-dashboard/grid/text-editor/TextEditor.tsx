@@ -5,6 +5,11 @@ import TextStyle from '@tiptap/extension-text-style';
 import FontFamily from '@tiptap/extension-font-family';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
+import CharacterCount from '@tiptap/extension-character-count';
+import Color from '@tiptap/extension-color';
+import Highlight from '@tiptap/extension-highlight';
+import Link from '@tiptap/extension-link';
+import Placeholder from '@tiptap/extension-placeholder';
 
 import { useEditorStore } from '@/context/EditorStore';
 import emitter from '@/global-state/EventBus';
@@ -67,6 +72,9 @@ const TextEditor: React.FC<TextEditorProps> = ({
         types: ['heading', 'paragraph', 'listItem', 'bulletList', 'orderedList'],
         defaultAlignment: textAlignHorizontal,
         alignments: ['left', 'center', 'right']
+      }),
+      CharacterCount.configure({
+        limit: maxChars || 1000,
       }),
     ],
     content: localContent,

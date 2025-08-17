@@ -33,15 +33,17 @@ export const createProject = async (projectData: { title: string; description?: 
 };
 
 // Update an existing project
-export const updateProject = async (projectId: string, projectData: Partial<{ title: string; description?: string; items: any; isPublic?: boolean }>) => {
+export const updateProject = async (projectId: string, projectData: Partial<{ title: string; description?: string; items: any; isPublic?: boolean; headerPhotoId?: string }>) => {
     const token = getAuthToken();
     if (!token) {
         throw new Error('No authentication token found');
     }
 
-    // Upload images to backend when updating project
-    const processedItems = await processProjectAssets(projectData.items, projectId);
-    projectData.items = processedItems;
+    // Only process assets if items are provided
+    if (projectData.items !== undefined) {
+        const processedItems = await processProjectAssets(projectData.items, projectId);
+        projectData.items = processedItems;
+    }
 
     // Update the project
     const response = await fetch(`${API_URL}/${projectId}`, {

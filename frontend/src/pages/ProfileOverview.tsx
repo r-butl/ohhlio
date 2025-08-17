@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useUserContext } from "@/context/UserContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -60,11 +60,31 @@ const ProfileOverview: React.FC = () => {
                  {projects.map((project) => (
                  <Card 
                      key={project.id} 
-                     className="hover:shadow-md transition-shadow cursor-pointer"
+                     className="hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
                      onClick={() => navigate(`/${username}/project/${project.id}`)}
                  >
+                     {/* Header Photo */}
+                     {project.headerPhotoId && (
+                       <div className="w-full h-32 bg-muted relative">
+                         <img 
+                           src={`/api/assets/${project.headerPhotoId}`}
+                           alt={project.title}
+                           className="w-full h-full object-cover"
+                           onError={(e) => {
+                             // Hide the image if it fails to load
+                             e.currentTarget.style.display = 'none';
+                           }}
+                         />
+                       </div>
+                     )}
+                     
                      <CardContent className="p-6">
-                     <CardTitle className="text-lg">{project.title}</CardTitle>
+                       <CardTitle className="text-lg mb-2">{project.title}</CardTitle>
+                       {project.description && (
+                         <p className="text-sm text-muted-foreground line-clamp-2">
+                           {project.description}
+                         </p>
+                       )}
                      </CardContent>
                  </Card>
                  ))}

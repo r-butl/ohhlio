@@ -85,6 +85,7 @@ type State = {
   setActiveOptionsPanel: (id: string | null) => void;
   setFileUploadSelected: (state: boolean) => void;
   setProjectId: (id: string | null) => void;
+  setProjectHeader: (header: ProjectHeader) => void;
   buttonHovered: boolean  // Used for controlling the resize and draggability of the grid items
                           //   when certain buttons on the component are hovered over them
   setButtonHoveredState: (state: boolean) => void;
@@ -131,6 +132,10 @@ export const useEditorStore = create<State>((set, get) => ({
 
   setProjectId: (id: string | null) => {
     set({ projectId: id });
+  },
+
+  setProjectHeader: (header: ProjectHeader) => {
+    set({ projectHeader: header });
   },
 
   // Toggle the option panel opened 

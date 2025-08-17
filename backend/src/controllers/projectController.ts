@@ -162,7 +162,7 @@ const cleanupOrphanedAssets = async (projectId: string, oldItems: any, newItems:
 // Update an existing project
 export const updateProject = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { title, description, items, isPublic } = req.body;
+  const { title, description, items, isPublic, headerPhotoId } = req.body;
   const userId = req.user?.id;
 
   console.log(`${items}`)
@@ -202,6 +202,7 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response): P
         description,
         items,
         isPublic,
+        headerPhotoId,
       },
     });
     res.json(updatedProject);

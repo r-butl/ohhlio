@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Renderer from '@/components/creator-dashboard/grid/EditorGrid';
 import EditorHeader from '@/components/creator-dashboard/EditorController';
+import ProjectInfo from '@/components/creator-dashboard/ProjectInfo';
 import { useEditorStore } from '@/context/EditorStore';
 import { getProjectById } from '@/services/projectService';
 import { toast } from 'sonner';
@@ -14,6 +15,7 @@ const CreatorDashboard: React.FC = () => {
   const mode = useEditorStore(state => state.mode);
   const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
   const setProjectId = useEditorStore(state => state.setProjectId);
+  const setProjectHeader = useEditorStore(state => state.setProjectHeader);
   const loadAssetsForItems = useEditorStore(state => state.loadAssetsForItems);
   
   // Check if current user is the owner of this page
@@ -44,6 +46,13 @@ const CreatorDashboard: React.FC = () => {
             // Load project items
             setItemsWithoutHistory(() => project.items);
             setProjectId(project.id);
+            
+            // Load project header data
+            setProjectHeader({
+              title: project.title,
+              description: project.description,
+              headerPhotoId: project.headerPhotoId
+            });
             
             // Load assets for all items after items are set
             await loadAssetsForItems();
@@ -78,6 +87,7 @@ const CreatorDashboard: React.FC = () => {
     <SidebarLayout>
       <div className="project-page">
         <EditorHeader isHomeUser={isHomeUser} />
+        <ProjectInfo />
         <Renderer />
       </div>
     </SidebarLayout>
