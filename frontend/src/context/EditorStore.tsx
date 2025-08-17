@@ -75,6 +75,9 @@ type State = {
   gridRowHeight: number           // Height in pixels of each row of the grid
   gridColumnCount: number         // Number of columns that will fit within the renderer
 
+  // Asset cache
+  assetCache: Record<string, any> // Cache for loaded assets
+
   // History interaction
   undo: () => void
   redo: () => void
@@ -101,6 +104,9 @@ type State = {
   
   // Asset loading
   loadAssetsForItems: () => Promise<void>
+  getAssetFromCache: (assetId: string) => any | null
+  addAssetToCache: (assetId: string, asset: any) => void
+  clearAssetCache: () => void
 }
 
 export const useEditorStore = create<State>((set, get) => ({
@@ -117,6 +123,7 @@ export const useEditorStore = create<State>((set, get) => ({
   buttonHovered: false,
   activeOptionsPanel: null,
   fileUploadSelected: false,
+  assetCache: {},
 
   // Toggle the fileUploadSelected boolea
   setFileUploadSelected: (state: boolean) => {
@@ -377,6 +384,29 @@ export const useEditorStore = create<State>((set, get) => ({
       })
     }),
 
+  // Get asset from cache
+  getAssetFromCache: (assetId: string) => {
+    const { assetCache } = get();
+    return assetCache[assetId] || null;
+  },
+
+  // Add asset to cache
+  addAssetToCache: (assetId: string, asset: any) => {
+    set(state => ({
+      assetCache: {
+        ...state.assetCache,
+        [assetId]: asset
+      }
+    }));
+    console.log(`Success grabbing item ${assetId} and caching it.`);
+  },
+
+  // Clear the asset cache
+  clearAssetCache: () => {
+    set({ assetCache: {} });
+    console.log('Asset cache cleared');
+  },
+
   // Loads the assets using their id that is found in the project map
   loadAssetsForItems: async () => {
     const items = get().items;
@@ -384,14 +414,29 @@ export const useEditorStore = create<State>((set, get) => ({
     for (const itemId in items) {
       const item = items[itemId];
       
-      // Skip if no assetId or already loaded
-      if (!item.props.assetId) {
+      // Skip if item doesn't have props or no assetId
+      if (!item.props || !item.props.assetId) {
         continue;
       }
       
       try {
-        console.log(`Using asset id ${item.props.assetId}`);
-        const asset = await getAssetById(item.props.assetId);
+        const assetId = item.props.assetId;
+        console.log(`Using asset id ${assetId}`);
+        
+        // Check cache first
+        let asset = get().getAssetFromCache(assetId);
+        
+        if (!asset) {
+          // If not in cache, fetch from API
+          asset = await getAssetById(assetId);
+          
+          if (asset) {
+            // Add to cache
+            get().addAssetToCache(assetId, asset);
+          }
+        } else {
+          console.log(`Asset ${assetId} found in cache`);
+        }
         
         if (asset) {
           get().setItemsWithoutHistory(draft => {
