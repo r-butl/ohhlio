@@ -34,9 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(user);
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
-    console.log("AuthContext.tsx: login");  
-    console.log(token);
-    console.log(user);
+
   };
 
   const logout = () => {

@@ -14,7 +14,7 @@ const LoginRegister: React.FC = () => {
 
   const handleSuccess = (username?: string) => {
     if (username) {
-      navigate(`/${username}/project`)
+      navigate(`/${username}`)
     } else {
       navigate('/project')
     }
