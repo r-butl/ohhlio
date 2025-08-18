@@ -4,13 +4,14 @@ import { useUserContext } from "@/context/UserContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import SidebarLayout from "@/layouts/SidebarLayout";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useProjectNavigation } from "@/hooks/useProjectNavigation";
 
 const ProfileOverview: React.FC = () => {
   const { user } = useAuth();
   const { projects, loadingProjects } = useUserContext();
-  const navigate = useNavigate();
   const { username } = useParams();
+  const { navigateToProject } = useProjectNavigation();
 
   if (!user) {
     return (
@@ -61,7 +62,7 @@ const ProfileOverview: React.FC = () => {
                  <Card 
                      key={project.id} 
                      className="hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
-                     onClick={() => navigate(`/${username}/project/${project.id}`)}
+                     onClick={() => navigateToProject(project.id, username || '')}
                  >
                      {/* Header Photo */}
                      {project.headerPhotoId && (

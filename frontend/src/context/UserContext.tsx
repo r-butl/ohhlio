@@ -23,7 +23,8 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
   const [projectsError, setProjectsError] = useState<any>(null);
 
   const fetchProjects = async () => {
-    if (!user.username) return;
+    // Use authUser directly to avoid race conditions
+    if (!authUser?.username || !isAuthenticated) return;
     setLoadingProjects(true);
     setProjectsError(null);
     try {
@@ -31,6 +32,7 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
       setProjects(projectData);
     } catch (error) {
       setProjectsError(error);
+      console.error('Failed to fetch projects:', error);
     } finally {
       setLoadingProjects(false);
     }
@@ -51,10 +53,10 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     }
   }, [authUser, isAuthenticated]);
 
-  // Fetch projects when user changes
+  // Fetch projects when auth state changes
   useEffect(() => {
     fetchProjects();
-  }, [user.username]);
+  }, [authUser, isAuthenticated]);
 
   return (
     <UserContext.Provider

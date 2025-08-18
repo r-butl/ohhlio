@@ -77,6 +77,7 @@ type State = {
 
   // Asset cache
   assetCache: Record<string, any> // Cache for loaded assets
+  isLoadingAssets: boolean // Loading state for assets
 
   // History interaction
   undo: () => void
@@ -107,6 +108,7 @@ type State = {
   getAssetFromCache: (assetId: string) => any | null
   addAssetToCache: (assetId: string, asset: any) => void
   clearAssetCache: () => void
+  setIsLoadingAssets: (loading: boolean) => void
 }
 
 export const useEditorStore = create<State>((set, get) => ({
@@ -124,6 +126,7 @@ export const useEditorStore = create<State>((set, get) => ({
   activeOptionsPanel: null,
   fileUploadSelected: false,
   assetCache: {},
+  isLoadingAssets: false,
 
   // Toggle the fileUploadSelected boolea
   setFileUploadSelected: (state: boolean) => {
@@ -138,6 +141,10 @@ export const useEditorStore = create<State>((set, get) => ({
   },
 
   setProjectId: (id: string | null) => {
+    // Clear asset cache when switching projects to avoid stale data
+    if (id !== get().projectId) {
+      get().clearAssetCache();
+    }
     set({ projectId: id });
   },
 
@@ -401,6 +408,11 @@ export const useEditorStore = create<State>((set, get) => ({
     console.log(`Success grabbing item ${assetId} and caching it.`);
   },
 
+  // Set loading state for assets
+  setIsLoadingAssets: (loading: boolean) => {
+    set({ isLoadingAssets: loading });
+  },
+
   // Clear the asset cache
   clearAssetCache: () => {
     set({ assetCache: {} });
@@ -411,45 +423,53 @@ export const useEditorStore = create<State>((set, get) => ({
   loadAssetsForItems: async () => {
     const items = get().items;
     
-    for (const itemId in items) {
-      const item = items[itemId];
-      
-      // Skip if item doesn't have props or no assetId
-      if (!item.props || !item.props.assetId) {
-        continue;
-      }
-      
-      try {
-        const assetId = item.props.assetId;
-        console.log(`Using asset id ${assetId}`);
+    // Set loading state
+    get().setIsLoadingAssets(true);
+    
+    try {
+      for (const itemId in items) {
+        const item = items[itemId];
         
-        // Check cache first
-        let asset = get().getAssetFromCache(assetId);
+        // Skip if item doesn't have props or no assetId
+        if (!item.props || !item.props.assetId) {
+          continue;
+        }
         
-        if (!asset) {
-          // If not in cache, fetch from API
-          asset = await getAssetById(assetId);
+        try {
+          const assetId = item.props.assetId;
+          console.log(`Using asset id ${assetId}`);
+          
+          // Check cache first
+          let asset = get().getAssetFromCache(assetId);
+          
+          if (!asset) {
+            // If not in cache, fetch from API
+            asset = await getAssetById(assetId);
+            
+            if (asset) {
+              // Add to cache
+              get().addAssetToCache(assetId, asset);
+            }
+          } else {
+            console.log(`Asset ${assetId} found in cache`);
+          }
           
           if (asset) {
-            // Add to cache
-            get().addAssetToCache(assetId, asset);
+            get().setItemsWithoutHistory(draft => {
+              if (item.type === 'image') {
+                draft[itemId].props.originalImage = asset;
+              } else {
+                draft[itemId].props.assetUrl = asset;
+              }
+            });
           }
-        } else {
-          console.log(`Asset ${assetId} found in cache`);
+        } catch (error) {
+          console.error(`Failed to load asset for item ${itemId}:`, error);
         }
-        
-        if (asset) {
-          get().setItemsWithoutHistory(draft => {
-            if (item.type === 'image') {
-              draft[itemId].props.originalImage = asset;
-            } else {
-              draft[itemId].props.assetUrl = asset;
-            }
-          });
-        }
-      } catch (error) {
-        console.error(`Failed to load asset for item ${itemId}:`, error);
       }
+    } finally {
+      // Clear loading state
+      get().setIsLoadingAssets(false);
     }
   }
 }))

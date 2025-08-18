@@ -13,6 +13,7 @@ import SidebarLayout from '../layouts/SidebarLayout';
 const CreatorDashboard: React.FC = () => {
   const { username, projectId } = useParams<{ username:string, projectId: string }>();
   const mode = useEditorStore(state => state.mode);
+  const isLoadingAssets = useEditorStore(state => state.isLoadingAssets);
   const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
   const setProjectId = useEditorStore(state => state.setProjectId);
   const setProjectHeader = useEditorStore(state => state.setProjectHeader);
@@ -38,7 +39,9 @@ const CreatorDashboard: React.FC = () => {
         return;
       }
 
-      if (projectId) {
+      // Only load project if it's not already loaded (e.g., direct URL access)
+      const currentProjectId = useEditorStore.getState().projectId;
+      if (projectId && currentProjectId !== projectId) {
         try {
           toast.loading('Loading project...');
           const project = await getProjectById(projectId);
@@ -66,7 +69,7 @@ const CreatorDashboard: React.FC = () => {
           toast.error(`Failed to load project: ${errorMessage}`);
           console.error(error);
         }
-      } else {
+      } else if (!projectId) {
         // If there's no projectId, ensure the store is cleared for a new project
         setItemsWithoutHistory(() => ({}));
         setProjectId(null);
@@ -74,7 +77,7 @@ const CreatorDashboard: React.FC = () => {
     };
 
     loadProject();
-  }, [projectId,  setProjectId, isHomeUser, user.username]);
+  }, [projectId, setProjectId, isHomeUser, user.username]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) =>

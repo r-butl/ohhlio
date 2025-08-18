@@ -28,18 +28,22 @@ import { deleteProject } from '@/services/projectService';
 import { toast } from 'sonner';
 import { UserContext } from "@/context/UserContext";
 import { useContext } from 'react';
+import { useProjectNavigation } from '@/hooks/useProjectNavigation';
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
-  const navigate = useNavigate();
   const location = useLocation();
   const userContext = useContext(UserContext);
+  const navigate = useNavigate();
 
   if (!userContext) {
     throw new Error('NavProjects must be used within a UserProvider');
   }
 
   const { projects, fetchProjects } = userContext;
+  
+  // Use the custom hook for project navigation
+  const { navigateToProject } = useProjectNavigation();
 
   // Get username from user context
   const { user } = userContext;
@@ -54,6 +58,8 @@ export function NavProjects() {
   const isProjectSelected = (projectId: string) => {
     return location.pathname === `/${user.username}/project/${projectId}`;
   };
+
+
 
   const handleDelete = async (projectId: string) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
@@ -78,7 +84,7 @@ export function NavProjects() {
   return (
     <>
       <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-        <SidebarGroupLabel>My Projects</SidebarGroupLabel>
+        <SidebarGroupLabel>My Portfolio</SidebarGroupLabel>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
@@ -86,13 +92,13 @@ export function NavProjects() {
               className={isProfileSelected ? "selected" : ""}
             >
               <House />
-              <span>Profile</span>
+              <span>Home</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           {projects.map((project: any) => (
             <SidebarMenuItem key={project.id}>
               <SidebarMenuButton 
-                onClick={() => navigate(`/${user.username}/project/${project.id}`)}
+                onClick={() => navigateToProject(project.id, user.username)}
                 className={isProjectSelected(project.id) ? "selected" : ""}
               >
                 <StickyNote className="h-4 w-2" />
@@ -110,7 +116,7 @@ export function NavProjects() {
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}
                 >
-                  <DropdownMenuItem onClick={() => navigate(`/${user.username}/project/${project.id}`)}>
+                  <DropdownMenuItem onClick={() => navigateToProject(project.id, user.username)}>
                     <Folder className="text-muted-foreground" />
                     <span>View Project</span>
                   </DropdownMenuItem>
