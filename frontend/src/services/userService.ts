@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { getAPIURL } from '@/utils/APIutils';
+
 
 const getAuthToken = () => {
     return localStorage.getItem('token');
@@ -10,8 +11,9 @@ export const getCurrentUser = async () => {
     if (!token) {
         throw new Error('No authentication token found');
     }
+    const API_URL = getAPIURL("users/profile");
 
-    const response = await fetch(`${API_URL}/users/profile`, {
+    const response = await fetch(`${API_URL}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -33,8 +35,10 @@ export const updateUserProfile = async (profileData: { profileImageId?: string; 
     if (!token) {
         throw new Error('No authentication token found');
     }
+    
+    const API_URL = getAPIURL("users/profile");
 
-    const response = await fetch(`${API_URL}/users/profile`, {
+    const response = await fetch(`${API_URL}`, {
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -61,7 +65,8 @@ export const uploadProfileImage = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_URL}/assets/profile-image`, {
+    const API_URL = getAPIURL("assets/profile-image")
+    const response = await fetch(`${API_URL}`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`,
