@@ -159,8 +159,106 @@ export const deleteAsset = async (req: AuthenticatedRequest, res: Response): Pro
   }
 };
 
+// Upload profile image
+export const uploadProfileImage = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: 'Not authenticated' });
+    return;
+  }
+
+  upload.single('file')(req, res, async (err) => {
+    if (err) {
+      console.error('Upload error:', err);
+      res.status(400).json({ message: err.message });
+      return;
+    }
+
+    if (!req.file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+
+    // Validate that it's an image
+    if (!req.file.mimetype.startsWith('image/')) {
+      res.status(400).json({ message: 'Only image files are allowed for profile pictures' });
+      return;
+    }
+
+    try {
+      // Generate unique S3 key for profile image
+      const key = `users/${userId}/profile/${uuidv4()}-${req.file.originalname}`;
+      
+      // Upload to S3 and get the key
+      const s3Key = await uploadFileToS3(req.file, key);
+      
+      // Generate signed URL for immediate access
+      const signedUrl = await getSignedDownloadUrl(s3Key);
+      
+      // Create the asset
+      const asset = await prisma.asset.create({
+        data: {
+          filename: req.file.originalname,
+          filePath: s3Key,
+          mimeType: req.file.mimetype,
+          fileSize: req.file.size,
+          type: 'image',
+          userId,
+          projectId: null, // Profile images are not associated with projects
+        },
+      });
+
+      // Get the user's current profile image to delete it later
+      const currentUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { profileImageId: true }
+      });
+
+      // Update the user's profile image
+      await prisma.user.update({
+        where: { id: userId },
+        data: { profileImageId: asset.id }
+      });
+
+      // If there was a previous profile image, delete it
+      if (currentUser?.profileImageId) {
+        try {
+          const oldAsset = await prisma.asset.findUnique({
+            where: { id: currentUser.profileImageId }
+          });
+          
+          if (oldAsset) {
+            // Delete from S3
+            await deleteFileFromS3(oldAsset.filePath);
+            // Delete from database
+            await prisma.asset.delete({
+              where: { id: currentUser.profileImageId }
+            });
+          }
+        } catch (error) {
+          console.error('Error deleting old profile image:', error);
+          // Don't fail the request if old image deletion fails
+        }
+      }
+
+      res.status(201).json({
+        id: asset.id,
+        filename: asset.filename,
+        filePath: signedUrl,
+        mimeType: asset.mimeType,
+        fileSize: asset.fileSize,
+        type: asset.type,
+      });
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      res.status(500).json({ message: 'Error uploading profile image' });
+    }
+  });
+};
+
 module.exports = {
   uploadAsset,
+  uploadProfileImage,
   getAssetById,
   deleteAsset,
 }; 

@@ -19,10 +19,13 @@ model User {
   email     String    @unique
   password  String
   username  String    @unique
+  profileImageId String? @unique
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   assets    Asset[]
   projects  Project[]
+  description String?
+  profileImage Asset? @relation("UserProfileImage", fields: [profileImageId], references: [id])
 }
 
 model Project {
@@ -51,4 +54,5 @@ model Asset {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   headerForProject Project? @relation("ProjectHeaderPhoto")
+  profileForUser User? @relation("UserProfileImage")
 }

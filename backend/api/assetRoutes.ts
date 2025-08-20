@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   uploadAsset,
+  uploadProfileImage,
   getAssetById,
   deleteAsset,
 } from '../src/controllers/assetController';
@@ -13,6 +14,9 @@ router.use(protect);
 
 // Upload a new asset
 router.post('/upload', uploadAsset);
+
+// Upload profile image
+router.post('/profile-image', uploadProfileImage);
 
 // Get asset by ID
 router.get('/:id', getAssetById);
