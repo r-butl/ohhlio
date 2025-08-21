@@ -11,8 +11,7 @@ import { useParams } from "react-router-dom";
 import { useProjectNavigation } from "@/hooks/useProjectNavigation";
 import { updateUserProfile, uploadProfileImage } from "@/services/userService";
 import { toast } from "sonner";
-
-import { getAssetById } from "@/services/assetService";
+import { Camera } from "lucide-react";
 
 const ProfileOverview: React.FC = () => {
   const { user } = useAuth();
@@ -21,12 +20,9 @@ const ProfileOverview: React.FC = () => {
   const { navigateToProject } = useProjectNavigation();
 
   // State for editing profile
-  const [isEditingPhoto, setIsEditingPhoto] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [profileDescription, setProfileDescription] = useState(
-    "Welcome to my profile! I'm a creator who loves building amazing projects."
-  );
-  const [tempDescription, setTempDescription] = useState(profileDescription);
+
+  const [tempDescription, setTempDescription] = useState(profileData.description);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -74,7 +70,6 @@ const ProfileOverview: React.FC = () => {
         await fetchProfileData();
         
         toast.success('Profile photo updated successfully!');
-        setIsEditingPhoto(false);
       } catch (error) {
         console.error('Failed to upload profile image:', error);
         toast.error('Failed to upload profile image');
@@ -87,8 +82,10 @@ const ProfileOverview: React.FC = () => {
   // Handle description save
   const handleDescriptionSave = async () => {
     try {
-      await updateUserProfile({ description: tempDescription });
-      setProfileDescription(tempDescription);
+      await updateUserProfile({ 
+        description: tempDescription 
+      });
+      fetchProfileData();
       setIsEditingDescription(false);
       toast.success('Profile description updated successfully!');
     } catch (error) {
@@ -99,17 +96,11 @@ const ProfileOverview: React.FC = () => {
 
   // Handle description cancel
   const handleDescriptionCancel = () => {
-    setTempDescription(profileDescription);
+    setTempDescription(profileData.description);
     setIsEditingDescription(false);
   };
 
-  // Get profile image URL
-  const getProfileImageUrl = () => {
-    if (userProfile?.profileImageId) {
-      return `/api/assets/${userProfile.profileImageId}`;
-    }
-    return "/default-avatar.png";
-  };
+
 
   if (!user) {
     return (
@@ -126,44 +117,31 @@ const ProfileOverview: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center gap-6 mb-4">
             <div className="relative">
-              <Avatar 
-                className="w-20 h-20 cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => setIsEditingPhoto(true)}
-              >
-                <AvatarImage src={profileData.profileImage} alt={user.username} />
-                <AvatarFallback className="text-lg">
-                  {user.username ? user.username.charAt(0).toUpperCase() : "no-name"}
-                </AvatarFallback>
-              </Avatar>
-              
-              {/* Photo upload overlay */}
-              {isEditingPhoto && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                  <div className="text-center">
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                        disabled={uploadingPhoto}
+              <label className="cursor-pointer group">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                  disabled={uploadingPhoto}
+                />
+                <div className="relative w-20 h-20 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors flex items-center justify-center cursor-pointer">
+                  {profileData.profileImage ? (
+                    <>
+                      <img 
+                        src={profileData.profileImage} 
+                        alt={user.username} 
+                        className="w-full h-full rounded-full object-cover"
                       />
-                      <div className="text-white text-xs">
-                        {uploadingPhoto ? 'Uploading...' : 'Click to upload'}
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-full flex items-center justify-center">
+                        <Camera className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
-                    </label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:text-gray-300 mt-1"
-                      onClick={() => setIsEditingPhoto(false)}
-                      disabled={uploadingPhoto}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
+                    </>
+                  ) : (
+                    <Camera className="w-8 h-8 text-gray-500" />
+                  )}
                 </div>
-              )}
+              </label>
             </div>
             
             <h1 className="text-3xl font-bold">
@@ -195,7 +173,7 @@ const ProfileOverview: React.FC = () => {
                 className="text-muted-foreground text-lg cursor-pointer hover:bg-muted/50 p-2 rounded transition-colors"
                 onClick={() => setIsEditingDescription(true)}
               >
-                {profileDescription}
+                {profileData.description}
               </p>
             )}
           </div>

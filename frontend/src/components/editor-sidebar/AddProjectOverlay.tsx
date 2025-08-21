@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useUserContext } from "@/context/UserContext";
 import { createProject } from "@/services/projectService";
 import { toast } from "sonner";
 import {

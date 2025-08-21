@@ -87,14 +87,21 @@ const updateUserProfile = async (req: AuthenticatedRequest, res: Response) => {
             }
         }
 
+        // Build update data object with only provided fields
+        const updateData: any = {};
+        
+        if (profileImageId !== undefined) {
+            updateData.profileImageId = profileImageId;
+        }
+        
+        if (description !== undefined) {
+            updateData.description = description;
+        }
+
         // Update the user profile
         const updatedUser = await prisma.user.update({
             where: { id: userId },
-            data: {
-                profileImageId: profileImageId || null,
-                description: description || null,
-
-            },
+            data: updateData,
             select: {
                 id: true,
                 email: true,

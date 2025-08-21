@@ -34,14 +34,13 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     if (!authUser?.username || !isAuthenticated) return;
     setLoadingProfileData(true);
     try {
-      const profileData = await getCurrentUser();
+      const retrievedProfileData = await getCurrentUser();
+      const imageAsset = await getAssetById(retrievedProfileData.profileImageId);
 
-      const imageAsset = await getAssetById(profileData.profileImageId);
-
-      console.log(profileData);
+      console.log(retrievedProfileData);
       setProfileData({
         profileImage: imageAsset,
-        description: profileData.description
+        description: retrievedProfileData.description
       });
 
     } catch (error) {
