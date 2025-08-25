@@ -3,7 +3,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useUserContext } from "@/context/UserContext";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import { useParams } from "react-router-dom";
-import { useProjectNavigation } from "@/hooks/useProjectNavigation";
 import { updateUserProfile, uploadProfileImage } from "@/services/userService";
 import { toast } from "sonner";
 import EditableDescription from "@/components/ui/editable-description";

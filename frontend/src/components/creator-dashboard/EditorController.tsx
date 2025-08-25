@@ -12,11 +12,11 @@ import RedoButton from "../buttons/Redo";
 import PublishButton from "../buttons/Publish";
 import AddContentButton from "../buttons/AddContentItem";
 
-interface EditorHeaderProps {
+interface EditorControllerProps {
     isHomeUser: boolean;  // This will be used to determine if user is the owner
 }
 
-const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
+const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser }) => {
     const mode = useEditorStore(state => state.mode);
     const sidebarOpen = useSidebar().open;
     const setEditorMode = useEditorStore(state => state.setEditorMode);
@@ -31,7 +31,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
 
 
     return (
-        <div className="editor-header pt-2 pl-2 pr-2 pb-2">
+        <div className="editor-controller pt-2 pl-2 pr-2 pb-2">
             <div className="flex w-full items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     
@@ -53,4 +53,4 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ isHomeUser }) => {
     );
 }
 
-export default EditorHeader;
+export default EditorController;

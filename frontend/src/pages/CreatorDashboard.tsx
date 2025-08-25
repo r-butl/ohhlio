@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Renderer from '@/components/creator-dashboard/grid/EditorGrid';
-import EditorHeader from '@/components/creator-dashboard/EditorController';
+import EditorController from '@/components/creator-dashboard/EditorController';
 import ProjectInfo from '@/components/creator-dashboard/ProjectInfo';
 import { useEditorStore } from '@/context/EditorStore';
 import { getProjectById } from '@/services/projectService';
@@ -89,7 +89,7 @@ const CreatorDashboard: React.FC = () => {
   return (
     <SidebarLayout>
       <div className="project-page">
-        <EditorHeader isHomeUser={isHomeUser} />
+        <EditorController isHomeUser={isHomeUser} />
         <ProjectInfo />
         <Renderer />
       </div>

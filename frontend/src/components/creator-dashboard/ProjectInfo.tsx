@@ -53,7 +53,7 @@ const ProjectInfo: React.FC = () => {
 
   return (
     <>
-      <div className="px-6 py-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/60 group">
+      <div className="px-6 py-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
           {/* Header Image */}
           <div className="mb-4 w-full">

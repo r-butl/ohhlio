@@ -57,9 +57,10 @@ const EditableHeaderImage: React.FC<EditableHeaderImageProps> = ({
   };
 
   return (
-    <div className={`relative w-full ${heightClasses[height]} ${className}`}>
-      <label className={`cursor-pointer group block w-full h-full ${disabled ? 'cursor-not-allowed' : ''}`}>
+    <div className={`relative w-full ${heightClasses[height]} ${className} group`}>
+      <label className={`cursor-pointer group block w-full h-full ${disabled ? 'cursor-not-allowed' : ''}`} htmlFor="file-upload">
         <input
+          id="file-upload"
           type="file"
           accept="image/*"
           onChange={handleImageUpload}
