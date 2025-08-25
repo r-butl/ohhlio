@@ -10,7 +10,7 @@ export const useProjectNavigation = () => {
   const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
   const setProjectId = useEditorStore(state => state.setProjectId);
   const setProjectHeader = useEditorStore(state => state.setProjectHeader);
-  const loadAssetsForItems = useEditorStore(state => state.loadAssetsForItems);
+  const loadProjectAssets = useEditorStore(state => state.loadProjectAssets);
 
   const navigateToProject = async (projectId: string, username: string) => {
     try {
@@ -29,7 +29,7 @@ export const useProjectNavigation = () => {
         });
         
         // Load assets before navigating
-        await loadAssetsForItems();
+        await loadProjectAssets();
       }
       
       toast.dismiss();

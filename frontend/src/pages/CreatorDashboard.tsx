@@ -17,7 +17,7 @@ const CreatorDashboard: React.FC = () => {
   const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
   const setProjectId = useEditorStore(state => state.setProjectId);
   const setProjectHeader = useEditorStore(state => state.setProjectHeader);
-  const loadAssetsForItems = useEditorStore(state => state.loadAssetsForItems);
+  const loadProjectAssets = useEditorStore(state => state.loadProjectAssets);
   
   // Check if current user is the owner of this page
   const { user } = useUserContext();
@@ -58,7 +58,7 @@ const CreatorDashboard: React.FC = () => {
             });
             
             // Load assets for all items after items are set
-            await loadAssetsForItems();
+            await loadProjectAssets();
           } else {
             console.log('Project or items do not exist, loading..')
           }

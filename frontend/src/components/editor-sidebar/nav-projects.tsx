@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 import { UserContext } from "@/context/UserContext";
 import { useContext } from 'react';
 import { useProjectNavigation } from '@/hooks/useProjectNavigation';
+import { useEditorStore } from '@/context/EditorStore';
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
@@ -40,7 +41,7 @@ export function NavProjects() {
     throw new Error('NavProjects must be used within a UserProvider');
   }
 
-  const { projects, fetchProjects } = userContext;
+  const { projects, fetchProjects } = useEditorStore();
   
   // Use the custom hook for project navigation
   const { navigateToProject } = useProjectNavigation();

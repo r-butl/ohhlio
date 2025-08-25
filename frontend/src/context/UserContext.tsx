@@ -10,12 +10,7 @@ type UserContextType = {
   user: { email: string; username: string; };
   profileData: { profileImage: string; description: string; };
   setUser: React.Dispatch<React.SetStateAction<{ email: string; username: string;}>>;
-  projects: any[];
-  setProjects: React.Dispatch<React.SetStateAction<any[]>>;
-  loadingProjects: boolean;
   loadingProfileData: boolean;
-  projectsError: any;
-  fetchProjects: () => Promise<void>;
   fetchProfileData: () => Promise<void>;
 };
 
@@ -25,10 +20,7 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
   const { user: authUser, isAuthenticated } = useAuth();
   const [user, setUser] = useState({ email: "", username: ""});
   const [profileData, setProfileData] = useState( {  profileImage: "", description: "" })
-  const [projects, setProjects] = useState<any[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState(false);
   const [loadingProfileData, setLoadingProfileData] = useState(false);
-  const [projectsError, setProjectsError] = useState<any>(null);
 
   const fetchProfileData = async () => {
     if (!authUser?.username || !isAuthenticated) return;
@@ -50,21 +42,7 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     }
   };
 
-  const fetchProjects = async () => {
-    // Use authUser directly to avoid race conditions
-    if (!authUser?.username || !isAuthenticated) return;
-    setLoadingProjects(true);
-    setProjectsError(null);
-    try {
-      const projectData = await getProjects();
-      setProjects(projectData);
-    } catch (error) {
-      setProjectsError(error);
-      console.error('Failed to fetch projects:', error);
-    } finally {
-      setLoadingProjects(false);
-    }
-  };
+
 
   // Sync user data when auth state changes
   useEffect(() => {
@@ -76,15 +54,10 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     } else {
       // Clear user data when logged out
       setUser({ email: "", username: "" });
-      setProjects([]);
-      setProjectsError(null);
     }
   }, [authUser, isAuthenticated]);
 
-  // Fetch projects when auth state changes
-  useEffect(() => {
-    fetchProjects();
-  }, [authUser, isAuthenticated]);
+
 
   return (
     <UserContext.Provider
@@ -92,12 +65,7 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         user,
         profileData,
         setUser,
-        projects,
-        setProjects,
-        loadingProjects,
         loadingProfileData,
-        projectsError,
-        fetchProjects,
         fetchProfileData
       }}
     >

@@ -19,11 +19,11 @@ export type TextItemProps = {
 }
 
 export type ImageItemProps = {
-  assetId: string | null;  // Reference to uploaded asset
-  originalImage: string | null;  // Keep for preview/fallback
+  assetId: string | null; 
+  originalImage: string | null; 
   zoom: number;
   aspectRatio: number;
-  isUploading?: boolean;  // Track upload state
+  isUploading?: boolean; 
 }
 
 // Layout configuration for 1 item
@@ -54,11 +54,15 @@ type ProjectHeader = {
   headerPhotoId?: string | null;
 }
 
+type currentProject = {
+  projectHeader: ProjectHeader
+  items: Record<string, Item>
+}
+
 // State information for the Editor page
 type State = {
 
-  projectHeader: ProjectHeader    // Project header
-  items: Record<string, Item>     // Items in the layout
+  currentProject: currentProject
 
   mode: 'edit' | 'display'        // Mode of the editor
   activeEditor: string | null     // ID of the current item being edited
@@ -104,31 +108,56 @@ type State = {
   updateLayout: (layout: any[]) => void
   
   // Asset loading
-  loadAssetsForItems: () => Promise<void>
-  getAssetFromCache: (assetId: string) => any | null
   addAssetToCache: (assetId: string, asset: any) => void
   clearAssetCache: () => void
+  getAssetFromCacheOrBackend: (assetId: string) => Promise<any>
+  loadProjectAssets: () => Promise<void>
   setIsLoadingAssets: (loading: boolean) => void
+
+  // Project management
+  updateProjectDescription: (description: string) => Promise<void>
+  updateProjectHeaderImage: (file: File) => Promise<void>
+  
+  // Project list management
+  projects: any[]
+  loadingProjects: boolean
+  projectsError: any
+  fetchProjects: () => Promise<void>
+  refreshProjects: () => Promise<void>
 }
 
 export const useEditorStore = create<State>((set, get) => ({
-  projectHeader: {},
-  items: {},
-  mode: 'display',
-  history: { past: [], future: [] },
-  activeEditor: null,
-  projectId: null,
+  
+  // Grid layout parameters
   editorMaxWidth: 800,
   gridRowHeight: 1,
   gridColumnCount: 4,
 
+  // UI State
+  activeEditor: null,
+  mode: 'display',
   buttonHovered: false,
   activeOptionsPanel: null,
   fileUploadSelected: false,
-  assetCache: {},
   isLoadingAssets: false,
 
-  // Toggle the fileUploadSelected boolea
+  // Items management
+  assetCache: {},
+  history: { past: [], future: [] },
+
+  // Project list state  
+  projectId: null,                // Current loaded project
+  currentProject: {               // Current loaded project
+    projectHeader: {},
+    items: {}
+  }, 
+  projects: [],                   // All projects
+  loadingProjects: false,
+  projectsError: null,
+
+  ///////////////// INTERACTION STATE /////////////////
+  
+  // Toggle the fileUploadSelected booleam
   setFileUploadSelected: (state: boolean) => {
     set(({ fileUploadSelected: state}));
     const fileUploadState = get();
@@ -141,15 +170,11 @@ export const useEditorStore = create<State>((set, get) => ({
   },
 
   setProjectId: (id: string | null) => {
-    // Clear asset cache when switching projects to avoid stale data
-    if (id !== get().projectId) {
-      get().clearAssetCache();
-    }
+    // // Clear asset cache when switching projects to avoid stale data
+    // if (id !== get().projectId) {
+    //   get().clearAssetCache();
+    // }
     set({ projectId: id });
-  },
-
-  setProjectHeader: (header: ProjectHeader) => {
-    set({ projectHeader: header });
   },
 
   // Toggle the option panel opened 
@@ -166,7 +191,8 @@ export const useEditorStore = create<State>((set, get) => ({
   setActiveEditor: (id: string | null ) => {
     console.log(`Setting active editor to: ${id}.`)
 
-    const { items, setItemsWithoutHistory } = get();
+    const { currentProject, setItemsWithoutHistory } = get();
+    const items = currentProject.items;
     if (id && items[id]) {
       setItemsWithoutHistory(draft => {
         if (draft[id]) {
@@ -177,9 +203,17 @@ export const useEditorStore = create<State>((set, get) => ({
     set({ activeEditor: id });
   },
 
+  // Set loading state for assets
+  setIsLoadingAssets: (loading: boolean) => {
+    set({ isLoadingAssets: loading });
+  },
+
+  ///////////////// HISTORY /////////////////
+
   // Actions that should be tracked in history (undo/redo)
   setItemsWithHistory: (fn) => {
-    const { items, history } = get()
+    const { currentProject, history } = get()
+    const items = currentProject.items;
     let patches: Patch[] = []
     let inversePatches: Patch[] = []
     const nextItems = produce(
@@ -193,66 +227,85 @@ export const useEditorStore = create<State>((set, get) => ({
 
     if (patches.length > 0) {
       console.log("Setting items. (history)", nextItems);
-      set({
-        items: nextItems,
+      set(state => ({
+        currentProject: {
+          ...state.currentProject,
+          items: nextItems
+        },
         history: {
           past: [...history.past, { patches, inversePatches }],
           future: []
         }
-      })
+      }))
     }
     console.log(`Past: ${history.past.length} Future: ${history.future.length}`)
   },
 
   // Actions that should NOT be tracked in history
   setItemsWithoutHistory: (fn) => {
-    const { items } = get()
+    const { currentProject } = get()
+    const items = currentProject.items;
     const nextItems = produce(items, (draft) => fn(draft))
     console.log("Setting items. (no history)", nextItems);
-    set({ items: nextItems })
+    set(state => ({
+      currentProject: {
+        ...state.currentProject,
+        items: nextItems 
+      }}
+  ))
   },
 
   // Undoes changes made to the grid items
   undo: () => {
-    const { history, items } = get()
+    const { history, currentProject } = get()
+    const items = currentProject.items;
     console.log(`Past: ${history.past.length} Future: ${history.future.length}`)
     if (history.past.length === 0) return
 
     const lastAction = history.past[history.past.length - 1]
     const newPast = history.past.slice(0, -1)
     
-    set({
-      items: applyPatches(items, lastAction.inversePatches),
+    set(state => ({
+      currentProject: {
+        ...state.currentProject,
+        items: applyPatches(items, lastAction.inversePatches),
+      },
       history: {
         past: newPast,
         future: [lastAction, ...history.future]
       }
-    })
+    }))
   },
 
   // Redoes changes made to the grid items
   redo: () => {
-    const { history, items } = get()
-
+    const { history, currentProject } = get()
+    const items = currentProject.items;
     console.log(`Past: ${history.past.length} Future: ${history.future.length}`)
 
     if (history.future.length === 0) return
 
     const actionToRedo = history.future[0]
     const newFuture = history.future.slice(1)
-    set({
-      items: applyPatches(items, actionToRedo.patches),
+    set(state => ({
+      currentProject: {
+        ...state.currentProject,
+        items: applyPatches(items, actionToRedo.patches),
+      },
       history: {
         past: [...history.past, actionToRedo],
         future: newFuture
       }
-    })
+    }))
   },
+
+  ///////////////// EDITING ITEMS /////////////////
 
   addTextBox: () => {
     console.log(`Adding text box`);
-    const { items } = get()
+    const { currentProject } = get()
     const id = String(Date.now())
+    const items = currentProject.items;
     
     const maxY = Object.values(items).reduce(
       (max, item) => Math.max(max, item.layout.y + item.layout.h), 
@@ -300,7 +353,8 @@ export const useEditorStore = create<State>((set, get) => ({
   addImage: (image) => {
     console.log(`Adding image item.`);
 
-    const { items, gridColumnCount } = get()
+    const { currentProject, gridColumnCount } = get()
+    const items = currentProject.items;
     const id = String(Date.now())
     
     // Find the next available position in a grid pattern
@@ -389,13 +443,107 @@ export const useEditorStore = create<State>((set, get) => ({
           draft[layoutItem.i].layout = layoutItem
         }
       })
-    }),
+  }),
 
-  // Get asset from cache
-  getAssetFromCache: (assetId: string) => {
-    const { assetCache } = get();
-    return assetCache[assetId] || null;
+
+  setProjectHeader: (header: ProjectHeader) => {
+    set( state => ({
+      currentProject: {
+        ...state.currentProject,
+        projectHeader: header 
+      }}));
   },
+
+  // Update project description
+  updateProjectDescription: async (description: string) => {
+    const { projectId, currentProject, setProjectHeader } = get();
+    
+    if (!projectId) {
+      throw new Error('No project selected');
+    }
+
+    try {
+      const { updateProject } = await import('../services/projectService');
+      await updateProject(projectId, {
+        description: description.trim() || undefined,
+      });
+
+      // Update local store
+      setProjectHeader({
+        ...currentProject.projectHeader,
+        description: description.trim() || undefined,
+      });
+
+      const { toast } = await import('sonner');
+      toast.success('Project description updated successfully!');
+      
+      // Refresh project list to sync with UserContext
+      await get().refreshProjects();
+    } catch (error) {
+      console.error('Failed to update project description:', error);
+      const { toast } = await import('sonner');
+      toast.error('Failed to update project description');
+      throw error;
+    }
+  },
+
+  // Update project header image
+  updateProjectHeaderImage: async (file: File) => {
+    const { projectId, currentProject, setProjectHeader } = get();
+    
+    if (!projectId) {
+      throw new Error('No project selected');
+    }
+
+    try {
+      const { toast } = await import('sonner');
+      toast.success('Uploading header image...');
+
+      // Store the old header photo ID for cleanup
+      const oldHeaderPhotoId = currentProject.projectHeader.headerPhotoId;
+
+      // Import services
+      const { uploadAsset, deleteAsset } = await import('../services/assetService');
+      const { updateProject } = await import('../services/projectService');
+
+      // Upload the header image
+      const uploadedAsset = await uploadAsset(file, projectId);
+
+      // Update project with new header photo ID
+      await updateProject(projectId, {
+        headerPhotoId: uploadedAsset.id,
+      });
+
+      // Update local store
+      setProjectHeader({
+        ...currentProject.projectHeader,
+        headerPhotoId: uploadedAsset.id,
+      });
+
+      // Clean up the old header photo if it exists
+      if (oldHeaderPhotoId) {
+        try {
+          await deleteAsset(oldHeaderPhotoId);
+          console.log(`Deleted old header photo: ${oldHeaderPhotoId}`);
+        } catch (cleanupError) {
+          console.error('Failed to delete old header photo:', cleanupError);
+          // Don't fail the upload if cleanup fails
+        }
+      }
+
+      toast.success('Header image updated successfully!');
+      
+      // Refresh project list to sync with UserContext
+      await get().refreshProjects();
+    } catch (error) {
+      console.error('Failed to upload header image:', error);
+      const { toast } = await import('sonner');
+      toast.error('Failed to upload header image');
+      throw error;
+    }
+  },
+
+  ///////////////// LOADING ITEMS /////////////////
 
   // Add asset to cache
   addAssetToCache: (assetId: string, asset: any) => {
@@ -408,25 +556,51 @@ export const useEditorStore = create<State>((set, get) => ({
     console.log(`Success grabbing item ${assetId} and caching it.`);
   },
 
-  // Set loading state for assets
-  setIsLoadingAssets: (loading: boolean) => {
-    set({ isLoadingAssets: loading });
-  },
-
   // Clear the asset cache
   clearAssetCache: () => {
     set({ assetCache: {} });
     console.log('Asset cache cleared');
   },
 
+  getAssetFromCacheOrBackend: async (assetId) => {
+
+    if (assetId) {
+      const { assetCache } = get()
+      let asset = assetCache[assetId] || null;
+               
+      // Load the asset
+      if (!asset) {
+
+        // If not in cache, fetch from API
+        asset = await getAssetById(assetId);
+        
+        if (asset) {
+          // Add to cache
+          get().addAssetToCache(assetId, asset);
+        }
+      } else {
+        console.log(`Asset ${assetId} found in cache`);
+      }
+
+      return asset
+
+    }
+    console.log("Could not find asset anywhere.")
+
+    return "";
+  },
+
   // Loads the assets using their id that is found in the project map
-  loadAssetsForItems: async () => {
-    const items = get().items;
+  loadProjectAssets: async () => {
+    const { currentProject } = get();
+    const items = currentProject.items;
     
     // Set loading state
     get().setIsLoadingAssets(true);
     
     try {
+
+      // Load in project Items
       for (const itemId in items) {
         const item = items[itemId];
         
@@ -439,20 +613,7 @@ export const useEditorStore = create<State>((set, get) => ({
           const assetId = item.props.assetId;
           console.log(`Using asset id ${assetId}`);
           
-          // Check cache first
-          let asset = get().getAssetFromCache(assetId);
-          
-          if (!asset) {
-            // If not in cache, fetch from API
-            asset = await getAssetById(assetId);
-            
-            if (asset) {
-              // Add to cache
-              get().addAssetToCache(assetId, asset);
-            }
-          } else {
-            console.log(`Asset ${assetId} found in cache`);
-          }
+          let asset = await get().getAssetFromCacheOrBackend(assetId);
           
           if (asset) {
             get().setItemsWithoutHistory(draft => {
@@ -467,9 +628,29 @@ export const useEditorStore = create<State>((set, get) => ({
           console.error(`Failed to load asset for item ${itemId}:`, error);
         }
       }
+
     } finally {
       // Clear loading state
       get().setIsLoadingAssets(false);
     }
+  },
+
+  // Fetch all projects for the user
+  fetchProjects: async () => {
+    try {
+      set({ loadingProjects: true, projectsError: null });
+      const { getProjects } = await import('../services/projectService');
+      const projectData = await getProjects();
+      set({ projects: projectData, loadingProjects: false });
+    } catch (error) {
+      console.error('Failed to fetch projects:', error);
+      set({ projectsError: error, loadingProjects: false });
+    }
+  },
+
+  // Refresh projects (useful after updates)
+  refreshProjects: async () => {
+    const { fetchProjects } = get();
+    await fetchProjects();
   }
 }))

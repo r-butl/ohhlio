@@ -18,7 +18,8 @@ const EditorGrid: React.FC<RendererProps> = () => {
   const buttonHovered = useEditorStore(state => state.buttonHovered);
   const mode = useEditorStore(state => state.mode);
   const activeEditor = useEditorStore(state => state.activeEditor);
-  const items = useEditorStore(state => state.items);
+  const items = useEditorStore(state => state.currentProject.items);
+
   const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   
   const isDraggable = mode === 'edit' && (activeEditor === null) && !buttonHovered;

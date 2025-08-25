@@ -18,7 +18,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   
   // Get item data from store
-  const item = useEditorStore(state => state.items[id]);
+  const item = useEditorStore(state => state.currentProject.items[id]);
   
   // Memoize the aspect ratio calculation to prevent infinite re-renders
   const currentAspectRatio = useMemo(() => {
