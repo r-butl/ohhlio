@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useEditorStore } from '@/context/EditorStore';
 
 interface AddProjectOverlayProps {
   isOpen: boolean;
@@ -25,7 +26,8 @@ const AddProjectOverlay: React.FC<AddProjectOverlayProps> = ({ isOpen, onClose }
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user, fetchProjects } = useUserContext();
+  const { user } = useUserContext();
+  const { fetchProjects } = useEditorStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {

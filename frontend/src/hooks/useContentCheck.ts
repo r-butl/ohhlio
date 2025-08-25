@@ -4,7 +4,7 @@ import { useEditorStore } from '../context/EditorStore';
 export const useContentCheck = ( id: string) => {
     // Checks if the current item contains any content
 
-    const item = useEditorStore(state => state.items[id]);
+    const item = useEditorStore(state => state.currentProject.items[id]);
 
     return useMemo(() => {
     

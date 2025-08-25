@@ -123,7 +123,6 @@ type State = {
   loadingProjects: boolean
   projectsError: any
   fetchProjects: () => Promise<void>
-  refreshProjects: () => Promise<void>
 }
 
 export const useEditorStore = create<State>((set, get) => ({
@@ -478,7 +477,7 @@ export const useEditorStore = create<State>((set, get) => ({
       toast.success('Project description updated successfully!');
       
       // Refresh project list to sync with UserContext
-      await get().refreshProjects();
+      await get().fetchProjects();
     } catch (error) {
       console.error('Failed to update project description:', error);
       const { toast } = await import('sonner');
@@ -534,7 +533,7 @@ export const useEditorStore = create<State>((set, get) => ({
       toast.success('Header image updated successfully!');
       
       // Refresh project list to sync with UserContext
-      await get().refreshProjects();
+      await get().fetchProjects();
     } catch (error) {
       console.error('Failed to upload header image:', error);
       const { toast } = await import('sonner');
@@ -648,9 +647,4 @@ export const useEditorStore = create<State>((set, get) => ({
     }
   },
 
-  // Refresh projects (useful after updates)
-  refreshProjects: async () => {
-    const { fetchProjects } = get();
-    await fetchProjects();
-  }
 }))

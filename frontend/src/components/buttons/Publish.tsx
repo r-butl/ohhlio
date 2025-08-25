@@ -5,7 +5,6 @@ import { createProject, updateProject, getProjects } from '@/services/projectSer
 import { toast } from 'sonner';
 import { UserContext } from '@/context/UserContext';
 import { useNavigate } from 'react-router-dom';
-
 const PublishButton: React.FC = () => {
 
     const userContext = useContext(UserContext);
@@ -13,14 +12,15 @@ const PublishButton: React.FC = () => {
     if (!userContext) {
         throw new Error('PublishButton must be used within a UserProvider');
     }
-    const { fetchProjects, user } = userContext;
+    const { user } = userContext;
+    const { fetchProjects } = useEditorStore();
     const setProjectId = useEditorStore(state => (state.setProjectId));
 
 
     const handlePublish = async () => {
 
         const projectId = useEditorStore.getState().projectId;
-        const items = useEditorStore.getState().items;
+        const items = useEditorStore.getState().currentProject.items;
 
         // Filter out empty items
         const filteredItems = Object.fromEntries(

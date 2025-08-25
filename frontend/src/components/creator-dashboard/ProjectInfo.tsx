@@ -14,10 +14,6 @@ const ProjectInfo: React.FC = () => {
 
   const [ headerPhotoURL, setHeaderPhotoURL ] = useState('');
 
-  if (!projectId) {
-    return null; // Don't show anything if no project is selected
-  }
-
   useEffect(() => {
     const loadAsset = async () => {
       if (projectHeader.headerPhotoId) {
@@ -37,6 +33,10 @@ const ProjectInfo: React.FC = () => {
   const handleHeaderImageUpload = async (file: File) => {
     await updateProjectHeaderImage(file);
   };
+
+  if (!projectId) {
+    return null; // Don't show anything if no project is selected
+  }
 
   if (!projectHeader.title) {
     return (

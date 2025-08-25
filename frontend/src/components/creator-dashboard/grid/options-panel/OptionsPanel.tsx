@@ -7,7 +7,7 @@ import { useContentCheck } from '@/hooks/useContentCheck';
 //import './OptionsPanel.css';
 
 const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivElement> }> = ({ id, parentRef }) => {
-  const item = useEditorStore(state => state.items[id]);
+  const item = useEditorStore(state => state.currentProject.items[id]);
   const hasContent = useContentCheck(id);
   const [activePageIndex, setActivePageIndex] = React.useState<number | null>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });

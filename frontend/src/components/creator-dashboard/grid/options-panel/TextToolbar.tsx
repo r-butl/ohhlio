@@ -7,7 +7,7 @@ import CancelButton from '@/components/buttons/Cancel';
 import emitter from '@/global-state/EventBus';
 
 const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
-  const item = useEditorStore(state => state.items[id]);
+  const item = useEditorStore(state => state.currentProject.items[id]);
   const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
 
   if (!item) return null;

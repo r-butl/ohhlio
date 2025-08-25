@@ -6,19 +6,11 @@ import AddProjectOverlay from '@/components/creator-dashboard/AddProjectOverlay'
 import React, { useState } from 'react';
 
 function AddProjectButton() {
-  const { user } = useUserContext();
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
-
 
   const handleClick = () => {
     setIsAddProjectOpen(true);
 
-    //        <a href={`/${user.username}/project`}>
-
-  }
-
-  const handleConfirm = () => {
-    
   }
 
   return (

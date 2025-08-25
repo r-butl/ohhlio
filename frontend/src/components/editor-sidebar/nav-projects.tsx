@@ -27,7 +27,7 @@ import {
 import { deleteProject } from '@/services/projectService';
 import { toast } from 'sonner';
 import { UserContext } from "@/context/UserContext";
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { useProjectNavigation } from '@/hooks/useProjectNavigation';
 import { useEditorStore } from '@/context/EditorStore';
 
@@ -42,6 +42,12 @@ export function NavProjects() {
   }
 
   const { projects, fetchProjects } = useEditorStore();
+
+  useEffect(() => {
+    fetchProjects();
+
+  }, []);
+
   
   // Use the custom hook for project navigation
   const { navigateToProject } = useProjectNavigation();
