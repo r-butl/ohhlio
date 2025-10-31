@@ -32,7 +32,9 @@ const GridItem: React.FC<GridItemProps> = ({
   const activeEditor = useEditorStore(state => state.activeEditor);
   const isEditing = activeEditor === id;
 
-  const mode = useEditorStore(state => state.mode);
+  const viewState = useEditorStore(state => state.viewState);
+  const isOwnerEdit = viewState === 'OwnerEdit';
+  const loadingAssets = useEditorStore(state => state.isLoadingAssets || state.loadingAssets);
 
   // Gets the dimensions of the grid item on change
   useEffect(() => {
@@ -52,7 +54,7 @@ const GridItem: React.FC<GridItemProps> = ({
         ref={containerRef}
         className={cn(
           "grid-item transition-shadow duration-300 ",
-          {"shadow-[0px_0px_20px_-10px_rgba(0,0,0,0.3)]": mode === 'edit'}
+          {"shadow-[0px_0px_20px_-10px_rgba(0,0,0,0.3)]": isOwnerEdit && !loadingAssets}
         )}
         data-item-id={id}
         onMouseEnter={() => setIsHovered(true)}
@@ -64,7 +66,7 @@ const GridItem: React.FC<GridItemProps> = ({
             gridHeight: dimensions.height
           })}    
         </div>
-        {isHovered && (mode === 'edit') && !isEditing && !(activeOptionsPanel === id) && (
+        {isHovered && isOwnerEdit && !loadingAssets && !isEditing && !(activeOptionsPanel === id) && (
 
           <button 
             className="options-toggle-btn"

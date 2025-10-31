@@ -3,13 +3,17 @@ import {
   uploadAsset,
   uploadProfileImage,
   getAssetById,
+  getPublicAssetById,
   deleteAsset,
 } from '../src/controllers/assetController';
 import { protect } from '../src/middleware/authMiddleware';
 
 const router = Router();
 
-// All asset routes require authentication
+// Public asset read
+router.get('/public/:id', getPublicAssetById);
+
+// All remaining asset routes require authentication
 router.use(protect);
 
 // Upload a new asset

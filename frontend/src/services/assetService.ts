@@ -145,6 +145,22 @@ export const getAssetById = async (id: string) => {
     return assetData.filePath; // Return the signed URL
 };
 
+// Get public asset by ID (no auth)
+export const getPublicAssetById = async (id: string) => {
+    const { getAPIURL } = await import('@/utils/APIutils');
+    const API_URL = getAPIURL('assets');
+    const response = await fetch(`${API_URL}/public/${id}`, {
+        method: 'GET'
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to fetch public asset');
+    }
+    const assetData = await response.json();
+    // Return the signed URL or path
+    return assetData.filePath;
+};
+
 // Delete asset
 export const deleteAsset = async (id: string): Promise<void> => {
     const token = getAuthToken();

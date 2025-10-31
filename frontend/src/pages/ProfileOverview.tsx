@@ -17,6 +17,7 @@ const ProfileOverview: React.FC = () => {
   const loadingProjects = useEditorStore(state => state.loadingProjects);
   const fetchProjects = useEditorStore(state => state.fetchProjects);
   const { username } = useParams();
+  const isOwner = user?.username === username;
 
   // Load user profile and projects on component mount
   useEffect(() => {
@@ -102,6 +103,7 @@ const ProfileOverview: React.FC = () => {
               alt={user.username}
               size="lg"
               onImageUpload={handlePhotoUpload}
+              disabled={!isOwner}
             />
             
             <h1 className="text-3xl font-bold">
@@ -115,6 +117,7 @@ const ProfileOverview: React.FC = () => {
               description={profileData.description || ""}
               onSave={handleDescriptionSave}
               placeholder="Enter your profile description..."
+              disabled={!isOwner}
             />
           </div>
         </div>

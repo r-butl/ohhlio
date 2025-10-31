@@ -3,27 +3,16 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Play, Square } from "lucide-react";
 
-import {
-    useSidebar
-  } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface PreviewButtonProps {
     isHomeUser: boolean;
 }
 
 const PreviewButton: React.FC<PreviewButtonProps> = ({ isHomeUser }) => {
-    const mode = useEditorStore(state => state.mode);
-    const sidebarOpen = useSidebar().open;
-    const toggleSidebar = useSidebar().toggleSidebar;
-    const setEditorMode = useEditorStore(state => state.setEditorMode);
-
-    React.useEffect(() => {
-        if (sidebarOpen) {
-            setEditorMode('edit');
-        } else {
-            setEditorMode('display');
-        }
-    }, [sidebarOpen, setEditorMode]);
+    const viewState = useEditorStore(state => state.viewState);
+    const togglePreview = useEditorStore(state => state.togglePreview);
+    const { open: sidebarOpen, toggleSidebar } = useSidebar();
 
     return (
         <Button
@@ -33,11 +22,14 @@ const PreviewButton: React.FC<PreviewButtonProps> = ({ isHomeUser }) => {
             size="icon"
             className="size-7"
             onClick={(event) => {
-            toggleSidebar()
+            event.preventDefault();
+            if (!isHomeUser) return;
+            togglePreview();
+            // keep sidebar open state unchanged; preview toggles view state
             }}
         >
-            {mode === "display" ? <Square /> : <Play /> }
-            <span className="sr-only">Toggle Sidebar</span>
+            {viewState === 'OwnerEdit' ?  <Play />  : <Square />}
+            <span className="sr-only">Toggle preview</span>
         </Button>
         )
 

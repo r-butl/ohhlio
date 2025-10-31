@@ -60,11 +60,14 @@ type currentProject = {
 }
 
 // State information for the Editor page
+type ViewState = 'PublicView' | 'OwnerEdit' | 'OwnerPreview'
+
 type State = {
 
   currentProject: currentProject
 
-  mode: 'edit' | 'display'        // Mode of the editor
+  viewState: ViewState            // Source of truth for view mode
+  isOwner: boolean                // Derived from route/auth; set via event
   activeEditor: string | null     // ID of the current item being edited
   activeOptionsPanel: string | null // ID of the current option panel that is open
   projectId: string | null;       // The ID of the current project being edited
@@ -82,13 +85,21 @@ type State = {
   // Asset cache
   assetCache: Record<string, any> // Cache for loaded assets
   isLoadingAssets: boolean // Loading state for assets
+  loadingProject: boolean
+  projectError: string | null
+  loadingAssets: boolean
+  assetErrorsById: Record<string, string>
 
   // History interaction
   undo: () => void
   redo: () => void
 
   // Editor interaction
-  setEditorMode: (mode: 'edit' | 'display') => void
+  // State machine events
+  viewerChanged: (isOwner: boolean) => void
+  togglePreview: () => void
+  enterEdit: () => void
+  exitEdit: () => void
   setActiveEditor: (id: string | null) => void
   setActiveOptionsPanel: (id: string | null) => void;
   setFileUploadSelected: (state: boolean) => void;
@@ -113,6 +124,10 @@ type State = {
   getAssetFromCacheOrBackend: (assetId: string) => Promise<any>
   loadProjectAssets: () => Promise<void>
   setIsLoadingAssets: (loading: boolean) => void
+  setLoadingProject: (loading: boolean) => void
+  setProjectError: (message: string | null) => void
+  setLoadingAssets: (loading: boolean) => void
+  setAssetError: (assetId: string, message: string) => void
 
   // Project management
   updateProjectDescription: (description: string) => Promise<void>
@@ -134,11 +149,16 @@ export const useEditorStore = create<State>((set, get) => ({
 
   // UI State
   activeEditor: null,
-  mode: 'display',
+  viewState: 'PublicView',
+  isOwner: false,
   buttonHovered: false,
   activeOptionsPanel: null,
   fileUploadSelected: false,
   isLoadingAssets: false,
+  loadingProject: false,
+  projectError: null,
+  loadingAssets: false,
+  assetErrorsById: {},
 
   // Items management
   assetCache: {},
@@ -181,9 +201,28 @@ export const useEditorStore = create<State>((set, get) => ({
     set(({ activeOptionsPanel: id }))
   },
 
-  // Toggles the state of the editor
-  setEditorMode: (mode: 'edit' | 'display') => {
-    set({ mode });
+  ///////////////// VIEW STATE MACHINE /////////////////
+  viewerChanged: (isOwner: boolean) => {
+    const current = get();
+    const nextView: ViewState = isOwner
+      ? (current.viewState === 'OwnerEdit' ? 'OwnerEdit' : 'OwnerPreview')
+      : 'PublicView';
+    set({ isOwner, viewState: nextView });
+  },
+  togglePreview: () => {
+    const { isOwner, viewState } = get();
+    if (!isOwner) return; // no-op for non-owners
+    const next: ViewState = viewState === 'OwnerEdit' ? 'OwnerPreview' : 'OwnerEdit';
+    set({ viewState: next });
+  },
+  enterEdit: () => {
+    const { isOwner } = get();
+    if (!isOwner) return;
+    set({ viewState: 'OwnerEdit' });
+  },
+  exitEdit: () => {
+    const { isOwner } = get();
+    set({ viewState: isOwner ? 'OwnerPreview' : 'PublicView' });
   },
 
   // Sets which grid item is actively editing
@@ -205,6 +244,18 @@ export const useEditorStore = create<State>((set, get) => ({
   // Set loading state for assets
   setIsLoadingAssets: (loading: boolean) => {
     set({ isLoadingAssets: loading });
+  },
+  setLoadingProject: (loading: boolean) => {
+    set({ loadingProject: loading });
+  },
+  setProjectError: (message: string | null) => {
+    set({ projectError: message });
+  },
+  setLoadingAssets: (loading: boolean) => {
+    set({ loadingAssets: loading });
+  },
+  setAssetError: (assetId: string, message: string) => {
+    set(state => ({ assetErrorsById: { ...state.assetErrorsById, [assetId]: message } }));
   },
 
   ///////////////// HISTORY /////////////////

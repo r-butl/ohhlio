@@ -10,6 +10,7 @@ interface EditableDescriptionProps {
   textClassName?: string;
   textareaClassName?: string;
   buttonSize?: 'sm' | 'default' | 'lg';
+  disabled?: boolean;
 }
 
 const EditableDescription: React.FC<EditableDescriptionProps> = ({
@@ -19,7 +20,8 @@ const EditableDescription: React.FC<EditableDescriptionProps> = ({
   className = "",
   textClassName = "text-muted-foreground text-lg cursor-pointer hover:bg-muted/50 p-2 rounded transition-colors",
   textareaClassName = "min-h-[80px] resize-none",
-  buttonSize = "sm"
+  buttonSize = "sm",
+  disabled = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempDescription, setTempDescription] = useState(description);
@@ -43,6 +45,7 @@ const EditableDescription: React.FC<EditableDescriptionProps> = ({
   };
 
   const handleStartEditing = () => {
+    if (disabled) return;
     setTempDescription(description);
     setIsEditing(true);
   };
@@ -76,12 +79,21 @@ const EditableDescription: React.FC<EditableDescriptionProps> = ({
           </div>
         </div>
       ) : (
-        <p 
-          className={textClassName}
-          onClick={handleStartEditing}
-        >
-          {description || placeholder}
-        </p>
+        disabled ? (
+          <p 
+            className={`text-muted-foreground text-sm p-1 rounded`}
+            style={{ cursor: 'default' }}
+          >
+            {description || placeholder}
+          </p>
+        ) : (
+          <p 
+            className={textClassName}
+            onClick={handleStartEditing}
+          >
+            {description || placeholder}
+          </p>
+        )
       )}
     </div>
   );

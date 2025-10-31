@@ -116,6 +116,39 @@ export const getAssetById = async (req: AuthenticatedRequest, res: Response): Pr
   }
 };
 
+// Public: Get asset by ID if it belongs to a public project
+export const getPublicAssetById = async (req: any, res: Response): Promise<void> => {
+  const { id } = req.params;
+  try {
+    const asset = await prisma.asset.findUnique({ where: { id } });
+    if (!asset) {
+      res.status(404).json({ message: 'Asset not found' });
+      return;
+    }
+    if (!asset.projectId) {
+      res.status(403).json({ message: 'Asset is not publicly accessible' });
+      return;
+    }
+    const project = await prisma.project.findUnique({ where: { id: asset.projectId } });
+    if (!project || !project.isPublic) {
+      res.status(403).json({ message: 'Asset is not publicly accessible' });
+      return;
+    }
+    const signedUrl = await getSignedDownloadUrl(asset.filePath);
+    res.json({
+      id: asset.id,
+      filename: asset.filename,
+      filePath: signedUrl,
+      mimeType: asset.mimeType,
+      fileSize: asset.fileSize,
+      type: asset.type,
+    });
+  } catch (error) {
+    console.error(`Error fetching public asset ${id}:`, error);
+    res.status(500).json({ message: 'Error fetching public asset' });
+  }
+};
+
 // Delete asset
 export const deleteAsset = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { id } = req.params;
@@ -260,5 +293,6 @@ module.exports = {
   uploadAsset,
   uploadProfileImage,
   getAssetById,
+  getPublicAssetById,
   deleteAsset,
 }; 

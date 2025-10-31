@@ -55,9 +55,11 @@ const EditableAvatar: React.FC<EditableAvatarProps> = ({
     }
   };
 
+  const interactive = !disabled && !uploading;
+
   return (
-    <div className={`relative ${className}`}>
-      <label className={`cursor-pointer group ${disabled ? 'cursor-not-allowed' : ''}`}>
+    <div className={`relative ${className} ${interactive ? 'group' : ''}`}>
+      <label className={`${interactive ? 'cursor-pointer' : ''} ${disabled ? 'cursor-not-allowed' : ''}`}>
         <input
           type="file"
           accept="image/*"
@@ -65,7 +67,7 @@ const EditableAvatar: React.FC<EditableAvatarProps> = ({
           className="hidden"
           disabled={disabled || uploading}
         />
-        <div className={`relative ${sizeClasses[size]} rounded-full bg-gray-200 hover:bg-gray-300 transition-colors flex items-center justify-center cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+        <div className={`relative ${sizeClasses[size]} rounded-full bg-gray-200 ${interactive ? 'hover:bg-gray-300 cursor-pointer' : ''} transition-colors flex items-center justify-center ${disabled ? 'opacity-50' : ''}`}>
           {imageUrl ? (
             <>
               <img 
@@ -73,9 +75,11 @@ const EditableAvatar: React.FC<EditableAvatarProps> = ({
                 alt={alt} 
                 className="w-full h-full rounded-full object-cover"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-full flex items-center justify-center">
-                <Camera className={`${iconSizes[size]} text-white opacity-0 group-hover:opacity-100 transition-opacity`} />
-              </div>
+              {interactive && (
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-full flex items-center justify-center">
+                  <Camera className={`${iconSizes[size]} text-white opacity-0 group-hover:opacity-100 transition-opacity`} />
+                </div>
+              )}
             </>
           ) : (
             <Camera className={`${defaultIconSizes[size]} text-gray-500`} />

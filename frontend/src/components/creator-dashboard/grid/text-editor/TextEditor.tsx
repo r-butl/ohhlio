@@ -41,7 +41,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
   } = item.props;
 
   const isActiveEditor = useEditorStore(state => state.activeEditor === id);
-  const isEditMode = useEditorStore(state => state.mode === 'edit');
+  const isEditMode = useEditorStore(state => state.viewState === 'OwnerEdit');
   const isEditing = isActiveEditor && isEditMode;
   const DEFAULT_MESSAGE = "Select <strong>Options &gt; Edit</strong> to add text.";
   const [localContent, setLocalContent] = useState(() => {
