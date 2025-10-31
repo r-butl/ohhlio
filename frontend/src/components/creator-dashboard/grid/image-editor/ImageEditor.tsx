@@ -3,6 +3,7 @@ import { GridDimensions } from '../grid-item/GridItem';
 import { useEditorStore, ImageItemProps } from '@/context/EditorStore';
 import emitter from '@/global-state/EventBus';
 import './ImageEditor.css';
+import AssetPlaceholder from '@/components/ui/AssetPlaceholder';
 
 interface ImageEditorProps extends GridDimensions {
   id: string;
@@ -92,6 +93,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
   }, [id, localZoom, localOriginalImage, imageProps, setItemsWithHistory, currentAspectRatio]);
 
+  const loadingAssets = useEditorStore(state => state.isLoadingAssets || state.loadingAssets);
+
   return (
     <div 
       className="image-editor" 
@@ -111,20 +114,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               }}
             />
           ) : (
-            <div 
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                backgroundColor: '#f5f5f5',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#999',
-                fontSize: '14px'
-              }}
-            >
-              No image selected
-            </div>
+            <AssetPlaceholder label={loadingAssets ? 'Loading image...' : 'No image selected'} />
           )}
         </div>
       ) : (
@@ -136,20 +126,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           ) : (
-            <div 
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                backgroundColor: '#f5f5f5',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#999',
-                fontSize: '14px'
-              }}
-            >
-              Loading image...
-            </div>
+            <AssetPlaceholder label={'Loading image...'} />
           )}
         </div>
       )}

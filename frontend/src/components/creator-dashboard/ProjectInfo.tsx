@@ -5,6 +5,8 @@ import EditableHeaderImage from '@/components/ui/editable-header-image';
 
 const ProjectInfo: React.FC = () => {
   const currentProject = useEditorStore(state => state.currentProject);
+  const viewState = useEditorStore(state => state.viewState);
+  const isOwnerEdit = viewState === 'OwnerEdit';
   const projectHeader = currentProject.projectHeader;
   const getAssetFromCacheOrBackend = useEditorStore(state => state.getAssetFromCacheOrBackend);
   const projectId = useEditorStore(state => state.projectId);
@@ -62,6 +64,7 @@ const ProjectInfo: React.FC = () => {
               alt={`${projectHeader.title} header image`}
               height="md"
               onImageUpload={handleHeaderImageUpload}
+              disabled={!isOwnerEdit}
             />
           </div>
           
@@ -79,6 +82,7 @@ const ProjectInfo: React.FC = () => {
                 placeholder="Add a project description..."
                 textClassName="text-sm text-muted-foreground line-clamp-2 cursor-pointer hover:bg-muted/50 p-1 rounded transition-colors"
                 textareaClassName="min-h-[60px] resize-none text-sm"
+                disabled={!isOwnerEdit}
               />
             </div>
           </div>

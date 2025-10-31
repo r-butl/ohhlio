@@ -107,6 +107,20 @@ export const getProjectById = async (id: string) => {
     return response.json();
 };
 
+// Get a public project by its ID (no auth)
+export const getPublicProjectById = async (id: string) => {
+    const response = await fetch(`${API_URL}/public/${id}`, {
+        method: 'GET'
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to fetch public project');
+    }
+
+    return response.json();
+};
+
 // Delete a project by its ID
 export const deleteProject = async (id: string) => {
     const token = getAuthToken();

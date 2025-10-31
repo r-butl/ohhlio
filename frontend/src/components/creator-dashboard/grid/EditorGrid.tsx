@@ -16,19 +16,21 @@ interface RendererProps {}
 const EditorGrid: React.FC<RendererProps> = () => {
 
   const buttonHovered = useEditorStore(state => state.buttonHovered);
-  const mode = useEditorStore(state => state.mode);
+  const viewState = useEditorStore(state => state.viewState);
   const activeEditor = useEditorStore(state => state.activeEditor);
   const items = useEditorStore(state => state.currentProject.items);
 
   const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   
-  const isDraggable = mode === 'edit' && (activeEditor === null) && !buttonHovered;
-  const isResizable = mode === 'edit' && !buttonHovered;
+  const isOwnerEdit = viewState === 'OwnerEdit';
+  const loadingAssets = useEditorStore(state => state.isLoadingAssets || state.loadingAssets);
+  const isDraggable = isOwnerEdit && (activeEditor === null) && !buttonHovered;
+  const isResizable = isOwnerEdit && !buttonHovered;
 
   const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
 
   const handleLayoutChange = (layout: any[]) => {
-    if (mode === 'edit') {
+    if (isOwnerEdit && !loadingAssets) {
       console.log('Updating layout in editor store from user interaction');
       setItemsWithHistory(draft => {
         layout.forEach(layoutItem => {
@@ -100,8 +102,8 @@ const EditorGrid: React.FC<RendererProps> = () => {
         breakpoints={{ lg: 768, xs: 0 }} 
         cols={{ lg: gridColumnCount, xs: 1 }}
         rowHeight={gridRowHeight}
-        isDraggable={isDraggable}
-        isResizable={isResizable}
+        isDraggable={isDraggable && !loadingAssets}
+        isResizable={isResizable && !loadingAssets}
         resizeHandles={['sw', 'se']}
         onDragStop={handleLayoutChange}
         onResizeStop={handleLayoutChange}

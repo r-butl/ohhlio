@@ -4,47 +4,56 @@ import Renderer from '@/components/creator-dashboard/grid/EditorGrid';
 import EditorController from '@/components/creator-dashboard/EditorController';
 import ProjectInfo from '@/components/creator-dashboard/ProjectInfo';
 import { useEditorStore } from '@/context/EditorStore';
-import { getProjectById } from '@/services/projectService';
+import { getProjectById, getPublicProjectById } from '@/services/projectService';
 import { toast } from 'sonner';
+import { getPublicAssetById } from '@/services/assetService';
 import { useUserContext } from '@/context/UserContext';
 
 import SidebarLayout from '../layouts/SidebarLayout';
+import ProjectLoader from '@/components/ui/ProjectLoader';
+import ProjectError from '@/components/ui/ProjectError';
 
 const CreatorDashboard: React.FC = () => {
   const { username, projectId } = useParams<{ username:string, projectId: string }>();
-  const mode = useEditorStore(state => state.mode);
+  const viewState = useEditorStore(state => state.viewState);
+  const viewerChanged = useEditorStore(state => state.viewerChanged);
   const isLoadingAssets = useEditorStore(state => state.isLoadingAssets);
+  const loadingProject = useEditorStore(state => state.loadingProject);
+  const projectError = useEditorStore(state => state.projectError);
   const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
   const setProjectId = useEditorStore(state => state.setProjectId);
   const setProjectHeader = useEditorStore(state => state.setProjectHeader);
   const loadProjectAssets = useEditorStore(state => state.loadProjectAssets);
+  const setLoadingProject = useEditorStore(state => state.setLoadingProject);
+  const setProjectError = useEditorStore(state => state.setProjectError);
   
   // Check if current user is the owner of this page
   const { user } = useUserContext();
   const isHomeUser = user.username === username;
   console.log(`${user.username} ${username}`)
 
+  // React to viewer changes (auth/route) and choose fetch path
+  useEffect(() => {
+    viewerChanged(Boolean(user.username) && isHomeUser);
+  }, [user.username, isHomeUser, viewerChanged]);
+
   // Effect to load project data when the component mounts or projectId changes
   useEffect(() => {
     const loadProject = async () => {
-      // Wait for user data to be loaded before checking authorization
-      if (!user.username) {
-        console.log('User data not loaded yet, waiting...');
+      // Guard against duplicate fetches
+      if (useEditorStore.getState().loadingProject) {
+        console.log('Project load already in progress; skipping.');
         return;
       }
-
-      // Check if user is authorized to access this page
-      if (!isHomeUser) {
-        toast.error('You are not authorized to access this page');
-        return;
-      }
-
       // Only load project if it's not already loaded (e.g., direct URL access)
       const currentProjectId = useEditorStore.getState().projectId;
       if (projectId && currentProjectId !== projectId) {
         try {
-          toast.loading('Loading project...');
-          const project = await getProjectById(projectId);
+          setProjectError(null);
+          setLoadingProject(true);
+          const project = isHomeUser
+            ? await getProjectById(projectId)
+            : await getPublicProjectById(projectId);
           if (project && project.items) {
             // Load project items
             setItemsWithoutHistory(() => project.items);
@@ -58,16 +67,37 @@ const CreatorDashboard: React.FC = () => {
             });
             
             // Load assets for all items after items are set
-            await loadProjectAssets();
+            if (isHomeUser) {
+              await loadProjectAssets();
+            } else {
+              // Public asset loading
+              const items = project.items || {};
+              for (const itemId in items) {
+                const item = items[itemId];
+                if (!item?.props?.assetId) continue;
+                try {
+                  const url = await getPublicAssetById(item.props.assetId);
+                  setItemsWithoutHistory(draft => {
+                    if (item.type === 'image') {
+                      draft[itemId].props.originalImage = url;
+                    } else {
+                      draft[itemId].props.assetUrl = url;
+                    }
+                  });
+                } catch (e) {
+                  console.error('Failed to load public asset', e);
+                }
+              }
+            }
           } else {
             console.log('Project or items do not exist, loading..')
           }
-          toast.dismiss();
+          setLoadingProject(false);
         } catch (error) {
-          toast.dismiss();
           const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-          toast.error(`Failed to load project: ${errorMessage}`);
-          console.error(error);
+          console.error('Failed to load project', errorMessage);
+          setProjectError(errorMessage);
+          setLoadingProject(false);
         }
       } else if (!projectId) {
         // If there's no projectId, ensure the store is cleared for a new project
@@ -81,17 +111,43 @@ const CreatorDashboard: React.FC = () => {
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) =>
-      e.key === 'Escape' && mode === 'edit';
+      e.key === 'Escape' && viewState === 'OwnerEdit';
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [mode]);
+  }, [viewState]);
+
+  // Unified loader and error render
+  if (loadingProject) {
+    return (
+      <SidebarLayout showSidebar={viewState === 'OwnerEdit'}>
+        <ProjectLoader />
+      </SidebarLayout>
+    );
+  }
+
+  if (projectError) {
+    return (
+      <SidebarLayout showSidebar={viewState === 'OwnerEdit'}>
+        <ProjectError message={projectError} />
+      </SidebarLayout>
+    );
+  }
+
+  const items = useEditorStore(state => state.currentProject.items);
+  const hasNoItems = !items || Object.keys(items).length === 0;
 
   return (
-    <SidebarLayout>
+    <SidebarLayout showSidebar={viewState === 'OwnerEdit'}>
       <div className="project-page">
         <EditorController isHomeUser={isHomeUser} />
         <ProjectInfo />
-        <Renderer />
+        {hasNoItems ? (
+          <div className="min-h-[200px] flex items-center justify-center text-gray-500">
+            {viewState === 'OwnerEdit' ? 'Start by adding content.' : 'No content yet.'}
+          </div>
+        ) : (
+          <Renderer />
+        )}
       </div>
     </SidebarLayout>
   );

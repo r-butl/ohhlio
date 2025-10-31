@@ -3,6 +3,7 @@ import {
   createProject,
   getProjects,
   getProjectById,
+  getPublicProjectById,
   updateProject,
   deleteProject,
 } from '../src/controllers/projectController';
@@ -10,7 +11,10 @@ import { protect } from '../src/middleware/authMiddleware';
 
 const router = Router();
 
-// Apply the protect middleware to all routes in this file
+// Public route(s)
+router.get('/public/:id', getPublicProjectById);
+
+// Apply the protect middleware to the remaining routes
 router.use(protect);
 
 router.route('/')

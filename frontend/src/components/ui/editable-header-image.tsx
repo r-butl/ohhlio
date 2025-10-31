@@ -56,39 +56,53 @@ const EditableHeaderImage: React.FC<EditableHeaderImageProps> = ({
     }
   };
 
+  const interactive = !disabled && !uploading;
+
   return (
-    <div className={`relative w-full ${heightClasses[height]} ${className} group`}>
-      <label className={`cursor-pointer group block w-full h-full ${disabled ? 'cursor-not-allowed' : ''}`} htmlFor="file-upload">
-        <input
-          id="file-upload"
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="hidden"
-          disabled={disabled || uploading}
-        />
-        <div className={`relative w-full h-full bg-muted rounded-lg overflow-hidden ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+    <div className={`relative w-full ${heightClasses[height]} ${className} ${interactive ? 'group' : ''}`}>
+      {interactive ? (
+        <label className={`block w-full h-full cursor-pointer`} htmlFor="file-upload">
+          <input
+            id="file-upload"
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+            disabled={disabled || uploading}
+          />
+          <div className={`relative w-full h-full bg-muted rounded-lg overflow-hidden`}>
+            {imageUrl ? (
+              <>
+                <img 
+                  src={imageUrl} 
+                  alt={alt} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                  <Image className={`${iconSizes[height]} text-white opacity-0 group-hover:opacity-100 transition-opacity`} />
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center w-full h-full">
+                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                  <Upload className={`${iconSizes[height]} mb-2`} />
+                  <span className="text-sm">Upload header image</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </label>
+      ) : (
+        <div className={`relative w-full h-full rounded-lg overflow-hidden`}>
           {imageUrl ? (
-            <>
-              <img 
-                src={imageUrl} 
-                alt={alt} 
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-                <Image className={`${iconSizes[height]} text-white opacity-0 group-hover:opacity-100 transition-opacity`} />
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center justify-center w-full h-full">
-              <div className="flex flex-col items-center justify-center text-muted-foreground">
-                <Upload className={`${iconSizes[height]} mb-2`} />
-                <span className="text-sm">Upload header image</span>
-              </div>
-            </div>
-          )}
+            <img 
+              src={imageUrl} 
+              alt={alt} 
+              className="w-full h-full object-cover"
+            />
+          ) : null}
         </div>
-      </label>
+      )}
     </div>
   );
 };

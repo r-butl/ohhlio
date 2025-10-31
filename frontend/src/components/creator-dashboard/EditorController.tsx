@@ -1,9 +1,7 @@
 import React from 'react';
 import { useEditorStore } from "../../context/EditorStore";
 
-import {
-  useSidebar
-} from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 
 import PreviewButton from "@/components/buttons/Preview";
 
@@ -17,17 +15,7 @@ interface EditorControllerProps {
 }
 
 const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser }) => {
-    const mode = useEditorStore(state => state.mode);
-    const sidebarOpen = useSidebar().open;
-    const setEditorMode = useEditorStore(state => state.setEditorMode);
-
-    React.useEffect(() => {
-        if (sidebarOpen) {
-            setEditorMode('edit');
-        } else {
-            setEditorMode('display');
-        }
-    }, [sidebarOpen, setEditorMode]);
+    const viewState = useEditorStore(state => state.viewState);
 
 
     return (
@@ -35,7 +23,7 @@ const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser }) => {
             <div className="flex w-full items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     
-                    {mode === "edit" && (
+                    {viewState === 'OwnerEdit' && (
                         <>
                             <UndoButton />
                             <RedoButton />
@@ -45,7 +33,7 @@ const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser }) => {
 
                 </div>
                 <div className="flex items-center gap-2">
-                    <PreviewButton isHomeUser={isHomeUser} />
+                    {isHomeUser && <PreviewButton isHomeUser={isHomeUser} />}
                     <PublishButton />
                 </div>
             </div>
