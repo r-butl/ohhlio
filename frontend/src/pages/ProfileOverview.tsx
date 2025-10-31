@@ -19,13 +19,13 @@ const ProfileOverview: React.FC = () => {
   const { username } = useParams();
   const isOwner = user?.username === username;
 
-  // Load user profile and projects on component mount
+  // Load private profile and projects only for the owner
   useEffect(() => {
-    if (user) {
+    if (user && isOwner) {
       fetchProfileData();
       fetchProjects();
     }
-  }, [user]);
+  }, [user, isOwner]);
 
 
   // Handle photo upload
