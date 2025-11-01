@@ -35,12 +35,25 @@ const CreatorDashboard: React.FC = () => {
   console.log(`${user.username} ${username}`)
   const isMobile = useIsMobile();
 
-  // React to viewer changes (auth/route/mobile) and choose fetch path
+  // React to viewer changes (auth/route/mobile) and choose default view; restore from storage
   useEffect(() => {
     if (isMobile) {
       viewerChanged(false); // Force public view on mobile
     } else {
-      viewerChanged(Boolean(user.username) && isHomeUser);
+      const isOwner = Boolean(user.username) && isHomeUser;
+      viewerChanged(isOwner);
+      if (isOwner) {
+        try {
+          const saved = localStorage.getItem('viewState');
+          if (saved === 'OwnerPreview') {
+            // viewerChanged already set owner; move to preview
+            useEditorStore.getState().exitEdit();
+          } else {
+            // default OwnerEdit
+            useEditorStore.getState().enterEdit();
+          }
+        } catch {}
+      }
     }
   }, [user.username, isHomeUser, viewerChanged, isMobile]);
 

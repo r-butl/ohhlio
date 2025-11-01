@@ -19,7 +19,16 @@ export const UserContext = createContext<UserContextType | null>(null);
 export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const { user: authUser, isAuthenticated } = useAuth();
   const [user, setUser] = useState({ email: "", username: ""});
-  const [profileData, setProfileData] = useState( {  profileImage: "", description: "" })
+  const [profileData, setProfileData] = useState( () => {
+    // Hydrate from cache to show avatar immediately
+    try {
+      const cachedAvatar = localStorage.getItem('avatarUrl') || "";
+      const cachedDescription = localStorage.getItem('profileDescription') || "";
+      return { profileImage: cachedAvatar, description: cachedDescription };
+    } catch {
+      return { profileImage: "", description: "" };
+    }
+  })
   const [loadingProfileData, setLoadingProfileData] = useState(false);
 
   const fetchProfileData = async () => {
@@ -34,6 +43,12 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         profileImage: imageAsset,
         description: retrievedProfileData.description
       });
+
+      // Cache for fast subsequent loads
+      try {
+        localStorage.setItem('avatarUrl', imageAsset || "");
+        localStorage.setItem('profileDescription', retrievedProfileData.description || "");
+      } catch {}
 
     } catch (error) {
       console.error('Failed to fetch profile data:', error);
@@ -51,9 +66,16 @@ export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         email: authUser.email,
         username: authUser.username || "",
       });
+      // Fetch and cache profile details on login
+      fetchProfileData();
     } else {
       // Clear user data when logged out
       setUser({ email: "", username: "" });
+      setProfileData({ profileImage: "", description: "" });
+      try {
+        localStorage.removeItem('avatarUrl');
+        localStorage.removeItem('profileDescription');
+      } catch {}
     }
   }, [authUser, isAuthenticated]);
 
