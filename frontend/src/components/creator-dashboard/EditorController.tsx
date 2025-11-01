@@ -29,7 +29,7 @@ const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser, page = 
                     {(viewState === 'PublicView' || viewState === 'OwnerPreview') && (
                         <NavMenuButton />
                     )}
-
+                    
                     {(viewState === 'OwnerEdit' && page === 'ProjectView') && (
                         <>
                             <UndoButton />
@@ -45,8 +45,8 @@ const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser, page = 
                             {(viewState === 'OwnerEdit' || viewState === 'OwnerPreview') && (
                                 <PreviewButton isHomeUser={isHomeUser} />
                             )}
-                            {(page === 'ProjectView' || page === 'ProfileOverview') && !isMobile && (
-                                <PublishButton />
+                            {(page === 'ProjectView') && !isMobile && viewState === 'OwnerEdit' && (
+                    <PublishButton />
                             )}
                         </>
                     )}

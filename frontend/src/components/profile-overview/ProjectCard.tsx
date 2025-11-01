@@ -23,8 +23,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 const token = localStorage.getItem('token');
                 try {
                     if (token) {
-                        const asset = await getAssetFromCacheOrBackend(project.headerPhotoId);
-                        setHeaderPhotoURL(asset);
+                const asset = await getAssetFromCacheOrBackend(project.headerPhotoId);
+                setHeaderPhotoURL(asset);
                     } else {
                         const { getPublicAssetById } = await import('@/services/assetService');
                         const url = await getPublicAssetById(project.headerPhotoId);

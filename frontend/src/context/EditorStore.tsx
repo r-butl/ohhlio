@@ -208,21 +208,26 @@ export const useEditorStore = create<State>((set, get) => ({
       ? (current.viewState === 'OwnerEdit' ? 'OwnerEdit' : 'OwnerPreview')
       : 'PublicView';
     set({ isOwner, viewState: nextView });
+    try { localStorage.setItem('viewState', nextView); } catch {}
   },
   togglePreview: () => {
     const { isOwner, viewState } = get();
     if (!isOwner) return; // no-op for non-owners
     const next: ViewState = viewState === 'OwnerEdit' ? 'OwnerPreview' : 'OwnerEdit';
     set({ viewState: next });
+    try { localStorage.setItem('viewState', next); } catch {}
   },
   enterEdit: () => {
     const { isOwner } = get();
     if (!isOwner) return;
     set({ viewState: 'OwnerEdit' });
+    try { localStorage.setItem('viewState', 'OwnerEdit'); } catch {}
   },
   exitEdit: () => {
     const { isOwner } = get();
-    set({ viewState: isOwner ? 'OwnerPreview' : 'PublicView' });
+    const next = isOwner ? 'OwnerPreview' : 'PublicView';
+    set({ viewState: next });
+    try { localStorage.setItem('viewState', next); } catch {}
   },
 
   // Sets which grid item is actively editing

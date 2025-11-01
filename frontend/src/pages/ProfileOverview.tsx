@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 import { updateUserProfile, uploadProfileImage, getUnifiedProfile } from "@/services/userService";
 import { toast } from "sonner";
 import EditableDescription from "@/components/ui/editable-description";
-import EditableAvatar from "@/components/ui/editable-avatar";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import ProjectCard from "@/components/profile-overview/ProjectCard"
 import { useEditorStore } from "@/context/EditorStore";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -54,12 +54,24 @@ const ProfileOverview: React.FC = () => {
     load();
   }, [user, isOwner, username]);
 
-  // Keep editor view state in sync with ownership for top bar controls; force public on mobile
+  // Keep editor view state in sync with ownership for top bar controls; force public on mobile;
+  // default to OwnerEdit for owners and restore last view on refresh
   useEffect(() => {
     if (isMobile) {
       viewerChanged(false);
     } else {
-      viewerChanged(Boolean(user?.username) && isOwner);
+      const isOwnerUser = Boolean(user?.username) && isOwner;
+      viewerChanged(isOwnerUser);
+      if (isOwnerUser) {
+        try {
+          const saved = localStorage.getItem('viewState');
+          if (saved === 'OwnerPreview') {
+            useEditorStore.getState().exitEdit();
+          } else {
+            useEditorStore.getState().enterEdit();
+          }
+        } catch {}
+      }
     }
   }, [user?.username, isOwner, viewerChanged, isMobile]);
 
@@ -121,18 +133,22 @@ const ProfileOverview: React.FC = () => {
   };
 
   return (
-    <SidebarLayout showSidebar={viewState === 'OwnerEdit'} avatarUrl={publicProfile?.profileImage || profileData?.profileImage}>
+    <SidebarLayout showSidebar={viewState === 'OwnerEdit'} avatarUrl={profileData?.profileImage}>
       <EditorController isHomeUser={isOwner} page={'ProfileOverview'} />
       <div className="container mx-auto px-4 py-20 max-w-4xl mt-8">
         {/* Header with Avatar */}
         <div className="mb-8">
           <div className="flex items-center gap-6 mb-4">
-            <EditableAvatar
-              imageUrl={publicProfile?.profileImage || profileData?.profileImage}
-              alt={(publicProfile?.username || user?.username || (username as string)) as string}
-              size="lg"
-              onImageUpload={handlePhotoUpload}
-              disabled={!isOwnerEdit}
+            <ProfileAvatar
+              src={(isOwnerEdit || isOwner) ? profileData?.profileImage : (publicProfile?.profileImage || "")}
+              alt={
+                isOwnerEdit
+                  ? ((user?.username || (username as string)) as string)
+                  : ((publicProfile?.username || user?.username || (username as string)) as string)
+              }
+              size="xl"
+              editable={isOwnerEdit}
+              onImageUpload={isOwnerEdit ? handlePhotoUpload : undefined}
             />
             
             <h1 className="text-3xl font-bold">

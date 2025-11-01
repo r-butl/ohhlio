@@ -22,8 +22,8 @@ const ProjectInfo: React.FC = () => {
       if (projectHeader.headerPhotoId) {
         try {
           if (isOwnerEdit) {
-            const asset = await getAssetFromCacheOrBackend(projectHeader.headerPhotoId);
-            setHeaderPhotoURL(asset);
+        const asset = await getAssetFromCacheOrBackend(projectHeader.headerPhotoId);
+        setHeaderPhotoURL(asset);
           } else {
             const url = await getPublicAssetById(projectHeader.headerPhotoId);
             setHeaderPhotoURL(url);
