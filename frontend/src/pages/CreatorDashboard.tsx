@@ -4,7 +4,7 @@ import Renderer from '@/components/creator-dashboard/grid/EditorGrid';
 import EditorController from '@/components/creator-dashboard/EditorController';
 import ProjectInfo from '@/components/creator-dashboard/ProjectInfo';
 import { useEditorStore } from '@/context/EditorStore';
-import { getProjectById, getPublicProjectById } from '@/services/projectService';
+import { getUnifiedProjectById } from '@/services/projectService';
 import { toast } from 'sonner';
 import { getPublicAssetById } from '@/services/assetService';
 import { useUserContext } from '@/context/UserContext';
@@ -12,6 +12,7 @@ import { useUserContext } from '@/context/UserContext';
 import SidebarLayout from '../layouts/SidebarLayout';
 import ProjectLoader from '@/components/ui/ProjectLoader';
 import ProjectError from '@/components/ui/ProjectError';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const CreatorDashboard: React.FC = () => {
   const { username, projectId } = useParams<{ username:string, projectId: string }>();
@@ -26,16 +27,22 @@ const CreatorDashboard: React.FC = () => {
   const loadProjectAssets = useEditorStore(state => state.loadProjectAssets);
   const setLoadingProject = useEditorStore(state => state.setLoadingProject);
   const setProjectError = useEditorStore(state => state.setProjectError);
+  const items = useEditorStore(state => state.currentProject.items);
   
   // Check if current user is the owner of this page
-  const { user } = useUserContext();
+  const { user, profileData } = useUserContext();
   const isHomeUser = user.username === username;
   console.log(`${user.username} ${username}`)
+  const isMobile = useIsMobile();
 
-  // React to viewer changes (auth/route) and choose fetch path
+  // React to viewer changes (auth/route/mobile) and choose fetch path
   useEffect(() => {
-    viewerChanged(Boolean(user.username) && isHomeUser);
-  }, [user.username, isHomeUser, viewerChanged]);
+    if (isMobile) {
+      viewerChanged(false); // Force public view on mobile
+    } else {
+      viewerChanged(Boolean(user.username) && isHomeUser);
+    }
+  }, [user.username, isHomeUser, viewerChanged, isMobile]);
 
   // Effect to load project data when the component mounts or projectId changes
   useEffect(() => {
@@ -51,9 +58,7 @@ const CreatorDashboard: React.FC = () => {
         try {
           setProjectError(null);
           setLoadingProject(true);
-          const project = isHomeUser
-            ? await getProjectById(projectId)
-            : await getPublicProjectById(projectId);
+          const project = await getUnifiedProjectById(projectId);
           if (project && project.items) {
             // Load project items
             setItemsWithoutHistory(() => project.items);
@@ -67,7 +72,7 @@ const CreatorDashboard: React.FC = () => {
             });
             
             // Load assets for all items after items are set
-            if (isHomeUser) {
+            if (project.canEdit) {
               await loadProjectAssets();
             } else {
               // Public asset loading
@@ -133,13 +138,12 @@ const CreatorDashboard: React.FC = () => {
     );
   }
 
-  const items = useEditorStore(state => state.currentProject.items);
   const hasNoItems = !items || Object.keys(items).length === 0;
 
   return (
-    <SidebarLayout showSidebar={viewState === 'OwnerEdit'}>
+    <SidebarLayout showSidebar={viewState === 'OwnerEdit'} avatarUrl={profileData.profileImage}>
       <div className="project-page">
-        <EditorController isHomeUser={isHomeUser} />
+        <EditorController isHomeUser={isHomeUser} page={'ProjectView'} />
         <ProjectInfo />
         {hasNoItems ? (
           <div className="min-h-[200px] flex items-center justify-center text-gray-500">

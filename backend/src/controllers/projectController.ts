@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 const prisma = require('../models/db');
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
+import { verifyToken } from '../utils/jwt';
 
 // Get all projects for the logged-in user
 export const getProjects = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -80,6 +81,57 @@ export const getPublicProjectById = async (req: any, res: Response): Promise<voi
   } catch (error) {
     console.error(`Error fetching public project ${id}:`, error);
     res.status(500).json({ message: 'Error fetching public project' });
+  }
+};
+
+// Unified: public if not owner, private if owner (auth optional)
+export const getProjectUnified = async (req: any, res: Response): Promise<void> => {
+  const { id } = req.params as { id: string };
+  // Try optional token
+  let requesterUserId: string | null = null;
+  const authHeader = req.headers.authorization || '';
+  if (authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    try {
+      const decoded = verifyToken(token);
+      requesterUserId = decoded.userId;
+    } catch {}
+  }
+  try {
+    const project = await prisma.project.findUnique({ where: { id } });
+    if (!project) {
+      res.status(404).json({ message: 'Project not found' });
+      return;
+    }
+    const isOwner = requesterUserId === project.userId;
+    if (!isOwner && !project.isPublic) {
+      res.status(403).json({ message: 'This project is not public' });
+      return;
+    }
+    res.json({ ...project, canEdit: isOwner });
+  } catch (error) {
+    console.error(`Error fetching unified project ${id}:`, error);
+    res.status(500).json({ message: 'Error fetching project' });
+  }
+};
+
+// Public: Get public projects for a user by username
+export const getPublicProjectsByUsername = async (req: any, res: Response): Promise<void> => {
+  const { username } = req.params as { username: string };
+  try {
+    const user = await prisma.user.findUnique({ where: { username }, select: { id: true } });
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+    const projects = await prisma.project.findMany({
+      where: { userId: user.id, isPublic: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+    res.json(projects);
+  } catch (error) {
+    console.error('Error fetching public projects by username:', error);
+    res.status(500).json({ message: 'Error fetching public projects' });
   }
 };
 
@@ -292,6 +344,8 @@ module.exports = {
   getProjects,
   getProjectById,
   getPublicProjectById,
+  getProjectUnified,
+  getPublicProjectsByUsername,
   createProject,
   updateProject,
   deleteProject,

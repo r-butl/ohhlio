@@ -44,8 +44,9 @@ export function NavProjects() {
   const { projects, fetchProjects } = useEditorStore();
 
   useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
     fetchProjects();
-
   }, []);
 
   
@@ -102,44 +103,47 @@ export function NavProjects() {
               <span>Home</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          {projects.map((project: any) => (
-            <SidebarMenuItem key={project.id}>
-              <SidebarMenuButton 
-                onClick={() => navigateToProject(project.id, user.username)}
-                className={isProjectSelected(project.id) ? "selected" : ""}
-              >
-                <StickyNote className="h-4 w-2" />
-                <span>{project.title}</span>
-              </SidebarMenuButton>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuAction showOnHover>
-                    <MoreHorizontal />
-                    <span className="sr-only">More</span>
-                  </SidebarMenuAction>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-48"
-                  side={isMobile ? "bottom" : "right"}
-                  align={isMobile ? "end" : "start"}
+          {projects.map((project: any) => {
+            const selected = isProjectSelected(project.id);
+            return (
+              <SidebarMenuItem key={project.id} className="group">
+                <SidebarMenuButton 
+                  onClick={() => navigateToProject(project.id, user.username)}
+                  className={selected ? "selected" : ""}
                 >
-                  <DropdownMenuItem onClick={() => navigateToProject(project.id, user.username)}>
-                    <Folder className="text-muted-foreground" />
-                    <span>View Project</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Share className="text-muted-foreground" />
-                    <span>Share Project</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleDelete(project.id)}>
-                    <Trash2 className="text-muted-foreground" />
-                    <span>Delete Project</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarMenuItem>
-          ))}
+                  <StickyNote className="h-4 w-2" />
+                  <span>{project.title}</span>
+                </SidebarMenuButton>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuAction showOnHover>
+                      <MoreHorizontal className={selected ? 'group-hover:text-white' : undefined} />
+                      <span className="sr-only">More</span>
+                    </SidebarMenuAction>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-48"
+                    side={isMobile ? "bottom" : "right"}
+                    align={isMobile ? "end" : "start"}
+                  >
+                    <DropdownMenuItem onClick={() => navigateToProject(project.id, user.username)}>
+                      <Folder className="text-muted-foreground" />
+                      <span>View Project</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Share className="text-muted-foreground" />
+                      <span>Share Project</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleDelete(project.id)}>
+                      <Trash2 className="text-muted-foreground" />
+                      <span>Delete Project</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroup>
     

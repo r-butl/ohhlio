@@ -20,8 +20,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     useEffect(() => {
         const loadAsset = async() => {
             if (project.headerPhotoId){
-                const asset = await getAssetFromCacheOrBackend(project.headerPhotoId);
-                setHeaderPhotoURL(asset);
+                const token = localStorage.getItem('token');
+                try {
+                    if (token) {
+                        const asset = await getAssetFromCacheOrBackend(project.headerPhotoId);
+                        setHeaderPhotoURL(asset);
+                    } else {
+                        const { getPublicAssetById } = await import('@/services/assetService');
+                        const url = await getPublicAssetById(project.headerPhotoId);
+                        setHeaderPhotoURL(url);
+                    }
+                } catch (e) {
+                    setHeaderPhotoURL("");
+                }
             } else {
                 setHeaderPhotoURL("");
             }

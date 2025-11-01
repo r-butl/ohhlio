@@ -4,7 +4,8 @@ const { protect } = require('../src/middleware/authMiddleware');
 
 const router = Router();
 
-router.get('/users', getAllUsers);
+// Base under /api/users
+router.get('/', getAllUsers);
 
 // Profile routes (require authentication)
 router.get('/profile', protect, getCurrentUser);

@@ -13,13 +13,18 @@ export const useProjectNavigation = () => {
   const loadProjectAssets = useEditorStore(state => state.loadProjectAssets);
 
   const navigateToProject = async (projectId: string, username: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // Public path: do not preload; let CreatorDashboard handle public fetch
+      navigate(`/${username}/project/${projectId}`);
+      return;
+    }
+
     try {
       toast.loading('Loading project...');
-      
-      // Load project data
+      // Private path: preload for faster transition
       const project = await getProjectById(projectId);
       if (project && project.items) {
-        // Set project data in store
         setItemsWithoutHistory(() => project.items);
         setProjectId(project.id);
         setProjectHeader({
@@ -27,18 +32,13 @@ export const useProjectNavigation = () => {
           description: project.description,
           headerPhotoId: project.headerPhotoId
         });
-        
-        // Load assets before navigating
         await loadProjectAssets();
       }
-      
       toast.dismiss();
-      
-      // Navigate after everything is loaded
       navigate(`/${username}/project/${projectId}`);
     } catch (error) {
       toast.dismiss();
-      const errorMessage = error instanceof Error ? error.message : "Failed to load project";
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load project';
       toast.error(errorMessage);
       console.error(error);
     }

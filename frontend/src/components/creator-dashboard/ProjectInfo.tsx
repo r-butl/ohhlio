@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useEditorStore } from '@/context/EditorStore';
 import EditableDescription from '@/components/ui/editable-description';
 import EditableHeaderImage from '@/components/ui/editable-header-image';
+import { getPublicAssetById } from '@/services/assetService';
 
 const ProjectInfo: React.FC = () => {
   const currentProject = useEditorStore(state => state.currentProject);
@@ -19,8 +20,17 @@ const ProjectInfo: React.FC = () => {
   useEffect(() => {
     const loadAsset = async () => {
       if (projectHeader.headerPhotoId) {
-        const asset = await getAssetFromCacheOrBackend(projectHeader.headerPhotoId);
-        setHeaderPhotoURL(asset);
+        try {
+          if (isOwnerEdit) {
+            const asset = await getAssetFromCacheOrBackend(projectHeader.headerPhotoId);
+            setHeaderPhotoURL(asset);
+          } else {
+            const url = await getPublicAssetById(projectHeader.headerPhotoId);
+            setHeaderPhotoURL(url);
+          }
+        } catch (e) {
+          setHeaderPhotoURL('');
+        }
       } else {
         setHeaderPhotoURL('');
       }

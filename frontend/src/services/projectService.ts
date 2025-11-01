@@ -107,19 +107,24 @@ export const getProjectById = async (id: string) => {
     return response.json();
 };
 
-// Get a public project by its ID (no auth)
-export const getPublicProjectById = async (id: string) => {
-    const response = await fetch(`${API_URL}/public/${id}`, {
-        method: 'GET'
-    });
 
+// Unified project fetch (auth-optional)
+export const getUnifiedProjectById = async (id: string) => {
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const response = await fetch(`${API_URL}/${id}`, {
+        method: 'GET',
+        headers
+    });
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to fetch public project');
+        throw new Error(errorData.message || 'Failed to fetch project');
     }
-
     return response.json();
 };
+
+// (Deprecated public project endpoints removed; use unified endpoints instead)
 
 // Delete a project by its ID
 export const deleteProject = async (id: string) => {
