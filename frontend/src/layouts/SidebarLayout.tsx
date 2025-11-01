@@ -5,11 +5,11 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 
-function SidebarLayout({ children, showSidebar = false }: { children: React.ReactNode, showSidebar?: boolean }) {
+function SidebarLayout({ children, showSidebar = false, avatarUrl }: { children: React.ReactNode, showSidebar?: boolean, avatarUrl?: string }) {
   return (
     
     <SidebarProvider>
-      {showSidebar && <AppSidebar />}
+      {showSidebar && <AppSidebar avatarUrl={avatarUrl} />}
       <SidebarInset>
         <div className="flex flex-1 flex-col">
           {children}

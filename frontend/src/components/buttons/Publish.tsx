@@ -70,11 +70,11 @@ const PublishButton: React.FC = () => {
                 toast.loading("Processing assets and publishing new project...");
                 
                 // First, create the project to get an ID
-                const newProject = await createProject({ title, items: {} });
+                const newProject = await createProject({ title, items: {}, isPublic: true });
                 setProjectId(newProject.id);
                 
                 // update the project with the items
-                await updateProject(newProject.id, { items: filteredItems });
+                await updateProject(newProject.id, { items: filteredItems, isPublic: true });
 
                 // Navigate to the project's page
                 navigate(`/${user.username}/project/${newProject.id}`);
@@ -96,8 +96,8 @@ const PublishButton: React.FC = () => {
             try {
                 toast.loading("Processing assets and updating project...");
                 
-                // update the project with the items
-                await updateProject(projectId, { items: filteredItems });
+                // update the project with the items and ensure it's public
+                await updateProject(projectId, { items: filteredItems, isPublic: true });
                 
                 toast.dismiss();
                 toast.success("Project updated successfully!");

@@ -59,7 +59,7 @@ const EditableAvatar: React.FC<EditableAvatarProps> = ({
 
   return (
     <div className={`relative ${className} ${interactive ? 'group' : ''}`}>
-      <label className={`${interactive ? 'cursor-pointer' : ''} ${disabled ? 'cursor-not-allowed' : ''}`}>
+      <label className={`${interactive ? 'cursor-pointer' : ''} ${disabled ? 'cursor-default' : ''}`}>
         <input
           type="file"
           accept="image/*"
@@ -67,7 +67,7 @@ const EditableAvatar: React.FC<EditableAvatarProps> = ({
           className="hidden"
           disabled={disabled || uploading}
         />
-        <div className={`relative ${sizeClasses[size]} rounded-full bg-gray-200 ${interactive ? 'hover:bg-gray-300 cursor-pointer' : ''} transition-colors flex items-center justify-center ${disabled ? 'opacity-50' : ''}`}>
+        <div className={`relative ${sizeClasses[size]} rounded-full bg-gray-200 ${interactive ? 'hover:bg-gray-300 cursor-pointer' : ''} transition-colors flex items-center justify-center`}>
           {imageUrl ? (
             <>
               <img 

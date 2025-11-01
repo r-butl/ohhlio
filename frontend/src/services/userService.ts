@@ -81,3 +81,20 @@ export const uploadProfileImage = async (file: File) => {
 
     return response.json();
 };
+
+// Unified profile (auth-optional)
+export const getUnifiedProfile = async (username: string) => {
+    const API_URL = getAPIURL("profile");
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const response = await fetch(`${API_URL}/${encodeURIComponent(username)}`, {
+        method: 'GET',
+        headers
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to fetch profile');
+    }
+    return response.json();
+};

@@ -12,7 +12,7 @@ import {
 import { useUserContext } from "@/context/UserContext";
 
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ avatarUrl, ...props }: React.ComponentProps<typeof Sidebar> & { avatarUrl?: string }) {
 
   const user = useUserContext().user;
 
@@ -24,7 +24,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={{
           name: user.username,
           email: user.email,
-          avatar: ""
+          avatar: avatarUrl || ""
         }} />
       </SidebarHeader>
       

@@ -17,6 +17,7 @@ const PORT = process.env.PORT || 3001;
 // Routers
 const authRoutes = require('../api/authRoutes');
 const userRoutes = require('../api/userRoutes');
+const profileRoutes = require('../api/profileRoutes');
 const projectRoutes = require('../api/projectRoutes');
 const assetRoutes = require('../api/assetRoutes');
 
@@ -57,6 +58,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/assets', assetRoutes);
 
