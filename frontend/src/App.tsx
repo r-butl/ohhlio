@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProjectEditor from '@/pages/CreatorDashboard';
 import LoginRegister from '@/pages/Login';
 import { UserProvider } from '@/context/UserContext';
-import FileUploadBox from '@/components/creator-dashboard/FileUploadBox';
 import ProfileOverview from '@/pages/ProfileOverview';
 
 import { Toaster } from 'sonner';
@@ -18,7 +17,6 @@ function App() {
     <UserProvider>
       {/* <PublicProjectsProvider> */}
         <BrowserRouter>
-          <FileUploadBox />
           <Toaster />
           <Routes>
             <Route path="/:username" element={<ProfileOverview />} />
