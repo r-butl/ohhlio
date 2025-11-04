@@ -19,6 +19,7 @@ export default defineConfig({
     }
   },
   build: {
+    target: 'es2017', // Target ES2017 for better Safari compatibility (Safari 11+)
     rollupOptions: {
       output: {
         assetFileNames: 'assets/[name][extname]'
