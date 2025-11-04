@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useEditorStore } from '@/context/EditorStore';
 import { OPTION_PAGES } from './OptionsPages';
 import { useContentCheck } from '@/hooks/useContentCheck';
-//import './OptionsPanel.css';
+import './OptionsPanel.css';
 
 const OptionsPanel: React.FC<{ id: string, parentRef: React.RefObject<HTMLDivElement> }> = ({ id, parentRef }) => {
   const item = useEditorStore(state => state.currentProject.items[id]);

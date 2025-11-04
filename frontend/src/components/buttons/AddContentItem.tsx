@@ -78,7 +78,7 @@ function AddContentButton({}: {}) {
               <span className="sr-only">Undo</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="start">
+        <DropdownMenuContent className="w-56 bg-system text-system-foreground border-system" align="start">
           <DropdownMenuGroup>
             <DropdownMenuItem onClick={() => addTextBox()}>
               Add Text
