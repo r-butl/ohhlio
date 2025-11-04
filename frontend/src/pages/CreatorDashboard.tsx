@@ -27,6 +27,7 @@ const CreatorDashboard: React.FC = () => {
   const loadProjectAssets = useEditorStore(state => state.loadProjectAssets);
   const setLoadingProject = useEditorStore(state => state.setLoadingProject);
   const setProjectError = useEditorStore(state => state.setProjectError);
+  const clearHistory = useEditorStore(state => state.clearHistory);
   const items = useEditorStore(state => state.currentProject.items);
   
   // Check if current user is the owner of this page
@@ -83,6 +84,9 @@ const CreatorDashboard: React.FC = () => {
               description: project.description,
               headerPhotoId: project.headerPhotoId
             });
+            
+            // Clear history after loading to mark as saved state
+            clearHistory();
             
             // Load assets for all items after items are set
             if (project.canEdit) {

@@ -124,6 +124,11 @@ const ProfileOverview: React.FC = () => {
         description: description 
       });
       fetchProfileData();
+      // Update publicProfile state immediately so the description reflects in the UI
+      setPublicProfile(prev => ({
+        ...prev,
+        description: description
+      }));
       toast.success('Profile description updated successfully!');
     } catch (error) {
       console.error('Failed to update profile description:', error);
@@ -171,17 +176,17 @@ const ProfileOverview: React.FC = () => {
 
         {/* Projects Section */}
         <div className="space-y-4">
-          {(isOwner ? loadingProjects : publicLoading) ? (
+          {publicLoading ? (
             <div className="flex items-center justify-center py-8">
               <p className="text-muted-foreground">Loading projects...</p>
             </div>
-          ) : (isOwner ? projects.length === 0 : publicProjects.length === 0) ? (
+          ) : publicProjects.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No projects yet. Start creating!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(isOwner ? projects : publicProjects).map((project) => (
+              {publicProjects.map((project) => (
                 <ProjectCard key={project.id} username={username} project={project}/>
               ))}
             </div>

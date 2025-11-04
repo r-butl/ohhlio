@@ -93,6 +93,7 @@ type State = {
   // History interaction
   undo: () => void
   redo: () => void
+  clearHistory: () => void
 
   // Editor interaction
   // State machine events
@@ -282,13 +283,16 @@ export const useEditorStore = create<State>((set, get) => ({
 
     if (patches.length > 0) {
       console.log("Setting items. (history)", nextItems);
+      const newPast = [...history.past, { patches, inversePatches }];
+      // Limit history to 20 items, pop oldest if exceeded
+      const limitedPast = newPast.length > 20 ? newPast.slice(-20) : newPast;
       set(state => ({
         currentProject: {
           ...state.currentProject,
           items: nextItems
         },
         history: {
-          past: [...history.past, { patches, inversePatches }],
+          past: limitedPast,
           future: []
         }
       }))
@@ -352,6 +356,11 @@ export const useEditorStore = create<State>((set, get) => ({
         future: newFuture
       }
     }))
+  },
+
+  // Clears history to mark project as saved
+  clearHistory: () => {
+    set({ history: { past: [], future: [] } });
   },
 
   ///////////////// EDITING ITEMS /////////////////
