@@ -15,6 +15,9 @@ const PublishButton: React.FC = () => {
     const { user } = userContext;
     const { fetchProjects } = useEditorStore();
     const setProjectId = useEditorStore(state => (state.setProjectId));
+    const history = useEditorStore(state => state.history);
+    const clearHistory = useEditorStore(state => state.clearHistory);
+    const hasChanges = history.past.length > 0;
 
 
     const handlePublish = async () => {
@@ -99,6 +102,9 @@ const PublishButton: React.FC = () => {
                 // update the project with the items and ensure it's public
                 await updateProject(projectId, { items: filteredItems, isPublic: true });
                 
+                // Clear history after successful publish
+                clearHistory();
+                
                 toast.dismiss();
                 toast.success("Project updated successfully!");
             } catch (error) {
@@ -114,6 +120,7 @@ const PublishButton: React.FC = () => {
         <Button
             variant="default"
             onClick={handlePublish}
+            disabled={!hasChanges}
         >
             Publish
         </Button>

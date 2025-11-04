@@ -1,5 +1,5 @@
 // frontend/src/App.tsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProjectEditor from '@/pages/CreatorDashboard';
 import LoginRegister from '@/pages/Login';
 import { UserProvider } from '@/context/UserContext';
@@ -25,7 +25,9 @@ function App() {
             <Route path="/:username/project" element={<ProjectEditor />} />
             <Route path="/:username/project/:projectId" element={<ProjectEditor />} />
             <Route path="/project" element={<ProjectEditor />} />
+            <Route path="/login" element={<LoginRegister />} />
             <Route path="/" element={<LoginRegister />} />
+
             {/* Add more routes as needed */}
           </Routes>
         </BrowserRouter>

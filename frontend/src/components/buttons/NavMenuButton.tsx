@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEditorStore } from '@/context/EditorStore';
-import { ListTree } from "lucide-react";
+import { AlignJustify, Search, User, LogIn, StickyNote } from "lucide-react";
 import { useProjectNavigation } from '@/hooks/useProjectNavigation';
 import { getUnifiedProfile } from '@/services/userService';
+import { useAuth } from '@/context/AuthContext';
+import { useUserContext } from '@/context/UserContext';
+import { ProfileAvatar } from '@/components/ui/profile-avatar';
 
 type NavMenuButtonProps = {
   alignLeft?: boolean;
@@ -14,22 +16,14 @@ type NavMenuButtonProps = {
 const NavMenuButton: React.FC<NavMenuButtonProps> = ({ alignLeft = true }) => {
   const navigate = useNavigate();
   const { username = '' } = useParams<{ username: string }>();
-  const isAuthed = typeof window !== 'undefined' && Boolean(localStorage.getItem('token'));
-  const projects = useEditorStore(state => state.projects);
-  const loadingProjects = useEditorStore(state => state.loadingProjects);
-  const fetchProjects = useEditorStore(state => state.fetchProjects);
+  const { user: authUser, isAuthenticated } = useAuth();
+  const { profileData } = useUserContext();
   const { navigateToProject } = useProjectNavigation();
   const [publicProjects, setPublicProjects] = useState<any[]>([]);
   const [loadingPublic, setLoadingPublic] = useState<boolean>(false);
 
   useEffect(() => {
-    if (isAuthed) {
-      if (!projects || projects.length === 0) {
-        fetchProjects();
-      }
-      return;
-    }
-    // Public: fetch projects via unified profile for the viewed username
+    // Always fetch projects for the viewed username, regardless of authentication
     if (username) {
       setLoadingPublic(true);
       getUnifiedProfile(username)
@@ -37,34 +31,65 @@ const NavMenuButton: React.FC<NavMenuButtonProps> = ({ alignLeft = true }) => {
         .catch(() => setPublicProjects([]))
         .finally(() => setLoadingPublic(false));
     }
-  }, [projects?.length, username, isAuthed]);
+  }, [username]);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="size-7" aria-label="Navigation menu">
-          <ListTree />
+          <AlignJustify/>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={alignLeft ? 'start' : 'end'} className="w-56">
-        <DropdownMenuLabel>Navigate</DropdownMenuLabel>
+        {/* Item 1: User profile or Login */}
+        {isAuthenticated && authUser ? (
+          <DropdownMenuItem onClick={() => navigate(`/${authUser.username}`)}>
+            <ProfileAvatar 
+              src={profileData.profileImage} 
+              alt={authUser.username || 'Profile'} 
+              size="sm" 
+              editable={false}
+              className="mr-2"
+            />
+            <span>My Profile</span>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onClick={() => navigate('/login')}>
+            <LogIn className="mr-2" />
+            <span>Login to Ohhlio</span>
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate(`/${username}`)}>
-          Profile homepage
+
+        {/* Item 2: Search (not implemented yet) */}
+        <DropdownMenuItem onClick={() => {/* TODO: implement search */}} disabled>
+          <Search className="mr-2" />
+          <span>Search</span>
         </DropdownMenuItem>
+
         <DropdownMenuSeparator />
-        <DropdownMenuLabel>Projects</DropdownMenuLabel>
-        {(isAuthed ? loadingProjects : loadingPublic) && (
+
+        <DropdownMenuLabel>{username}'s Portfolio</DropdownMenuLabel>
+        {/* Item 3: Current user's profile home */}
+        <DropdownMenuItem onClick={() => navigate(`/${username}`)}>
+          <User className="mr-2" />
+          <span>Profile Overview</span>
+        </DropdownMenuItem>
+
+        {/* Following items: Projects */}
+        {loadingPublic && (
           <DropdownMenuItem disabled>Loading...</DropdownMenuItem>
         )}
-        {!(isAuthed ? loadingProjects : loadingPublic) &&
-         (!(isAuthed ? projects : publicProjects) || (isAuthed ? projects.length === 0 : publicProjects.length === 0)) && (
+        {!loadingPublic &&
+         (!publicProjects || publicProjects.length === 0) && (
           <DropdownMenuItem disabled>No projects</DropdownMenuItem>
         )}
-        {!(isAuthed ? loadingProjects : loadingPublic) &&
-          (isAuthed ? projects : publicProjects)?.map((project: any) => (
+        {!loadingPublic &&
+          publicProjects?.map((project: any) => (
             <DropdownMenuItem key={project.id} onClick={() => navigateToProject(project.id, username)}>
-              {project.title || 'Untitled project'}
+              <StickyNote className="mr-2 h-4 w-2" />
+              <span>{project.title || 'Untitled project'}</span>
             </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
