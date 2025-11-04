@@ -73,7 +73,7 @@ function AddContentButton({}: {}) {
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className='h-8 w-8 aspect-square p-1'>
+          <Button variant="ghost" className='h-8 w-8 aspect-square p-1'>
               <Plus className="h-4 w-4" />
               <span className="sr-only">Undo</span>
           </Button>

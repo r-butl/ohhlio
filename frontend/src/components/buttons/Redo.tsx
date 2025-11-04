@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { RotateCw } from "lucide-react"
+import { Redo } from "lucide-react"
 import { useEditorStore } from "../../context/EditorStore";
 
 
@@ -8,11 +8,11 @@ function RedoButton({  }: {}) {
   const futureLength = useEditorStore(state => state.history.future.length);
   return (
     <Button 
-      variant="outline" 
+      variant="ghost" 
       onClick={() => redo()} 
       className='h-8 w-8 aspect-square p-1'
       disabled={futureLength === 0}>
-      <RotateCw className="h-2 w-2" />
+      <Redo className="h-2 w-2" />
       <span className="sr-only">Redo</span>
     </Button>
   )

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { RotateCcw } from "lucide-react"
+import { Undo } from "lucide-react"
 import { useEditorStore } from "../../context/EditorStore";
 
 
@@ -8,14 +8,13 @@ function UndoButton({  }: {}) {
   const pastLength = useEditorStore(state => state.history.past.length);
   return (
     <Button 
-      variant="outline" 
+      variant="ghost" 
       onClick={() => undo()} 
       className='h-8 w-8 aspect-square p-1'
       disabled={pastLength === 0}>
-      <RotateCcw className="h-2 w-2" />
+      <Undo className="h-2 w-2" />
       <span className="sr-only">Undo</span>
     </Button>
   )
 }
-
 export default UndoButton;
