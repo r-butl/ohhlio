@@ -85,7 +85,7 @@ const GridItem: React.FC<GridItemProps> = ({
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="h-8 w-8 bg-background/90 backdrop-blur-sm hover:bg-background border border-border"
+                  className="h-8 w-8 rounded-full bg-background/90 backdrop-blur-sm hover:bg-background border border-border"
                   onMouseEnter={(e) => e.stopPropagation()}
                   onMouseLeave={(e) => e.stopPropagation()}
                 >
