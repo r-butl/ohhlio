@@ -3,6 +3,7 @@ import { useEditorStore } from '@/context/EditorStore';
 import EditableDescription from '@/components/ui/editable-description';
 import EditableHeaderImage from '@/components/ui/editable-header-image';
 import { getPublicAssetById } from '@/services/assetService';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ProjectInfo: React.FC = () => {
   const currentProject = useEditorStore(state => state.currentProject);
@@ -14,6 +15,7 @@ const ProjectInfo: React.FC = () => {
   const editorMaxWidth = useEditorStore(state => state.editorMaxWidth);
   const updateProjectDescription = useEditorStore(state => state.updateProjectDescription);
   const updateProjectHeaderImage = useEditorStore(state => state.updateProjectHeaderImage);
+  const isMobile = useIsMobile();
 
   const [ headerPhotoURL, setHeaderPhotoURL ] = useState('');
 
@@ -72,7 +74,7 @@ const ProjectInfo: React.FC = () => {
             <EditableHeaderImage
               imageUrl={headerPhotoURL}
               alt={`${projectHeader.title} header image`}
-              height="md"
+              height={isMobile ? "md" : "md"}
               onImageUpload={handleHeaderImageUpload}
               disabled={!isOwnerEdit}
             />

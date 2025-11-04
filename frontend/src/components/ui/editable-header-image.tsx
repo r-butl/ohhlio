@@ -20,10 +20,10 @@ const EditableHeaderImage: React.FC<EditableHeaderImageProps> = ({
 }) => {
   const [uploading, setUploading] = useState(false);
 
-  const heightClasses = {
-    sm: 'h-20',
-    md: 'h-32',
-    lg: 'h-40'
+  const aspectRatioClasses = {
+    sm: 'aspect-[4/1]',   // 4:1 ratio
+    md: 'aspect-[16/6]',  // ~2.67:1 ratio
+    lg: 'aspect-video'    // 16:9 ratio
   };
 
   const iconSizes = {
@@ -59,7 +59,7 @@ const EditableHeaderImage: React.FC<EditableHeaderImageProps> = ({
   const interactive = !disabled && !uploading;
 
   return (
-    <div className={`relative w-full ${heightClasses[height]} ${className} ${interactive ? 'group' : ''}`}>
+    <div className={`relative w-full ${aspectRatioClasses[height]} ${className} ${interactive ? 'group' : ''}`}>
       {interactive ? (
         <label className={`block w-full h-full cursor-pointer`} htmlFor="file-upload">
           <input

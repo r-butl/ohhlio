@@ -123,6 +123,7 @@ const PublishButton: React.FC = () => {
             variant="default"
             onClick={handlePublish}
             disabled={!hasChanges}
+            className="bg-system text-system-foreground hover:bg-system/90"
         >
             Publish
         </Button>

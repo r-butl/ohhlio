@@ -6,6 +6,7 @@ import 'react-resizable/css/styles.css';
 import TextEditor from './text-editor/TextEditor';
 import ImageEditor from './image-editor/ImageEditor';
 import GridItem from './grid-item/GridItem';
+import ToolbarOverlay from './options-panel/ToolbarOverlay';
 
 import { useEditorStore } from '../../../context/EditorStore';
 
@@ -120,6 +121,7 @@ const EditorGrid: React.FC<RendererProps> = () => {
                 style={{height: '200px'}}>
             </div>
       </footer>
+      <ToolbarOverlay />
     </div>
   );
 };
