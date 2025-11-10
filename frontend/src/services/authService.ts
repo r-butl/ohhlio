@@ -1,5 +1,18 @@
 import { getAPIURL } from '@/utils/APIutils';
 
+export const AUTH_EVENTS = {
+  FORCE_LOGOUT: 'ohhlio:auth:force-logout',
+} as const;
+
+const emitAuthEvent = (eventName: (typeof AUTH_EVENTS)[keyof typeof AUTH_EVENTS], detail?: Record<string, unknown>) => {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(eventName, { detail }));
+};
+
+export const handleTokenExpiration = () => {
+  emitAuthEvent(AUTH_EVENTS.FORCE_LOGOUT, { reason: 'token-expired' });
+};
+
 const AUTH_URL = getAPIURL('auth');
 
 type LoginResponse = {

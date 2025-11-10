@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { AUTH_EVENTS } from "@/services/authService";
 
 type User = {
   email: string;
@@ -29,20 +30,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = (token: string, user: User) => {
+  const login = useCallback((token: string, user: User) => {
     setToken(token);
     setUser(user);
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
 
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null);
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-  };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleForcedLogout = () => {
+      logout();
+    };
+    window.addEventListener(AUTH_EVENTS.FORCE_LOGOUT, handleForcedLogout);
+    return () => {
+      window.removeEventListener(AUTH_EVENTS.FORCE_LOGOUT, handleForcedLogout);
+    };
+  }, [logout]);
 
   const isAuthenticated = !!token && !!user;
 

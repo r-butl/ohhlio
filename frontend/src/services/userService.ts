@@ -1,4 +1,5 @@
 import { getAPIURL } from '@/utils/APIutils';
+import { handleTokenExpiration } from './authService';
 
 
 const getAuthToken = () => {
@@ -22,7 +23,10 @@ export const getCurrentUser = async () => {
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to fetch user profile');
     }
 
@@ -48,7 +52,10 @@ export const updateUserProfile = async (profileData: { profileImageId?: string; 
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to update user profile');
     }
 
@@ -75,7 +82,10 @@ export const uploadProfileImage = async (file: File) => {
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to upload profile image');
     }
 
@@ -86,15 +96,29 @@ export const uploadProfileImage = async (file: File) => {
 export const getUnifiedProfile = async (username: string) => {
     const API_URL = getAPIURL("profile");
     const token = localStorage.getItem('token');
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    const response = await fetch(`${API_URL}/${encodeURIComponent(username)}`, {
-        method: 'GET',
-        headers
-    });
+
+    const fetchProfile = async (withAuth: boolean) => {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (withAuth && token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        return fetch(`${API_URL}/${encodeURIComponent(username)}`, {
+            method: 'GET',
+            headers
+        });
+    };
+
+    let response = await fetchProfile(Boolean(token));
+
+    if (response.status === 401 && token) {
+        handleTokenExpiration();
+        response = await fetchProfile(false);
+    }
+
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to fetch profile');
     }
+
     return response.json();
 };
