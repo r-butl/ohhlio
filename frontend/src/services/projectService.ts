@@ -1,4 +1,5 @@
 import { getAPIURL } from '@/utils/APIutils';
+import { handleTokenExpiration } from './authService';
 
 const API_URL = getAPIURL("projects");
 
@@ -25,6 +26,9 @@ export const createProject = async (projectData: { title: string; description?: 
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to create project');
     }
@@ -56,6 +60,9 @@ export const updateProject = async (projectId: string, projectData: Partial<{ ti
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to update project');
     }
@@ -78,6 +85,9 @@ export const getProjects = async () => {
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to fetch projects');
     }
@@ -100,6 +110,9 @@ export const getProjectById = async (id: string) => {
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to fetch project');
     }
@@ -111,16 +124,31 @@ export const getProjectById = async (id: string) => {
 // Unified project fetch (auth-optional)
 export const getUnifiedProjectById = async (id: string) => {
     const token = localStorage.getItem('token');
-    const headers: Record<string, string> = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: 'GET',
-        headers
-    });
+
+    const fetchProject = async (withAuth: boolean) => {
+        const headers: Record<string, string> = {};
+        if (withAuth && token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch(`${API_URL}/${id}`, {
+            method: 'GET',
+            headers
+        });
+        return response;
+    };
+
+    let response = await fetchProject(Boolean(token));
+
+    if (response.status === 401 && token) {
+        handleTokenExpiration();
+        response = await fetchProject(false);
+    }
+
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to fetch project');
     }
+
     return response.json();
 };
 
@@ -141,6 +169,9 @@ export const deleteProject = async (id: string) => {
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to delete project');
     }

@@ -1,4 +1,5 @@
 import { getAPIURL } from '@/utils/APIutils';
+import { handleTokenExpiration } from './authService';
 
 const API_URL = getAPIURL("assets");
 
@@ -97,7 +98,10 @@ export const uploadAsset = async (file: File, projectId?: string) => {
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to upload file');
     }
 
@@ -128,7 +132,10 @@ export const getAssetById = async (id: string) => {
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to fetch asset');
     }
 
@@ -176,7 +183,10 @@ export const deleteAsset = async (id: string): Promise<void> => {
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
+        if (response.status === 401) {
+            handleTokenExpiration();
+        }
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to delete asset');
     }
     
