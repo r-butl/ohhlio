@@ -35,8 +35,6 @@ const CreatorDashboard: React.FC = () => {
 
   return (
     <SidebarLayout showSidebar={viewState === 'OwnerEdit'} avatarUrl={profileData.profileImage}>
-      <EditorController isHomeUser={isHomeUser} page={'ProfileOverview'} />
-
       <div className="project-page">
         <EditorController isHomeUser={isHomeUser} page={'ProjectView'} />
         <ProjectInfo />
