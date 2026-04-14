@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Image, Upload } from 'lucide-react';
+import { toast } from 'sonner';
+import { compressImage } from '@/utils/compressImage';
 
 interface EditableHeaderImageProps {
   imageUrl?: string;
@@ -34,25 +36,27 @@ const EditableHeaderImage: React.FC<EditableHeaderImageProps> = ({
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && !disabled) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        return;
-      }
-      
-      // Validate file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        return;
-      }
+    if (!file || disabled) return;
 
-      try {
-        setUploading(true);
-        await onImageUpload(file);
-      } catch (error) {
-        console.error('Failed to upload image:', error);
-      } finally {
-        setUploading(false);
-      }
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Image must be smaller than 50MB');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const compressed = await compressImage(file, { maxWidth: 1920, maxHeight: 1080, quality: 0.85 });
+      await onImageUpload(compressed);
+    } catch (error) {
+      console.error('Failed to upload image:', error);
+      toast.error('Failed to upload image');
+    } finally {
+      setUploading(false);
     }
   };
 

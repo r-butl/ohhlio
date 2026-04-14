@@ -12,6 +12,7 @@ import { useEditorStore } from "@/context/EditorStore";
 import { useIsMobile } from "@/hooks/use-mobile";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import EditorController from "@/components/creator-dashboard/EditorController";
+import { compressImage } from "@/utils/compressImage";
 // unified endpoint includes projects; no separate import
 
 const ProfileOverview: React.FC = () => {
@@ -78,19 +79,18 @@ const ProfileOverview: React.FC = () => {
 
   // Handle photo upload
   const handlePhotoUpload = async (file: File) => {
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please select an image file');
       return;
     }
-    
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be smaller than 5MB');
+
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Image must be smaller than 50MB');
       return;
     }
 
     try {
+      file = await compressImage(file, { maxWidth: 800, maxHeight: 800, quality: 0.85 });
 
       toast.success('Updating profile photo...');
 

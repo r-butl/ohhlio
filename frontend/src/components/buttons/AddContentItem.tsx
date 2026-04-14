@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { toast } from "sonner"
+import { compressImage } from "@/utils/compressImage"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,48 +19,40 @@ function AddContentButton({}: {}) {
     const addImage = useEditorStore(state => state.addImage);
     const fileInputRef = useRef<HTMLInputElement>(null);
     
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB safety net — compression handles the rest
 
-    const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = Array.from(event.target.files || []);
-        
+
+        if (fileInputRef.current) fileInputRef.current.value = '';
         if (selectedFiles.length === 0) return;
-        
-        // Filter out files that are too large
+
+        // Safety net — reject files that are truly absurd in size (50MB+)
         const validFiles = selectedFiles.filter(file => file.size <= MAX_FILE_SIZE);
         const invalidFiles = selectedFiles.filter(file => file.size > MAX_FILE_SIZE);
-        
+
         if (invalidFiles.length > 0) {
-            alert(`${invalidFiles.length} file(s) are too large (max 10MB) and will be skipped.`);
+            toast.error(`${invalidFiles.length} image${invalidFiles.length > 1 ? 's' : ''} skipped — file size must be under 50MB`);
         }
-        
-        if (validFiles.length === 0) {
-            alert('No valid files to upload.');
-            // Reset input to allow selecting the same files again
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
+
+        if (validFiles.length === 0) return;
+
+        for (const file of validFiles) {
+            try {
+                const compressed = await compressImage(file, { maxWidth: 1920, maxHeight: 1920, quality: 0.85 });
+                const reader = new FileReader();
+                reader.onload = () => {
+                    addImage(reader.result as string);
+                };
+                reader.readAsDataURL(compressed);
+            } catch {
+                toast.error(`Failed to process ${file.name}`);
             }
-            return;
-        }
-        
-        // Process each valid file
-        validFiles.forEach((file) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                const imageData = reader.result as string;
-                addImage(imageData);
-            };
-            reader.readAsDataURL(file);
-        });
-        
-        // Reset input to allow selecting the same files again
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
         }
     };
 
     const handleAddImageClick = () => {
-        fileInputRef.current?.click();
+        setTimeout(() => fileInputRef.current?.click(), 0);
     };
 
   return (
