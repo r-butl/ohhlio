@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LoginForm } from '@/components/LoginForm';
-import { RegisterForm } from '@/components/RegisterForm';
+import { LoginForm } from '@/pages/login/login-page-components/LoginForm';
+import { RegisterForm } from '@/pages/login/login-page-components/RegisterForm';
 
 
 const LoginRegister: React.FC = () => {

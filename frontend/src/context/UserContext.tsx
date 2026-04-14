@@ -1,20 +1,13 @@
 // src/context/UserContext.tsx
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { getProjects } from "@/services/projectService";
 import { getCurrentUser } from "@/services/userService";
 import { getAssetById } from "@/services/assetService";
 import { useAuth } from "./AuthContext";
-import { profile } from "console";
 
-type UserContextType = {
-  user: { email: string; username: string; };
-  profileData: { profileImage: string; description: string; };
-  setUser: React.Dispatch<React.SetStateAction<{ email: string; username: string;}>>;
-  loadingProfileData: boolean;
-  fetchProfileData: () => Promise<void>;
-};
 
-export const UserContext = createContext<UserContextType | null>(null);
+import { UserContextInterface } from "@/interfaces/UserAuthInterfaces";
+
+export const UserContext = createContext<UserContextInterface | null>(null);
 
 export const UserProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const { user: authUser, isAuthenticated } = useAuth();

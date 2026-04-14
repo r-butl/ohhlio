@@ -6,6 +6,7 @@ const API_URL = getAPIURL("assets");
 // Simple in-memory cache for assets
 const assetCache = new Map<string, { data: string; timestamp: number }>();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+const MAX_CACHE_SIZE = 100;
 
 // Helper function to get the auth token from localStorage
 const getAuthToken = () => {
@@ -142,7 +143,11 @@ export const getAssetById = async (id: string) => {
     // Get the asset data with signed URL
     const assetData = await response.json();
     
-    // Cache the result
+    // Cache the result, evicting the oldest entry if the cache is full
+    if (assetCache.size >= MAX_CACHE_SIZE) {
+        const oldestKey = assetCache.keys().next().value;
+        assetCache.delete(oldestKey);
+    }
     assetCache.set(id, {
         data: assetData.filePath,
         timestamp: Date.now()

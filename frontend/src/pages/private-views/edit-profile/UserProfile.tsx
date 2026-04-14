@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useUserContext } from "@/context/UserContext";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import EditorController from '@/components/creator-dashboard/EditorController';
+
 import { useParams } from "react-router-dom";
 import { updateUserProfile, uploadProfileImage, getUnifiedProfile } from "@/services/userService";
 import { toast } from "sonner";
@@ -16,13 +15,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const ProfileOverview: React.FC = () => {
   const { user } = useAuth();
   const { profileData, fetchProfileData } = useUserContext();
-  const projects = useEditorStore(state => state.projects);
-  const loadingProjects = useEditorStore(state => state.loadingProjects);
-  const fetchProjects = useEditorStore(state => state.fetchProjects);
-  const viewState = useEditorStore(state => state.viewState);
-  const isOwnerEdit = viewState === 'OwnerEdit';
+
   const { username } = useParams();
   const isOwner = user?.username === username;
+  const viewState = useEditorStore(state => state.viewState);
+
+  const isOwnerEdit = viewState === 'OwnerEdit';
   const viewerChanged = useEditorStore(state => state.viewerChanged);
   const isMobile = useIsMobile();
 
@@ -138,8 +136,7 @@ const ProfileOverview: React.FC = () => {
   };
 
   return (
-    <SidebarLayout showSidebar={viewState === 'OwnerEdit'} avatarUrl={profileData?.profileImage}>
-      <EditorController isHomeUser={isOwner} page={'ProfileOverview'} />
+    <>
       <div className="container mx-auto px-4 py-20 max-w-4xl mt-8">
         {/* Header with Avatar */}
         <div className="mb-8">
@@ -193,8 +190,8 @@ const ProfileOverview: React.FC = () => {
           )}
         </div>
       </div>
-    </SidebarLayout>
-  );
+    </>
+        );
 };
 
 export default ProfileOverview;

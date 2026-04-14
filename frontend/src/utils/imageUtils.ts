@@ -1,1 +1,0 @@
-// Image utility functions can be added here in the future 
