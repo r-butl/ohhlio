@@ -1,23 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { AUTH_EVENTS } from "@/services/authService";
 
-type User = {
-  email: string;
-  username?: string;
-};
+import { UserInterface, AuthContextInterface } from "@/interfaces/UserAuthInterfaces";
 
-type AuthContextType = {
-  user: User | null;
-  token: string | null;
-  login: (token: string, user: User) => void;
-  logout: () => void;
-  isAuthenticated: boolean;
-};
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextInterface | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserInterface | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
   // On mount, load from localStorage
@@ -30,7 +19,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = useCallback((token: string, user: User) => {
+
+  // Login callback
+  const login = useCallback((token: string, user: UserInterface) => {
     setToken(token);
     setUser(user);
     localStorage.setItem("token", token);
@@ -38,6 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   }, []);
 
+  // Logout callback
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
@@ -45,6 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("user");
   }, []);
 
+
+  // forced log out callback
   useEffect(() => {
     if (typeof window === "undefined") return;
     const handleForcedLogout = () => {

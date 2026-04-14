@@ -38,7 +38,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             setMessage('Fill out all fields!');
             return;
         }
-        
+
+        if (password !== confirmPassword) {
+            setMessage('Passwords do not match.');
+            return;
+        }
+
         const body: any = { username, email, password };
         
         try {
@@ -120,6 +125,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Min. 8 characters with uppercase, lowercase, number, and special character.
+                    </p>
                 </div>
                 { password !== "" && <div className="grid gap-2">
                     <div className="flex items-center">

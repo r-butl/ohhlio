@@ -88,7 +88,7 @@ const updateUserProfile = async (req: AuthenticatedRequest, res: Response) => {
         }
 
         // Build update data object with only provided fields
-        const updateData: any = {};
+        const updateData: Record<string, unknown> = {};
         
         if (profileImageId !== undefined) {
             updateData.profileImageId = profileImageId;

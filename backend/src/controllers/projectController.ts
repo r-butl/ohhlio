@@ -1,9 +1,8 @@
-import { Response } from 'express';
-import path from 'path';
-import fs from 'fs';
+import { Request, Response } from 'express';
 const prisma = require('../models/db');
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { verifyToken } from '../utils/jwt';
+import { deleteAsset } from '../services/storageService';
 
 // Get all projects for the logged-in user
 export const getProjects = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -60,7 +59,7 @@ export const getProjectById = async (req: AuthenticatedRequest, res: Response): 
 };
 
 // Public: Get a single project by its ID if it is public
-export const getPublicProjectById = async (req: any, res: Response): Promise<void> => {
+export const getPublicProjectById = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
     const project = await prisma.project.findUnique({
@@ -85,7 +84,7 @@ export const getPublicProjectById = async (req: any, res: Response): Promise<voi
 };
 
 // Unified: public if not owner, private if owner (auth optional)
-export const getProjectUnified = async (req: any, res: Response): Promise<void> => {
+export const getProjectUnified = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params as { id: string };
   // Try optional token
   let requesterUserId: string | null = null;
@@ -116,7 +115,7 @@ export const getProjectUnified = async (req: any, res: Response): Promise<void> 
 };
 
 // Public: Get public projects for a user by username
-export const getPublicProjectsByUsername = async (req: any, res: Response): Promise<void> => {
+export const getPublicProjectsByUsername = async (req: Request, res: Response): Promise<void> => {
   const { username } = req.params as { username: string };
   try {
     const user = await prisma.user.findUnique({ where: { username }, select: { id: true } });
@@ -167,61 +166,30 @@ export const createProject = async (req: AuthenticatedRequest, res: Response): P
 };
 
 
-const deleteAsset = async (assetId: string) => {
-  try {
-    const asset = await prisma.asset.findUnique({
-      where: { id: assetId }
-    });
-
-    if (!asset) {
-      console.log(`Asset ${assetId} not found in database`);
-      return;
-    }
-
-    // Delete the file from disk
-    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
-    const filePath = path.join(uploadDir, asset.filePath);
-    
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      console.log(`Deleted file: ${filePath}`);
-    } else {
-      console.log(`File not found on disk: ${filePath}`);
-    }
-
-    // Delete the database entry
-    await prisma.asset.delete({
-      where: { id: assetId }
-    });
-    
-    console.log(`Deleted asset ${assetId} from database`);
-  } catch (error) {
-    console.error(`Error deleting asset ${assetId}:`, error);
-  }
-}
-
 // Helper function to find and delete orphaned assets
-const cleanupOrphanedAssets = async (projectId: string, oldItems: any, newItems: any) => {
+const cleanupOrphanedAssets = async (projectId: string, oldItems: Record<string, unknown>, newItems: Record<string, unknown>) => {
   try {
     // Extract asset IDs from old items
     const oldAssetIds = new Set<string>();
-    Object.values(oldItems).forEach((item: any) => {
-      if (item.props && item.props.assetId) {
-        oldAssetIds.add(item.props.assetId);
+    Object.values(oldItems).forEach((item: unknown) => {
+      const i = item as { props?: { assetId?: string } };
+      if (i.props && i.props.assetId) {
+        oldAssetIds.add(i.props.assetId);
       }
     });
 
     // Extract asset IDs from new items
     const newAssetIds = new Set<string>();
-    Object.values(newItems).forEach((item: any) => {
-      if (item.props && item.props.assetId) {
-        newAssetIds.add(item.props.assetId);
+    Object.values(newItems).forEach((item: unknown) => {
+      const i = item as { props?: { assetId?: string } };
+      if (i.props && i.props.assetId) {
+        newAssetIds.add(i.props.assetId);
       }
     });
 
     // Find orphaned assets (in old but not in new)
     const orphanedAssetIds = Array.from(oldAssetIds).filter(id => !newAssetIds.has(id));
-    
+
     console.log(`Found ${orphanedAssetIds.length} orphaned assets to delete`);
 
     // Delete orphaned assets

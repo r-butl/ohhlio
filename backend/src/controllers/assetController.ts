@@ -1,8 +1,9 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 const prisma = require('../models/db');
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
-import { upload, uploadFileToS3, deleteFileFromS3, getSignedDownloadUrl } from '../services/s3Service';
+import { upload, uploadFileToS3, getSignedDownloadUrl } from '../services/s3Service';
+import { deleteAsset as deleteAssetFromStorage } from '../services/storageService';
 
 // Upload a single file
 export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -117,7 +118,7 @@ export const getAssetById = async (req: AuthenticatedRequest, res: Response): Pr
 };
 
 // Public: Get asset by ID if it belongs to a public project
-export const getPublicAssetById = async (req: any, res: Response): Promise<void> => {
+export const getPublicAssetById = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
     const asset = await prisma.asset.findUnique({ where: { id } });
@@ -174,16 +175,7 @@ export const deleteAsset = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
 
-    // The filePath now contains the S3 key directly
-    const s3Key = asset.filePath;
-    
-    // Delete from S3
-    await deleteFileFromS3(s3Key);
-
-    // Delete from database
-    await prisma.asset.delete({
-      where: { id },
-    });
+    await deleteAssetFromStorage(id);
 
     res.status(204).send();
   } catch (error) {
@@ -261,12 +253,7 @@ export const uploadProfileImage = async (req: AuthenticatedRequest, res: Respons
           });
           
           if (oldAsset) {
-            // Delete from S3
-            await deleteFileFromS3(oldAsset.filePath);
-            // Delete from database
-            await prisma.asset.delete({
-              where: { id: currentUser.profileImageId }
-            });
+            await deleteAssetFromStorage(currentUser.profileImageId);
           }
         } catch (error) {
           console.error('Error deleting old profile image:', error);

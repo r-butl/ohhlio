@@ -1,10 +1,10 @@
 // frontend/src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import ProjectEditor from '@/pages/CreatorDashboard';
-import LoginRegister from '@/pages/Login';
+import ProjectEditor from '@/pages/private-views/CreatorDashboard';
+import LoginRegister from '@/pages/login/Login';
 import { UserProvider } from '@/context/UserContext';
-import ProfileOverview from '@/pages/ProfileOverview';
-
+import ProfileOverview from '@/pages/private-views/edit-profile/UserProfile';
+import CreatorDashboard from '@/pages/private-views/CreatorDashboard'
 import { Toaster } from 'sonner';
 
 function App() {

@@ -1,5 +1,5 @@
 import { generateToken } from '../utils/jwt';
-const bcrypt = require("bcrypt");
+import bcrypt from 'bcrypt';
 const prisma = require('../models/db');
 const validator = require('validator');
 import type { Request, Response } from 'express';
@@ -21,11 +21,6 @@ const register = async (req: Request, res: Response) => {
     // Check if the user already exists
     try {
 
-        // Check if the email has a valid format using regex
-        if (!validator.isEmail(email)) {
-            return res.status(400).json({ message: 'Invalid email format' });
-        }
-    
         // Check if the email already exists
         const existingEmail = await prisma.user.findUnique({ where: { email } });
         if (existingEmail) {
