@@ -24,6 +24,7 @@ model User {
   updatedAt DateTime  @updatedAt
   assets    Asset[]
   projects  Project[]
+  notes     Note[]
   description String?
   profileImage Asset? @relation("UserProfileImage", fields: [profileImageId], references: [id])
 }
@@ -40,6 +41,7 @@ model Project {
   updatedAt   DateTime @updatedAt
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   headerPhoto Asset?   @relation("ProjectHeaderPhoto", fields: [headerPhotoId], references: [id])
+  assets      ProjectAsset[]
 }
 
 model Asset {
@@ -50,9 +52,28 @@ model Asset {
   fileSize  Int
   type      String
   userId    String
-  projectId String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   headerForProject Project? @relation("ProjectHeaderPhoto")
-  profileForUser User? @relation("UserProfileImage")
+  profileForUser   User?    @relation("UserProfileImage")
+  projects         ProjectAsset[]
+}
+
+model ProjectAsset {
+  projectId String
+  assetId   String
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, assetId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  body      String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
