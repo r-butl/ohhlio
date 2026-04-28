@@ -5,6 +5,7 @@ import LoginRegister from '@/pages/login/Login';
 import { UserProvider } from '@/context/UserContext';
 import ProfileOverview from '@/pages/private-views/edit-profile/UserProfile';
 import CreatorDashboard from '@/pages/private-views/CreatorDashboard'
+import CapturePage from '@/pages/capture/CapturePage';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             <Route path="/:username/project" element={<ProjectEditor />} />
             <Route path="/:username/project/:projectId" element={<ProjectEditor />} />
             <Route path="/project" element={<ProjectEditor />} />
+            <Route path="/capture" element={<CapturePage />} />
             <Route path="/login" element={<LoginRegister />} />
             <Route path="/" element={<LoginRegister />} />
 
