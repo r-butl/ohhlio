@@ -5,6 +5,7 @@ import {
   getAssetById,
   getPublicAssetById,
   deleteAsset,
+  getBucketAssets,
 } from '../src/controllers/assetController';
 import { protect } from '../src/middleware/authMiddleware';
 
@@ -15,6 +16,9 @@ router.get('/public/:id', getPublicAssetById);
 
 // All remaining asset routes require authentication
 router.use(protect);
+
+// Get bucket assets (unlinked to any project)
+router.get('/bucket', getBucketAssets);
 
 // Upload a new asset
 router.post('/upload', uploadAsset);

@@ -20,6 +20,7 @@ const userRoutes = require('../api/userRoutes');
 const profileRoutes = require('../api/profileRoutes');
 const projectRoutes = require('../api/projectRoutes');
 const assetRoutes = require('../api/assetRoutes');
+const noteRoutes = require('../api/noteRoutes');
 
 // Serve static files with CORS headers (before helmet middleware)
 const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
@@ -61,6 +62,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/assets', assetRoutes);
+app.use('/api/notes', noteRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {

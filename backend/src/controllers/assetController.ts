@@ -50,12 +50,11 @@ export const uploadAsset = async (req: AuthenticatedRequest, res: Response): Pro
       const asset = await prisma.asset.create({
         data: {
           filename: req.file.originalname,
-          filePath: s3Key, // Store S3 key instead of URL
+          filePath: s3Key,
           mimeType: req.file.mimetype,
           fileSize: req.file.size,
           type: getAssetType(req.file.mimetype),
           userId,
-          projectId: projectId || null,
         },
       });
 
@@ -117,21 +116,24 @@ export const getAssetById = async (req: AuthenticatedRequest, res: Response): Pr
   }
 };
 
-// Public: Get asset by ID if it belongs to a public project
+// Public: Get asset by ID if it belongs to at least one public project
 export const getPublicAssetById = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
-    const asset = await prisma.asset.findUnique({ where: { id } });
+    const asset = await prisma.asset.findUnique({
+      where: { id },
+      include: {
+        projects: {
+          include: { project: { select: { isPublic: true } } },
+        },
+      },
+    });
     if (!asset) {
       res.status(404).json({ message: 'Asset not found' });
       return;
     }
-    if (!asset.projectId) {
-      res.status(403).json({ message: 'Asset is not publicly accessible' });
-      return;
-    }
-    const project = await prisma.project.findUnique({ where: { id: asset.projectId } });
-    if (!project || !project.isPublic) {
+    const isPublic = asset.projects.some((pa: { project: { isPublic: boolean } }) => pa.project.isPublic);
+    if (!isPublic) {
       res.status(403).json({ message: 'Asset is not publicly accessible' });
       return;
     }
@@ -220,7 +222,6 @@ export const uploadProfileImage = async (req: AuthenticatedRequest, res: Respons
       // Generate signed URL for immediate access
       const signedUrl = await getSignedDownloadUrl(s3Key);
       
-      // Create the asset
       const asset = await prisma.asset.create({
         data: {
           filename: req.file.originalname,
@@ -229,7 +230,6 @@ export const uploadProfileImage = async (req: AuthenticatedRequest, res: Respons
           fileSize: req.file.size,
           type: 'image',
           userId,
-          projectId: null, // Profile images are not associated with projects
         },
       });
 
@@ -276,10 +276,107 @@ export const uploadProfileImage = async (req: AuthenticatedRequest, res: Respons
   });
 };
 
+// Get all assets not linked to any project (the bucket)
+export const getBucketAssets = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: 'Not authenticated' });
+    return;
+  }
+  try {
+    const assets = await prisma.asset.findMany({
+      where: {
+        userId,
+        projects: { none: {} },
+        profileForUser: null,
+        headerForProject: null,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const assetsWithUrls = await Promise.all(
+      assets.map(async (asset: { id: string; filename: string; filePath: string; mimeType: string; fileSize: number; type: string; createdAt: Date }) => ({
+        id: asset.id,
+        filename: asset.filename,
+        filePath: await getSignedDownloadUrl(asset.filePath),
+        mimeType: asset.mimeType,
+        fileSize: asset.fileSize,
+        type: asset.type,
+        createdAt: asset.createdAt,
+      }))
+    );
+
+    res.json(assetsWithUrls);
+  } catch (error) {
+    console.error('Error fetching bucket assets:', error);
+    res.status(500).json({ message: 'Error fetching bucket assets' });
+  }
+};
+
+// Link an asset to a project
+export const linkAssetToProject = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const userId = req.user?.id;
+  const { id: projectId, assetId } = req.params;
+  if (!userId) {
+    res.status(401).json({ message: 'Not authenticated' });
+    return;
+  }
+  try {
+    const [project, asset] = await Promise.all([
+      prisma.project.findUnique({ where: { id: projectId } }),
+      prisma.asset.findUnique({ where: { id: assetId } }),
+    ]);
+    if (!project || project.userId !== userId) {
+      res.status(403).json({ message: 'Not authorized' });
+      return;
+    }
+    if (!asset || asset.userId !== userId) {
+      res.status(403).json({ message: 'Not authorized' });
+      return;
+    }
+    await prisma.projectAsset.upsert({
+      where: { projectId_assetId: { projectId, assetId } },
+      update: {},
+      create: { projectId, assetId },
+    });
+    res.status(201).json({ projectId, assetId });
+  } catch (error) {
+    console.error('Error linking asset to project:', error);
+    res.status(500).json({ message: 'Error linking asset to project' });
+  }
+};
+
+// Unlink an asset from a project
+export const unlinkAssetFromProject = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const userId = req.user?.id;
+  const { id: projectId, assetId } = req.params;
+  if (!userId) {
+    res.status(401).json({ message: 'Not authenticated' });
+    return;
+  }
+  try {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project || project.userId !== userId) {
+      res.status(403).json({ message: 'Not authorized' });
+      return;
+    }
+    await prisma.projectAsset.delete({
+      where: { projectId_assetId: { projectId, assetId } },
+    });
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error unlinking asset from project:', error);
+    res.status(500).json({ message: 'Error unlinking asset from project' });
+  }
+};
+
 module.exports = {
   uploadAsset,
   uploadProfileImage,
   getAssetById,
   getPublicAssetById,
   deleteAsset,
+  getBucketAssets,
+  linkAssetToProject,
+  unlinkAssetFromProject,
 }; 

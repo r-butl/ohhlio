@@ -6,6 +6,7 @@ import {
   updateProject,
   deleteProject,
 } from '../src/controllers/projectController';
+import { linkAssetToProject, unlinkAssetFromProject } from '../src/controllers/assetController';
 import { protect } from '../src/middleware/authMiddleware';
 
 const router = Router();
@@ -23,5 +24,8 @@ router.route('/')
 router.route('/:id')
   .put(updateProject)
   .delete(deleteProject);
+
+router.post('/:id/assets/:assetId', linkAssetToProject);
+router.delete('/:id/assets/:assetId', unlinkAssetFromProject);
 
 module.exports = router;
