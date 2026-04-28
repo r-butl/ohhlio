@@ -39,3 +39,19 @@ Uploaded files are stored in the configured upload directory with unique filenam
 1. Install dependencies: `npm install`
 2. Run database migrations: `npx prisma migrate dev`
 3. Start the server: `npm run dev` 
+
+
+## Reseting DB Completely
+
+If Docker is using an old/corrupted volume where no password was set during initialization. Fix it by removing the stale volume and restarting:  
+
+```
+docker-compose down -v
+docker-compose up -d postgres                                                                              
+```                                                                                            
+
+The -v removes the named volume (postgres_data) so Postgres reinitializes cleanly with the credentials in the compose file. Then run migrations: 
+
+```
+cd backend && npm run db:migrate
+```
