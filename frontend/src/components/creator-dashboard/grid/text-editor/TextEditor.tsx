@@ -2,8 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
-import FontFamily from '@tiptap/extension-font-family';
-import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import CharacterCount from '@tiptap/extension-character-count';
 
@@ -63,8 +61,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
     extensions: [
       StarterKit,
       TextStyle,
-      FontFamily,
-      Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph', 'listItem', 'bulletList', 'orderedList'],
         defaultAlignment: textAlignHorizontal,
@@ -153,32 +149,24 @@ const TextEditor: React.FC<TextEditorProps> = ({
 
     if (!editor) return;
 
-    const handleToggleBold = ( { id: targetId }: { id: string }) => {
+    const handleSetHeading = ({ id: targetId, level }: { id: string; level: 1 | 2 | 3 | 4 | 5 | 6 }) => {
       if (targetId === id) {
-        editor.chain().focus().toggleBold().run();
+        editor.chain().focus().toggleHeading({ level }).run();
       }
     };
 
-    const handleToggleItalic = ( { id: targetId }: { id: string }) => {
+    const handleSetParagraph = ({ id: targetId }: { id: string }) => {
       if (targetId === id) {
-        editor.chain().focus().toggleItalic().run();
+        editor.chain().focus().setParagraph().run();
       }
     };
 
-    const handleToggleUnderline = ( { id: targetId }: { id: string }) => {
-      if (targetId === id) {
-        editor.chain().focus().toggleUnderline().run();
-      }
-    };
-
-    emitter.on("toggle:bold", handleToggleBold);
-    emitter.on("toggle:italic", handleToggleItalic);
-    emitter.on("toggle:underline", handleToggleUnderline);
+    emitter.on('set:heading', handleSetHeading);
+    emitter.on('set:paragraph', handleSetParagraph);
 
     return () => {
-      emitter.off("toggle:bold", handleToggleBold);
-      emitter.off("toggle:italic", handleToggleItalic);
-      emitter.off("toggle:underline", handleToggleUnderline);
+      emitter.off('set:heading', handleSetHeading);
+      emitter.off('set:paragraph', handleSetParagraph);
     };
 
   }, [editor, id]);
