@@ -38,7 +38,7 @@ const ProjectInfo: React.FC = () => {
       }
     };
     loadAsset();
-  }, [projectHeader.headerPhotoId]);
+  }, [projectHeader.headerPhotoId, isOwnerEdit, getAssetFromCacheOrBackend]);
 
   const handleDescriptionSave = async (description: string) => {
     await updateProjectDescription(description);
