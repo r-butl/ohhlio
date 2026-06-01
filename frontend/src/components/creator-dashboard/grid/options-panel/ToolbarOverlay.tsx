@@ -45,7 +45,7 @@ const ToolbarOverlay: React.FC = () => {
   return createPortal(
     <div
       ref={containerRef}
-      className="options-panel"
+      className="rounded-xl shadow-xl border border-border bg-background min-w-[220px]"
       style={{
         position: 'absolute',
         top: position.top,
@@ -53,21 +53,17 @@ const ToolbarOverlay: React.FC = () => {
         zIndex: 2000
       }}
     >
-      <div className="panel-header">
-        <button 
-          onClick={() => {
-            setActiveEditor(null);
-          }} 
-          className="close-button" 
+      <div className="relative h-6">
+        <button
+          onClick={() => setActiveEditor(null)}
+          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground text-lg leading-none"
           aria-label="Close"
         >
           ×
         </button>
       </div>
-      <div className="panel-content">
-        <div className="options-content">
-          <ToolbarComponent id={activeEditor} />
-        </div>
+      <div className="px-4 pb-4 flex flex-col gap-3">
+        <ToolbarComponent id={activeEditor} />
       </div>
     </div>,
     document.getElementById('option-panel-root') || document.body

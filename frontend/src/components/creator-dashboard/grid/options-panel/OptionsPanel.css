@@ -22,16 +22,17 @@
 
 .drop-down label {
   font-size: 12px;
-  color: #666;
+  color: hsl(var(--muted-foreground));
   font-weight: 500;
 }
 
 .font-family-select,
 .font-size-select {
   padding: 6px 8px;
-  border: 1px solid #ddd;
+  border: 1px solid hsl(var(--border));
   border-radius: 4px;
-  background: white;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   cursor: pointer;
   min-width: 100px;
 }
@@ -44,7 +45,7 @@
 
 .button-group label {
   font-size: 12px;
-  color: #666;
+  color: hsl(var(--muted-foreground));
   margin-bottom: 2px;
 }
 
@@ -55,20 +56,21 @@
 
 .format-button {
   padding: 4px 8px;
-  border: 1px solid #ccc;
+  border: 1px solid hsl(var(--border));
   border-radius: 4px;
-  background: white;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   cursor: pointer;
   min-width: 30px;
 }
 
 .format-button:hover {
-  background-color: #f0f0f0;
+  background-color: hsl(var(--muted));
 }
 
 .format-button.active {
-  background-color: #e0e0e0;
-  border-color: #666;
+  background-color: hsl(var(--muted));
+  border-color: hsl(var(--border));
 }
 
 .cancel-button {
@@ -111,17 +113,18 @@
 
 .option-button {
   padding: 6px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid hsl(var(--border));
   border-radius: 4px;
-  background: white;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease;
 }
 
 .option-button:hover {
-  background: #f8f9fa;
-  border-color: #adb5bd;
+  background: hsl(var(--muted));
+  border-color: hsl(var(--border));
 }
 
 /* Options Toggle Button (for the grid item) */
