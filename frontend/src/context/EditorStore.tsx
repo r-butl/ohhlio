@@ -416,12 +416,12 @@ export const useEditorStore = create<State>((set, get) => ({
       x: position.x,
       y: position.y,
       w: ITEM_W,
-      h: 200,
+      h: 45,
       i: id,
       minW: ITEM_W,
       minH: 1,
       maxW: gridColumnCount,
-      maxH: 1000,
+      maxH: 200,
     };
     
     

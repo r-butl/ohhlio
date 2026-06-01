@@ -43,6 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (typeof window === "undefined") return;
     const handleForcedLogout = () => {
       logout();
+      sessionStorage.setItem("auth:session-expired", "1");
+      window.location.href = "/login";
     };
     window.addEventListener(AUTH_EVENTS.FORCE_LOGOUT, handleForcedLogout);
     return () => {

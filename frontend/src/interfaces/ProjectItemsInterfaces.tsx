@@ -24,17 +24,17 @@ export interface ItemProps {
     id: string;
     type: 'text' | 'image';
     layout: ItemLayoutProps;
-    contents: ImageProps | TextProps;
+    props: ImageProps | TextProps;
 }
 
 
 export interface ProjectHeader {
-    title: string;
+    title?: string;
     description?: string;
-    headerPhoto?: ImageProps;
+    headerPhotoId?: string;
 }
-  
+
 export interface ProjectProps {
     projectHeader: ProjectHeader
-    items: ItemProps[]
+    items: Record<string, ItemProps>
 }
