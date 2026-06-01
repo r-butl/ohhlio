@@ -92,3 +92,7 @@
     color: hsl(var(--system-foreground));
   }
 }
+
+.react-grid-item {
+  border-radius: 10px;
+}
