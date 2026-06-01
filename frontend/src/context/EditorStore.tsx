@@ -16,6 +16,19 @@ import {
 
 enablePatches()
 
+export interface TextItemProps {
+  content: string;
+  fontFamily: string;
+  fontSize: number;
+  textAlignVertical: 'top' | 'center' | 'bottom';
+  textAlignHorizontal: 'left' | 'center' | 'right';
+  isBold: boolean;
+  isItalic: boolean;
+  isUnderline: boolean;
+  maxChars: number;
+  charCount: number;
+  textStyle?: 'heading' | 'paragraph';
+}
 
 // State information for the Editor page
 type ViewState = 'PublicView' | 'OwnerEdit' | 'OwnerPreview'
@@ -319,7 +332,8 @@ export const useEditorStore = create<State>((set, get) => ({
       isItalic: false,
       isUnderline: false,
       maxChars: 1000,
-      charCount: 0
+      charCount: 0,
+      textStyle: 'paragraph' as const,
     };
 
     let layout_config ={
