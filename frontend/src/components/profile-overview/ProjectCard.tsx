@@ -38,14 +38,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             }
         }
         loadAsset();
-    }, [project.headerPhotoId])
+    }, [project.headerPhotoId, getAssetFromCacheOrBackend])
 
     return (
      <Card 
         key={project.projectId} 
         className="hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
         onClick={() => {
-            console.log(`Navigating to ${project}`)
             navigateToProject(project.id, username || '')
         }}
     >
