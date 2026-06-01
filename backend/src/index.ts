@@ -47,14 +47,6 @@ app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Add request logging middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(`🔍 ${req.method} ${req.path}`);
-  console.log(`📊 Content-Length: ${req.headers['content-length']}`);
-  console.log(`📋 Content-Type: ${req.headers['content-type']}`);
-  console.log(`👤 User-Agent: ${req.headers['user-agent']}`);
-  next();
-});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -88,13 +80,7 @@ if (process.env.NODE_ENV !== 'test') {
       await prisma.$connect();
       console.log('✅ Database connected successfully');
       
-      // Test database connection
-      console.log('🔄 Testing database connection...');
-      await prisma.$executeRaw`SELECT 1`;
-      console.log('✅ Database connection successful');
-      
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log('🔍 Console logging is working!');
     } catch (error) {
       console.error('❌ Database connection failed:', error);
       process.exit(1);
