@@ -36,6 +36,7 @@ type ViewState = 'PublicView' | 'OwnerEdit' | 'OwnerPreview'
 type State = {
 
   currentProject: ProjectProps
+  projectId: string | null        // ID of the currently loaded project
 
   viewState: ViewState            // Source of truth for view mode
   activeEditor: string | null     // ID of the current item being edited
@@ -366,37 +367,35 @@ export const useEditorStore = create<State>((set, get) => ({
     const items = currentProject.items;
     const id = String(Date.now())
     
-    // Find the next available position in a grid pattern
+    const ITEM_W = 2;
+
+    // Place 2-wide images row-wise: fill x=0 then x=2, then next row
     const findNextPosition = () => {
       const existingItems = Object.values(items);
-      
+
       if (existingItems.length === 0) {
         return { x: 0, y: 0 };
       }
-      
-      // Find the highest Y coordinate
-      const maxY = Math.max(...existingItems.map(item => item.layout.y + item.layout.h));
-      
-      // Find items at the current row (maxY)
-      const itemsAtCurrentRow = existingItems.filter(item => 
-        item.layout.y < maxY && item.layout.y + item.layout.h >= maxY
+
+      // For each valid x slot, find how far down that column group extends
+      const slots = Array.from(
+        { length: Math.floor(gridColumnCount / ITEM_W) },
+        (_, i) => i * ITEM_W
       );
-      
-      // Check if there's space in the current row
-      const usedXPositions = itemsAtCurrentRow.map(item => item.layout.x);
-      let nextX = 0;
-      
-      while (usedXPositions.includes(nextX)) {
-        nextX++;
-      }
-      
-      // If we can fit in current row, use it
-      if (nextX < gridColumnCount) {
-        return { x: nextX, y: maxY };
-      }
-      
-      // Otherwise, start a new row
-      return { x: 0, y: maxY };
+
+      const slotBottoms = slots.map(slotX => {
+        const overlapping = existingItems.filter(item =>
+          item.layout.x < slotX + ITEM_W && item.layout.x + item.layout.w > slotX
+        );
+        const bottom = overlapping.length > 0
+          ? Math.max(...overlapping.map(item => item.layout.y + item.layout.h))
+          : 0;
+        return { x: slotX, y: bottom };
+      });
+
+      // Pick the slot with the lowest bottom (ties broken by leftmost x)
+      slotBottoms.sort((a, b) => a.y - b.y || a.x - b.x);
+      return { x: slotBottoms[0].x, y: slotBottoms[0].y };
     };
     
     const position = findNextPosition();
@@ -413,16 +412,16 @@ export const useEditorStore = create<State>((set, get) => ({
       isUploading: false
     };
 
-    layout_config ={
+    layout_config = {
       x: position.x,
       y: position.y,
-      w: 1,
-      h: 30,
+      w: ITEM_W,
+      h: 200,
       i: id,
-      minW: 1,  
-      minH: 30,
+      minW: ITEM_W,
+      minH: 1,
       maxW: gridColumnCount,
-      maxH: 200,
+      maxH: 1000,
     };
     
     
