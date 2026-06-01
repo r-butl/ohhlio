@@ -104,7 +104,7 @@ const EditableHeaderImage: React.FC<EditableHeaderImageProps> = ({
               alt={alt} 
               className="w-full h-full object-cover"
             />
-          ) : null}
+          ) : <></>}
         </div>
       )}
     </div>
