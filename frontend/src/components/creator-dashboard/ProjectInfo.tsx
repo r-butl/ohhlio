@@ -23,9 +23,10 @@ const ProjectInfo: React.FC = () => {
     const loadAsset = async () => {
       if (projectHeader.headerPhotoId) {
         try {
-          if (isOwnerEdit) {
-        const asset = await getAssetFromCacheOrBackend(projectHeader.headerPhotoId);
-        setHeaderPhotoURL(asset);
+          const token = localStorage.getItem('token');
+          if (token) {
+            const asset = await getAssetFromCacheOrBackend(projectHeader.headerPhotoId);
+            setHeaderPhotoURL(asset);
           } else {
             const url = await getPublicAssetById(projectHeader.headerPhotoId);
             setHeaderPhotoURL(url);
@@ -38,7 +39,7 @@ const ProjectInfo: React.FC = () => {
       }
     };
     loadAsset();
-  }, [projectHeader.headerPhotoId, isOwnerEdit, getAssetFromCacheOrBackend]);
+  }, [projectHeader.headerPhotoId, getAssetFromCacheOrBackend]);
 
   const handleDescriptionSave = async (description: string) => {
     await updateProjectDescription(description);
@@ -70,15 +71,17 @@ const ProjectInfo: React.FC = () => {
       <div className="px-6 py-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
           {/* Header Image */}
-          <div className="mb-4 w-full">
-            <EditableHeaderImage
-              imageUrl={headerPhotoURL}
-              alt={`${projectHeader.title} header image`}
-              height={isMobile ? "md" : "md"}
-              onImageUpload={handleHeaderImageUpload}
-              disabled={!isOwnerEdit}
-            />
-          </div>
+          {(isOwnerEdit || headerPhotoURL) && (
+            <div className="mb-4 w-full">
+              <EditableHeaderImage
+                imageUrl={headerPhotoURL}
+                alt={`${projectHeader.title} header image`}
+                height={isMobile ? "md" : "md"}
+                onImageUpload={handleHeaderImageUpload}
+                disabled={!isOwnerEdit}
+              />
+            </div>
+          )}
           
           {/* Project Info */}
           <div className="flex items-start justify-between">
