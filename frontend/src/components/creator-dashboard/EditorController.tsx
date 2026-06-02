@@ -43,10 +43,11 @@ const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser, page = 
                     {isHomeUser && (
                         <>
                             {(viewState === 'OwnerEdit' || viewState === 'OwnerPreview') && (
+
                                 <PreviewButton isHomeUser={isHomeUser} />
                             )}
                             {(page === 'ProjectView') && !isMobile && viewState === 'OwnerEdit' && (
-                    <PublishButton />
+                                <PublishButton />
                             )}
                         </>
                     )}

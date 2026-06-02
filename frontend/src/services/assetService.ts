@@ -122,7 +122,7 @@ export const getAssetById = async (id: string) => {
     
     const token = getAuthToken();
     if (!token) {
-        throw new Error('No authentication token found');
+        return getPublicAssetById(id);
     }
 
     const response = await fetch(`${API_URL}/${id}`, {

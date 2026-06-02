@@ -112,7 +112,13 @@ export const useEditorStore = create<State>((set, get) => ({
 
   // UI State
   activeEditor: null,
-  viewState: 'PublicView',
+  viewState: (() => {
+    try {
+      const saved = localStorage.getItem('viewState') as ViewState | null;
+      if (saved === 'OwnerEdit' || saved === 'OwnerPreview') return saved;
+    } catch {}
+    return 'PublicView';
+  })(),
   buttonHovered: false,
   activeOptionsPanel: null,
   fileUploadSelected: false,
@@ -367,7 +373,7 @@ export const useEditorStore = create<State>((set, get) => ({
     const items = currentProject.items;
     const id = String(Date.now())
     
-    const ITEM_W = 2;
+    const ITEM_W = 1;
 
     // Place 2-wide images row-wise: fill x=0 then x=2, then next row
     const findNextPosition = () => {
@@ -379,13 +385,13 @@ export const useEditorStore = create<State>((set, get) => ({
 
       // For each valid x slot, find how far down that column group extends
       const slots = Array.from(
-        { length: Math.floor(gridColumnCount / ITEM_W) },
-        (_, i) => i * ITEM_W
+        { length: Math.floor(gridColumnCount / 2) },
+        (_, i) => i * 2
       );
 
       const slotBottoms = slots.map(slotX => {
         const overlapping = existingItems.filter(item =>
-          item.layout.x < slotX + ITEM_W && item.layout.x + item.layout.w > slotX
+          item.layout.x < slotX + 2 && item.layout.x + item.layout.w > slotX
         );
         const bottom = overlapping.length > 0
           ? Math.max(...overlapping.map(item => item.layout.y + item.layout.h))
@@ -415,10 +421,10 @@ export const useEditorStore = create<State>((set, get) => ({
     layout_config = {
       x: position.x,
       y: position.y,
-      w: ITEM_W,
+      w: 2,
       h: 45,
       i: id,
-      minW: ITEM_W,
+      minW: 1,
       minH: 1,
       maxW: gridColumnCount,
       maxH: 200,
