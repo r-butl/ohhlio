@@ -146,7 +146,9 @@ export const getUnifiedProjectById = async (id: string) => {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to fetch project');
+        const err = new Error(errorData.message || 'Failed to fetch project') as Error & { status: number };
+        err.status = response.status;
+        throw err;
     }
 
     return response.json();

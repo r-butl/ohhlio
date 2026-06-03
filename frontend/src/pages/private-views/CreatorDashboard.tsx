@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Renderer from '@/components/creator-dashboard/grid/EditorGrid';
 import EditorController from '@/components/creator-dashboard/EditorController';
 import ProjectInfo from '@/components/creator-dashboard/ProjectInfo';
@@ -20,21 +20,31 @@ const CreatorDashboard: React.FC = () => {
   const storeProjectId = useEditorStore(state => state.projectId);
 
   const [loadingOnRefresh, setLoadingOnRefresh] = useState(false);
+  // null = unknown (pending verification), true = allowed, false = denied
+  const [canView, setCanView] = useState<boolean | null>(null);
 
   const hasNoItems = useEditorStore(
     state => !state.currentProject.items || Object.keys(state.currentProject.items).length === 0
   );
 
+  const navigate = useNavigate();
   const { user, profileData } = useUserContext();
   const { username, projectId: urlProjectId } = useParams<{ username: string; projectId: string }>();
   const isHomeUser = user?.username === username;
 
-  // On direct load or refresh, the store is empty — fetch the project from the URL param
+  // On direct load, refresh, or auth state change — re-verify access to the project
   useEffect(() => {
-    if (!urlProjectId || storeProjectId === urlProjectId) return;
+    // No project in URL — this is the new-project page, always accessible
+    if (!urlProjectId) {
+      setCanView(true);
+      return;
+    }
 
+    // Re-fetch whenever the URL project or the logged-in user changes so that
+    // a logout clears stale store data and triggers a 403 redirect.
     const load = async () => {
       setLoadingOnRefresh(true);
+      setCanView(null);
       try {
         const project = await getUnifiedProjectById(urlProjectId);
         if (project) {
@@ -46,16 +56,22 @@ const CreatorDashboard: React.FC = () => {
             headerPhotoId: project.headerPhotoId,
           });
           await loadProjectAssets();
+          setCanView(true);
         }
-      } catch {
-        // leave hasNoItems true — the empty state will render
+      } catch (err) {
+        const status = (err as Error & { status?: number }).status;
+        if (status === 403 || status === 404) {
+          setCanView(false);
+          navigate(`/${username}`);
+          return;
+        }
       } finally {
         setLoadingOnRefresh(false);
       }
     };
 
     load();
-  }, [urlProjectId]);
+  }, [urlProjectId, user]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -73,18 +89,22 @@ const CreatorDashboard: React.FC = () => {
     <SidebarLayout showSidebar={viewState === 'OwnerEdit'} avatarUrl={profileData.profileImage}>
       <div className="project-page">
         <EditorController isHomeUser={isHomeUser} page={'ProjectView'} />
-        <ProjectInfo />
-        {loadingOnRefresh ? (
+        {canView === null || loadingOnRefresh ? (
           <div className="min-h-[200px] flex items-center justify-center">
             <div className="animate-pulse text-muted-foreground text-sm">Loading project...</div>
           </div>
-        ) : showEmpty ? (
-          <div className="min-h-[200px] flex items-center justify-center text-gray-500">
-            {viewState === 'OwnerEdit' ? 'Start by adding content.' : 'No content yet.'}
-          </div>
-        ) : (
-          <Renderer />
-        )}
+        ) : canView ? (
+          <>
+            <ProjectInfo />
+            {showEmpty ? (
+              <div className="min-h-[200px] flex items-center justify-center text-gray-500">
+                {viewState === 'OwnerEdit' ? 'Start by adding content.' : 'No content yet.'}
+              </div>
+            ) : (
+              <Renderer />
+            )}
+          </>
+        ) : null}
       </div>
     </SidebarLayout>
   );
