@@ -7,10 +7,9 @@ interface EditableDescriptionProps {
   onSave: (description: string) => Promise<void>;
   placeholder?: string;
   className?: string;
-  textClassName?: string;
   textareaClassName?: string;
   buttonSize?: 'sm' | 'default' | 'lg';
-  disabled?: boolean;
+  isEditable?: boolean;
 }
 
 const EditableDescription: React.FC<EditableDescriptionProps> = ({
@@ -18,10 +17,10 @@ const EditableDescription: React.FC<EditableDescriptionProps> = ({
   onSave,
   placeholder = "Enter description...",
   className = "",
-  textClassName = "text-muted-foreground text-lg cursor-pointer hover:bg-muted/50 p-2 rounded transition-colors",
   textareaClassName = "min-h-[80px] resize-none",
   buttonSize = "sm",
-  disabled = false
+  isEditable = false,
+
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempDescription, setTempDescription] = useState(description);
@@ -52,7 +51,7 @@ const EditableDescription: React.FC<EditableDescriptionProps> = ({
   };
 
   const handleStartEditing = () => {
-    if (disabled) return;
+    if (!isEditable) return;
     setTempDescription(description);
     setIsEditing(true);
   };
@@ -87,17 +86,16 @@ const EditableDescription: React.FC<EditableDescriptionProps> = ({
         </div>
       ) : (
 
-        description ? (
-        <p
-          className={disabled ? `text-muted-foreground text-sm p-1 rounded` : textClassName}
-          style={disabled ? { cursor: 'default' } : {}}
-          onClick={disabled ? () => {} : handleStartEditing}
-        >
-          {description}
-        </p>
-        ) : (
-          <></>
+        ((isEditable || description) &&
+          <p
+            className={isEditing ? `text-muted-foreground text-sm p-1 rounded` : `text-sm text-muted-foreground line-clamp-2 cursor-pointer p-1 rounded transition-colors ${ isEditable ? 'hover:bg-muted/100' : '' }`}
+            style={!isEditable ? { cursor: 'default' } : {}}
+            onClick={handleStartEditing}
+          >
+            {description || placeholder}
+          </p>
         )
+        
       )}
     </div>
   );

@@ -95,9 +95,8 @@ const ProjectInfo: React.FC = () => {
                 description={projectHeader.description || ""}
                 onSave={handleDescriptionSave}
                 placeholder="Add a project description..."
-                textClassName="text-sm text-muted-foreground line-clamp-2 cursor-pointer hover:bg-muted/50 p-1 rounded transition-colors"
                 textareaClassName="min-h-[60px] resize-none text-sm"
-                disabled={!isOwnerEdit}
+                isEditable={isOwnerEdit}
               />
             </div>
           </div>
