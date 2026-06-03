@@ -87,7 +87,7 @@ const CreatorDashboard: React.FC = () => {
 
   return (
     <SidebarLayout showSidebar={viewState === 'OwnerEdit'} avatarUrl={profileData.profileImage}>
-      <div className="project-page">
+      <div className="project-page px-6">
         <EditorController isHomeUser={isHomeUser} page={'ProjectView'} />
         {canView === null || loadingOnRefresh ? (
           <div className="min-h-[200px] flex items-center justify-center">

@@ -86,20 +86,17 @@ const EditableDescription: React.FC<EditableDescriptionProps> = ({
           </div>
         </div>
       ) : (
-        disabled ? (
-          <p 
-            className={`text-muted-foreground text-sm p-1 rounded`}
-            style={{ cursor: 'default' }}
-          >
-            {description || placeholder}
-          </p>
+
+        description ? (
+        <p
+          className={disabled ? `text-muted-foreground text-sm p-1 rounded` : textClassName}
+          style={disabled ? { cursor: 'default' } : {}}
+          onClick={disabled ? () => {} : handleStartEditing}
+        >
+          {description}
+        </p>
         ) : (
-          <p 
-            className={textClassName}
-            onClick={handleStartEditing}
-          >
-            {description || placeholder}
-          </p>
+          <></>
         )
       )}
     </div>
