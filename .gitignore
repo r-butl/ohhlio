@@ -1,6 +1,6 @@
 # Local Netlify folder
 .netlify
-
+.DS_Store
 # Backend
 backend/node_modules/
 backend/dist/

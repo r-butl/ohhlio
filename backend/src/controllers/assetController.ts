@@ -126,13 +126,16 @@ export const getPublicAssetById = async (req: Request, res: Response): Promise<v
         projects: {
           include: { project: { select: { isPublic: true } } },
         },
+        headerForProject: { select: { isPublic: true } },
       },
     });
     if (!asset) {
       res.status(404).json({ message: 'Asset not found' });
       return;
     }
-    const isPublic = asset.projects.some((pa: { project: { isPublic: boolean } }) => pa.project.isPublic);
+    const isPublic =
+      asset.projects.some((pa: { project: { isPublic: boolean } }) => pa.project.isPublic) ||
+      asset.headerForProject?.isPublic === true;
     if (!isPublic) {
       res.status(403).json({ message: 'Asset is not publicly accessible' });
       return;

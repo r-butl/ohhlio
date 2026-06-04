@@ -158,6 +158,7 @@ export const createProject = async (req: AuthenticatedRequest, res: Response): P
         userId,
       },
     });
+    await syncProjectAssets(newProject.id, items);
     res.status(201).json(newProject);
   } catch (error) {
     console.error('Error creating project:', error);
@@ -165,6 +166,26 @@ export const createProject = async (req: AuthenticatedRequest, res: Response): P
   }
 };
 
+
+const extractAssetIds = (items: Record<string, unknown>): string[] => {
+  const ids: string[] = [];
+  Object.values(items).forEach((item: unknown) => {
+    const i = item as { props?: { assetId?: string } };
+    if (i.props?.assetId) ids.push(i.props.assetId);
+  });
+  return ids;
+};
+
+const syncProjectAssets = async (projectId: string, items: Record<string, unknown>) => {
+  const assetIds = extractAssetIds(items);
+  await prisma.projectAsset.deleteMany({ where: { projectId } });
+  if (assetIds.length > 0) {
+    await prisma.projectAsset.createMany({
+      data: assetIds.map((assetId: string) => ({ projectId, assetId })),
+      skipDuplicates: true,
+    });
+  }
+};
 
 // Helper function to find and delete orphaned assets
 const cleanupOrphanedAssets = async (projectId: string, oldItems: Record<string, unknown>, newItems: Record<string, unknown>) => {
@@ -250,6 +271,9 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response): P
         headerPhotoId,
       },
     });
+    if (items !== undefined) {
+      await syncProjectAssets(id, items);
+    }
     res.json(updatedProject);
   } catch (error) {
     console.error(`Error updating project ${id}:`, error);
