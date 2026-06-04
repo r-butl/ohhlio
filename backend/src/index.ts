@@ -6,13 +6,31 @@ const dotenv = require('dotenv');
 const path = require('path');
 const prisma = require('./models/db');
 
+import fs from 'fs';
 import { Request, Response, NextFunction } from 'express';
+import { createMetaRouter, buildMetaTags } from './middleware/metaMiddleware';
+import { sitemapHandler } from './controllers/sitemapController';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+const FRONTEND_DIST_PATH = process.env.FRONTEND_DIST_PATH || path.join(__dirname, '../../frontend/dist');
+const INDEX_HTML_PATH = path.join(FRONTEND_DIST_PATH, 'index.html');
+
+let indexHtml = '';
+if (fs.existsSync(INDEX_HTML_PATH)) {
+  indexHtml = fs.readFileSync(INDEX_HTML_PATH, 'utf-8');
+}
+
+const genericMetaTags = buildMetaTags({
+  title: 'Ohhlio',
+  description: 'Build and share your portfolio with Ohhlio.',
+  url: process.env.APP_URL || 'https://ohhlio.com',
+});
+const genericHtml = indexHtml ? indexHtml.replaceAll('<!-- META_TAGS -->', genericMetaTags) : '';
 
 // Routers
 const authRoutes = require('../api/authRoutes');
@@ -30,6 +48,18 @@ app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   next();
 }, express.static(uploadDir));
+
+// Serve built frontend assets (JS, CSS, images) without serving index.html
+app.use(express.static(FRONTEND_DIST_PATH, { index: false }));
+
+// robots.txt
+app.get('/robots.txt', (_req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(`User-agent: *\nAllow: /\nSitemap: ${process.env.APP_URL || 'https://ohhlio.com'}/sitemap.xml`);
+});
+
+// sitemap.xml
+app.get('/sitemap.xml', sitemapHandler);
 
 // Middleware
 app.use(helmet());
@@ -67,9 +97,23 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// 404 handler
-app.use('/*', (req: Request, res: Response) => {
+// Per-route meta tag injection for profile and project pages
+if (indexHtml) {
+  app.use(createMetaRouter(indexHtml));
+}
+
+// API 404 — JSON response for unknown API routes
+app.use('/api/*', (_req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });
+});
+
+// SPA catch-all — serve index.html with generic meta for all other routes
+app.use((_req: Request, res: Response) => {
+  if (genericHtml) {
+    res.send(genericHtml);
+  } else {
+    res.status(404).json({ error: 'Frontend not built' });
+  }
 });
 
 // Only start the server if not in test mode
