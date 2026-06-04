@@ -24,15 +24,17 @@ export interface MetaTagOptions {
 
 export function buildMetaTags(opts: MetaTagOptions): string {
   const { title, description, url, ogImage } = opts;
+  const escapedUrl = escHtml(url);
+  const escapedOgImage = ogImage ? escHtml(ogImage) : undefined;
   const tags = [
     `  <title>${escHtml(title)}</title>`,
     `  <meta name="description" content="${escHtml(description)}" />`,
     `  <meta property="og:title" content="${escHtml(title)}" />`,
     `  <meta property="og:description" content="${escHtml(description)}" />`,
-    `  <meta property="og:url" content="${url}" />`,
+    `  <meta property="og:url" content="${escapedUrl}" />`,
   ];
-  if (ogImage) {
-    tags.push(`  <meta property="og:image" content="${ogImage}" />`);
+  if (escapedOgImage) {
+    tags.push(`  <meta property="og:image" content="${escapedOgImage}" />`);
   }
   return tags.join('\n');
 }
