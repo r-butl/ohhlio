@@ -49,18 +49,6 @@ app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
   next();
 }, express.static(uploadDir));
 
-// Serve built frontend assets (JS, CSS, images) without serving index.html
-app.use(express.static(FRONTEND_DIST_PATH, { index: false }));
-
-// robots.txt
-app.get('/robots.txt', (_req: Request, res: Response) => {
-  res.setHeader('Content-Type', 'text/plain');
-  res.send(`User-agent: *\nAllow: /\nSitemap: ${process.env.APP_URL || 'https://ohhlio.com'}/sitemap.xml`);
-});
-
-// sitemap.xml
-app.get('/sitemap.xml', sitemapHandler);
-
 // Middleware
 app.use(helmet());
 
@@ -77,6 +65,18 @@ app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Serve built frontend assets (JS, CSS, images) without serving index.html
+app.use(express.static(FRONTEND_DIST_PATH, { index: false }));
+
+// robots.txt
+app.get('/robots.txt', (_req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(`User-agent: *\nAllow: /\nSitemap: ${process.env.APP_URL || 'https://ohhlio.com'}/sitemap.xml`);
+});
+
+// sitemap.xml
+app.get('/sitemap.xml', sitemapHandler);
+
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -91,16 +91,16 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'OK', message: 'Ohhlio Backend is running!' });
 });
 
+// Per-route meta tag injection for profile and project pages
+if (indexHtml) {
+  app.use(createMetaRouter(indexHtml));
+}
+
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
   console.error('Express error:', err);
   res.status(500).json({ error: 'Something went wrong!' });
 });
-
-// Per-route meta tag injection for profile and project pages
-if (indexHtml) {
-  app.use(createMetaRouter(indexHtml));
-}
 
 // API 404 — JSON response for unknown API routes
 app.use('/api/*', (_req: Request, res: Response) => {
