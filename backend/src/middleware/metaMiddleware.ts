@@ -11,6 +11,10 @@ const GENERIC_META = {
   description: 'Build and share your portfolio with Ohhlio.',
 };
 
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 export interface MetaTagOptions {
   title: string;
   description: string;
@@ -21,10 +25,10 @@ export interface MetaTagOptions {
 export function buildMetaTags(opts: MetaTagOptions): string {
   const { title, description, url, ogImage } = opts;
   const tags = [
-    `  <title>${title}</title>`,
-    `  <meta name="description" content="${description}" />`,
-    `  <meta property="og:title" content="${title}" />`,
-    `  <meta property="og:description" content="${description}" />`,
+    `  <title>${escHtml(title)}</title>`,
+    `  <meta name="description" content="${escHtml(description)}" />`,
+    `  <meta property="og:title" content="${escHtml(title)}" />`,
+    `  <meta property="og:description" content="${escHtml(description)}" />`,
     `  <meta property="og:url" content="${url}" />`,
   ];
   if (ogImage) {
@@ -59,7 +63,7 @@ export function createMetaRouter(indexHtml: string): Router {
       } else {
         let ogImage: string | undefined;
         if (project.headerPhoto) {
-          try { ogImage = await getSignedDownloadUrl(project.headerPhoto.filePath); } catch { /* skip */ }
+          try { ogImage = await getSignedDownloadUrl(project.headerPhoto.filePath, 604800); } catch { /* skip */ }
         }
         metaTags = buildMetaTags({
           title: `${project.title} | ${username} | Ohhlio`,
@@ -69,7 +73,7 @@ export function createMetaRouter(indexHtml: string): Router {
         });
       }
 
-      res.send(indexHtml.replace(PLACEHOLDER, metaTags));
+      res.send(indexHtml.replaceAll(PLACEHOLDER, metaTags));
     } catch (err) {
       next(err);
     }
@@ -97,7 +101,7 @@ export function createMetaRouter(indexHtml: string): Router {
       } else {
         let ogImage: string | undefined;
         if (user.profileImage) {
-          try { ogImage = await getSignedDownloadUrl(user.profileImage.filePath); } catch { /* skip */ }
+          try { ogImage = await getSignedDownloadUrl(user.profileImage.filePath, 604800); } catch { /* skip */ }
         }
         metaTags = buildMetaTags({
           title: `${username} | Ohhlio`,
@@ -107,7 +111,7 @@ export function createMetaRouter(indexHtml: string): Router {
         });
       }
 
-      res.send(indexHtml.replace(PLACEHOLDER, metaTags));
+      res.send(indexHtml.replaceAll(PLACEHOLDER, metaTags));
     } catch (err) {
       next(err);
     }
