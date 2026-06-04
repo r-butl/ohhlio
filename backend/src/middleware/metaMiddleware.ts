@@ -3,7 +3,7 @@ import { Request, Response, NextFunction, Router } from 'express';
 const prisma = require('../models/db');
 import { getSignedDownloadUrl } from '../services/s3Service';
 
-const PLACEHOLDER = '<!-- META_TAGS -->';
+const PLACEHOLDER = '<title>Ohhlio</title>\n    <meta name="description" content="Build and share your portfolio with Ohhlio." />';
 const APP_URL = process.env.APP_URL || 'https://ohhlio.com';
 
 const GENERIC_META = {

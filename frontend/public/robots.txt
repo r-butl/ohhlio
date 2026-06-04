@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://ohhlio.com/sitemap.xml

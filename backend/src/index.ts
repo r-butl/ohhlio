@@ -30,7 +30,7 @@ const genericMetaTags = buildMetaTags({
   description: 'Build and share your portfolio with Ohhlio.',
   url: process.env.APP_URL || 'https://ohhlio.com',
 });
-const genericHtml = indexHtml ? indexHtml.replaceAll('<!-- META_TAGS -->', genericMetaTags) : '';
+const genericHtml = indexHtml ? indexHtml.replaceAll('<title>Ohhlio</title>\n    <meta name="description" content="Build and share your portfolio with Ohhlio." />', genericMetaTags) : '';
 
 // Routers
 const authRoutes = require('../api/authRoutes');
@@ -50,7 +50,21 @@ app.use('/uploads', (req: Request, res: Response, next: NextFunction) => {
 }, express.static(uploadDir));
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+}));
 
 // CORS middleware (simplified for Vercel)
 app.use(cors({
@@ -65,17 +79,16 @@ app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve built frontend assets (JS, CSS, images) without serving index.html
-app.use(express.static(FRONTEND_DIST_PATH, { index: false }));
-
-// robots.txt
+// robots.txt and sitemap must come before static file serving
 app.get('/robots.txt', (_req: Request, res: Response) => {
   res.setHeader('Content-Type', 'text/plain');
   res.send(`User-agent: *\nAllow: /\nSitemap: ${process.env.APP_URL || 'https://ohhlio.com'}/sitemap.xml`);
 });
 
-// sitemap.xml
 app.get('/sitemap.xml', sitemapHandler);
+
+// Serve built frontend assets (JS, CSS, images) without serving index.html
+app.use(express.static(FRONTEND_DIST_PATH, { index: false }));
 
 
 // Routes
