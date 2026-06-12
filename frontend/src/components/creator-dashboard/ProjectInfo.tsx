@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useEditorStore } from '@/context/EditorStore';
-import EditableDescription from '@/components/ui/editable-description';
-import EditableHeaderImage from '@/components/ui/editable-header-image';
+import EditableDescription from '@/components/ui/EditableDescription';
+import EditableHeaderImage from '@/components/ui/EditableHeaderImage';
 import { getPublicAssetById } from '@/services/assetService';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/useMobile';
 
 const ProjectInfo: React.FC = () => {
   const currentProject = useEditorStore(state => state.currentProject);

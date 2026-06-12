@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './GridItem.css';
 import { useEditorStore } from '@/context/EditorStore';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { MoreVertical, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui/DropdownMenu';
 import { OPTION_PAGES } from '../options-panel/OptionsPages';
 import { useContentCheck } from '@/hooks/useContentCheck';
 

@@ -5,11 +5,11 @@ import { useUserContext } from "@/context/UserContext";
 import { useParams } from "react-router-dom";
 import { updateUserProfile, uploadProfileImage, getUnifiedProfile } from "@/services/userService";
 import { toast } from "sonner";
-import EditableDescription from "@/components/ui/editable-description";
-import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import EditableDescription from "@/components/ui/EditableDescription";
+import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
 import ProjectCard from "@/components/profile-overview/ProjectCard"
 import { useEditorStore } from "@/context/EditorStore";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/useMobile";
 import SidebarLayout from "@/layouts/SidebarLayout";
 import EditorController from "@/components/creator-dashboard/EditorController";
 import { compressImage } from "@/utils/compressImage";

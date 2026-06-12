@@ -1,5 +1,5 @@
 import { CirclePlus } from "lucide-react";
-import { SidebarMenuButton } from "../ui/sidebar";
+import { SidebarMenuButton } from "../ui/Sidebar";
 import { useUserContext } from "@/context/UserContext";
 import AddProjectOverlay from '@/components/creator-dashboard/AddProjectOverlay';
 

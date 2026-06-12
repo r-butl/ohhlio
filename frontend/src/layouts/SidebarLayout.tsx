@@ -1,9 +1,9 @@
-import { AppSidebar } from "@/components/editor-sidebar/app-sidebar"
+import { AppSidebar } from "@/components/editor-sidebar/AppSidebar"
 
 import {
   SidebarInset,
   SidebarProvider,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 
 function SidebarLayout({ children, showSidebar = false, avatarUrl }: { children: React.ReactNode, showSidebar?: boolean, avatarUrl?: string }) {
   return (

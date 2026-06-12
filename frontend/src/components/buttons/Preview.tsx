@@ -1,9 +1,9 @@
 import { useEditorStore } from "../../context/EditorStore";
 import React from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { Play, Square } from "lucide-react";
 
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/Sidebar";
 
 interface PreviewButtonProps {
     isHomeUser: boolean;

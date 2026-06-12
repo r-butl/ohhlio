@@ -1,8 +1,6 @@
 import React from 'react';
 import { useEditorStore } from "../../context/EditorStore";
 
-import { useSidebar } from "@/components/ui/sidebar";
-
 import PreviewButton from "@/components/buttons/Preview";
 import NavMenuButton from "@/components/buttons/NavMenuButton";
 
@@ -10,7 +8,7 @@ import UndoButton from "../buttons/Undo";
 import RedoButton from "../buttons/Redo";
 import PublishButton from "../buttons/Publish";
 import AddContentButton from "../buttons/AddContentItem";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface EditorControllerProps {
     isHomeUser: boolean;  // This will be used to determine if user is the owner

@@ -1,14 +1,14 @@
 import * as React from "react"
 
 import AddProjectButton from "@/components/buttons/AddProject";
-import { NavProjects } from "@/components/editor-sidebar/nav-projects"
-import { NavUser } from "@/components/editor-sidebar/nav-user";
+import { NavProjects } from "@/components/editor-sidebar/NavProjects";
+import { NavUser } from "@/components/editor-sidebar/NavUser";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 import { useUserContext } from "@/context/UserContext";
 
 

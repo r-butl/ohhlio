@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/Button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/DropdownMenu";
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlignJustify, Search, User, LogIn, StickyNote } from "lucide-react";
 import { useProjectNavigation } from '@/hooks/useProjectNavigation';
 import { getUnifiedProfile } from '@/services/userService';
 import { useAuth } from '@/context/AuthContext';
 import { useUserContext } from '@/context/UserContext';
-import { ProfileAvatar } from '@/components/ui/profile-avatar';
+import { ProfileAvatar } from '@/components/ui/ProfileAvatar';
 
 type NavMenuButtonProps = {
   alignLeft?: boolean;

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import { Plus } from "lucide-react"
 import { toast } from "sonner"
 import { compressImage } from "@/utils/compressImage"
@@ -10,7 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuShortcut,
     DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
+  } from "@/components/ui/DropdownMenu"
 
 import { useEditorStore } from "../../context/EditorStore";
 

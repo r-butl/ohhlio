@@ -10,7 +10,7 @@ import {
   Sparkles,
 } from "lucide-react"
 
-import { ProfileAvatar } from "@/components/ui/profile-avatar"
+import { ProfileAvatar } from "@/components/ui/ProfileAvatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,13 +19,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/DropdownMenu"
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 import { useAuth } from "@/context/AuthContext"
 import { useUserContext } from "@/context/UserContext"
 

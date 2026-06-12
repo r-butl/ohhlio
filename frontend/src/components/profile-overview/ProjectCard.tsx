@@ -1,4 +1,4 @@
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/Card";
 import React, { useState, useEffect, useInsertionEffect } from "react";
 import { useProjectNavigation } from "@/hooks/useProjectNavigation";
 import { useEditorStore } from "@/context/EditorStore";

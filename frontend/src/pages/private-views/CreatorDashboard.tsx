@@ -8,7 +8,7 @@ import { getUnifiedProjectById } from '@/services/projectService';
 
 import { useUserContext } from '@/context/UserContext';
 import SidebarLayout from "@/layouts/SidebarLayout";
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/useMobile';
 
 const CreatorDashboard: React.FC = () => {
   const viewState = useEditorStore(state => state.viewState);
