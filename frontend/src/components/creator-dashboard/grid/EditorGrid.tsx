@@ -9,6 +9,13 @@ import GridItem from './grid-item/GridItem';
 import ToolbarOverlay from './options-panel/ToolbarOverlay';
 
 import { useEditorStore } from '../../../context/EditorStore';
+import { deriveImageHeightUnits, getColWidth, unitsToPx } from '@/lib/gridUnits';
+
+// Single source of truth for RGL's margin/padding/breakpoint config — also
+// passed into the <ResponsiveGrid> props below and used by gridUnits.
+const GRID_MARGIN: [number, number] = [5, 5];
+const GRID_PADDING: [number, number] = [1, 1];
+const BREAKPOINT_LG = 768;
 
 const ResponsiveGrid = WidthProvider(Responsive);
 
@@ -60,22 +67,49 @@ const EditorGrid: React.FC<RendererProps> = () => {
 
   const generateLayouts = useCallback(() => {
     const itemValues = Object.values(items);
-    
-    // Desktop layout uses the user-configured layout directly
-    const desktopLayout = itemValues.map(item => ({ ...item.layout }));
 
-    // Mobile layout stacks everything in a single column
+    // For image items, derive `h` from the stored aspectRatio and the
+    // current pixel width so the rendered ratio stays constant across
+    // viewport widths and the mobile/desktop toggle. Text items keep their
+    // stored `h` unchanged.
+    const deriveH = (item: typeof itemValues[number], widthUnits: number, cols: number) => {
+      if (item.type !== 'image') return item.layout.h;
+
+      return deriveImageHeightUnits({
+        aspectRatio: item.props.aspectRatio,
+        widthUnits,
+        containerWidthPx,
+        cols,
+        marginX: GRID_MARGIN[0],
+        marginY: GRID_MARGIN[1],
+        paddingX: GRID_PADDING[0],
+        rowHeight: gridRowHeight,
+        minH: item.layout.minH || 1,
+        maxH: item.layout.maxH || 100,
+        fallbackH: item.layout.h,
+      });
+    };
+
+    // Desktop layout uses the user-configured layout, with image heights derived
+    const desktopLayout = itemValues.map(item => ({
+      ...item.layout,
+      h: deriveH(item, item.layout.w, gridColumnCount),
+    }));
+
+    // Mobile layout stacks everything in a single column, with image heights
+    // derived for a full-width (w=1, cols=1) item
     const mobileLayout = itemValues.map(item => ({
       ...item.layout,
       w: 1, // Force width to 1 column
       x: 0, // Ensure it's in the first (and only) column
+      h: deriveH(item, 1, 1),
     }));
 
     return {
       lg: desktopLayout,
       xs: mobileLayout,
     };
-  }, [items]);
+  }, [items, containerWidthPx, gridColumnCount, gridRowHeight]);
 
   const renderItem = (item: typeof items[string]) => {
 
@@ -115,7 +149,7 @@ const EditorGrid: React.FC<RendererProps> = () => {
       <ResponsiveGrid
         className="layout"
         layouts={generateLayouts()}
-        breakpoints={{ lg: 768, xs: 0 }} 
+        breakpoints={{ lg: BREAKPOINT_LG, xs: 0 }}
         cols={{ lg: gridColumnCount, xs: 1 }}
         rowHeight={gridRowHeight}
         isDraggable={isDraggable && !loadingAssets}
@@ -123,8 +157,8 @@ const EditorGrid: React.FC<RendererProps> = () => {
         resizeHandles={['sw', 'se']}
         onDragStop={handleLayoutChange}
         onResizeStop={handleLayoutChange}
-        margin={[5, 5]}
-        containerPadding={[1, 1]}
+        margin={GRID_MARGIN}
+        containerPadding={GRID_PADDING}
         compactType="vertical"
         preventCollision={false}
       >
