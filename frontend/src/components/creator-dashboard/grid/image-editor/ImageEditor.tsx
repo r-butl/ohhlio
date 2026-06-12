@@ -22,18 +22,15 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   // Get item data from store
   const item = useEditorStore(state => state.currentProject.items[id]);
   
-  // Memoize the aspect ratio calculation to prevent infinite re-renders
-  const currentAspectRatio = useMemo(() => {
-    return gridWidth && gridHeight ? gridWidth / gridHeight : 4 / 3;
-  }, [gridWidth, gridHeight]);
-  
-  // Provide default values if item doesn't exist or props are incomplete
+  // Provide default values if item doesn't exist or props are incomplete.
+  // aspectRatio defaults to 4/3 for new items; the locked ratio is set by
+  // EditorGrid's onResizeStop handler, not here.
   const defaultImageProps: ImageProps = useMemo(() => ({
     assetId: null,
     originalImage: null,
     zoom: 1,
-    aspectRatio: currentAspectRatio
-  }), [currentAspectRatio]);
+    aspectRatio: 4 / 3
+  }), []);
 
   const storedImageProps = item?.type === 'image' ? item.props : undefined;
 
@@ -67,15 +64,13 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   useEffect(() => {
     const handleConfirm = ({ id: editId }: { id: string }) => {
       if (editId === id) {
-        console.log('Confirm pressed - saving image data');
         setItemsWithHistory(draft => {
           const draftItem = draft[id];
           if (draftItem && draftItem.type === 'image') {
             draftItem.props = {
               ...draftItem.props,
               originalImage: localOriginalImage,
-              zoom: localZoom,
-              aspectRatio: currentAspectRatio
+              zoom: localZoom
             };
           }
         });
@@ -83,7 +78,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
 
     const handleCancel = () => {
-      console.log('Cancel pressed - resetting image data');
       setLocalZoom(imageProps.zoom);
       setLocalOriginalImage(imageProps.originalImage);
     };
@@ -95,7 +89,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       emitter.off('confirm-edit', handleConfirm);
       emitter.off('cancel-edit', handleCancel);
     };
-  }, [id, localZoom, localOriginalImage, imageProps, setItemsWithHistory, currentAspectRatio]);
+  }, [id, localZoom, localOriginalImage, imageProps, setItemsWithHistory]);
 
   const loadingAssets = useEditorStore(state => state.isLoadingAssets);
 

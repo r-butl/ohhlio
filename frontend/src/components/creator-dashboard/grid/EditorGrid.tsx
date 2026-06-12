@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { WidthProvider, Responsive } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -9,6 +9,13 @@ import GridItem from './grid-item/GridItem';
 import ToolbarOverlay from './options-panel/ToolbarOverlay';
 
 import { useEditorStore } from '../../../context/EditorStore';
+import { deriveImageHeightUnits, getColWidth, unitsToPx } from '@/lib/gridUnits';
+
+// Single source of truth for RGL's margin/padding/breakpoint config — also
+// passed into the <ResponsiveGrid> props below and used by gridUnits.
+const GRID_MARGIN: [number, number] = [5, 5];
+const GRID_PADDING: [number, number] = [1, 1];
+const BREAKPOINT_LG = 768;
 
 const ResponsiveGrid = WidthProvider(Responsive);
 
@@ -30,13 +37,48 @@ const EditorGrid: React.FC<RendererProps> = () => {
 
   const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
 
+  const containerRef = useRef<HTMLDivElement>(null!);
+  const [containerWidthPx, setContainerWidthPx] = useState(0);
+  const [currentBreakpoint, setCurrentBreakpoint] = useState<'lg' | 'xs'>('lg');
+
+  // Measures the outer wrapper's width so image aspect ratios can be derived
+  // from real pixel widths at both the lg (4-col) and xs (1-col) breakpoints.
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(entries => {
+      const { width } = entries[0].contentRect;
+      setContainerWidthPx(width);
+    });
+
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const handleBreakpointChange = (newBreakpoint: string) => {
+    setCurrentBreakpoint(newBreakpoint === 'lg' ? 'lg' : 'xs');
+  };
+
   const handleLayoutChange = (layout: any[]) => {
     if (isOwnerEdit && !loadingAssets) {
-      console.log('Updating layout in editor store from user interaction');
       setItemsWithHistory(draft => {
         layout.forEach(layoutItem => {
-          if (draft[layoutItem.i]) {
-            draft[layoutItem.i].layout = layoutItem;
+          const draftItem = draft[layoutItem.i];
+          if (!draftItem) return;
+
+          draftItem.layout = layoutItem;
+
+          // Dragging only changes position, but resizing changes w/h —
+          // recompute aspectRatio from the new pixel box so the ratio the
+          // user just set becomes the new locked ratio. `cols` is taken from
+          // RGL's own onBreakpointChange callback so it matches whichever
+          // layout (lg or xs) RGL is actually editing.
+          if (draftItem.type === 'image' && containerWidthPx) {
+            const cols = currentBreakpoint === 'lg' ? gridColumnCount : 1;
+            const colWidth = getColWidth(containerWidthPx, cols, GRID_MARGIN[0], GRID_PADDING[0]);
+            const widthPx = unitsToPx(layoutItem.w, colWidth, GRID_MARGIN[0]);
+            const heightPx = unitsToPx(layoutItem.h, gridRowHeight, GRID_MARGIN[1]);
+            if (heightPx > 0) {
+              draftItem.props.aspectRatio = widthPx / heightPx;
+            }
           }
         });
       });
@@ -45,22 +87,49 @@ const EditorGrid: React.FC<RendererProps> = () => {
 
   const generateLayouts = useCallback(() => {
     const itemValues = Object.values(items);
-    
-    // Desktop layout uses the user-configured layout directly
-    const desktopLayout = itemValues.map(item => ({ ...item.layout }));
 
-    // Mobile layout stacks everything in a single column
+    // For image items, derive `h` from the stored aspectRatio and the
+    // current pixel width so the rendered ratio stays constant across
+    // viewport widths and the mobile/desktop toggle. Text items keep their
+    // stored `h` unchanged.
+    const deriveH = (item: typeof itemValues[number], widthUnits: number, cols: number) => {
+      if (item.type !== 'image') return item.layout.h;
+
+      return deriveImageHeightUnits({
+        aspectRatio: item.props.aspectRatio,
+        widthUnits,
+        containerWidthPx,
+        cols,
+        marginX: GRID_MARGIN[0],
+        marginY: GRID_MARGIN[1],
+        paddingX: GRID_PADDING[0],
+        rowHeight: gridRowHeight,
+        minH: item.layout.minH || 1,
+        maxH: item.layout.maxH || 100,
+        fallbackH: item.layout.h,
+      });
+    };
+
+    // Desktop layout uses the user-configured layout, with image heights derived
+    const desktopLayout = itemValues.map(item => ({
+      ...item.layout,
+      h: deriveH(item, item.layout.w, gridColumnCount),
+    }));
+
+    // Mobile layout stacks everything in a single column, with image heights
+    // derived for a full-width (w=1, cols=1) item
     const mobileLayout = itemValues.map(item => ({
       ...item.layout,
       w: 1, // Force width to 1 column
       x: 0, // Ensure it's in the first (and only) column
+      h: deriveH(item, 1, 1),
     }));
 
     return {
       lg: desktopLayout,
       xs: mobileLayout,
     };
-  }, [items]);
+  }, [items, containerWidthPx, gridColumnCount, gridRowHeight]);
 
   const renderItem = (item: typeof items[string]) => {
 
@@ -96,11 +165,11 @@ const EditorGrid: React.FC<RendererProps> = () => {
 
   return (
 
-    <div style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
+    <div ref={containerRef} style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
       <ResponsiveGrid
         className="layout"
         layouts={generateLayouts()}
-        breakpoints={{ lg: 768, xs: 0 }} 
+        breakpoints={{ lg: BREAKPOINT_LG, xs: 0 }}
         cols={{ lg: gridColumnCount, xs: 1 }}
         rowHeight={gridRowHeight}
         isDraggable={isDraggable && !loadingAssets}
@@ -108,8 +177,9 @@ const EditorGrid: React.FC<RendererProps> = () => {
         resizeHandles={['sw', 'se']}
         onDragStop={handleLayoutChange}
         onResizeStop={handleLayoutChange}
-        margin={[5, 5]}
-        containerPadding={[1, 1]}
+        onBreakpointChange={handleBreakpointChange}
+        margin={GRID_MARGIN}
+        containerPadding={GRID_PADDING}
         compactType="vertical"
         preventCollision={false}
       >
