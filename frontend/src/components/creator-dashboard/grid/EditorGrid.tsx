@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { WidthProvider, Responsive } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -24,7 +24,7 @@ const EditorGrid: React.FC<RendererProps> = () => {
   const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   
   const isOwnerEdit = viewState === 'OwnerEdit';
-  const loadingAssets = useEditorStore(state => state.isLoadingAssets || state.loadingAssets);
+  const loadingAssets = useEditorStore(state => state.isLoadingAssets);
   const isDraggable = isOwnerEdit && (activeEditor === null) && !buttonHovered;
   const isResizable = isOwnerEdit && !buttonHovered;
 

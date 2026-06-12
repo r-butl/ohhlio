@@ -44,7 +44,7 @@ const GridItem: React.FC<GridItemProps> = ({
 
   const viewState = useEditorStore(state => state.viewState);
   const isOwnerEdit = viewState === 'OwnerEdit';
-  const loadingAssets = useEditorStore(state => state.isLoadingAssets || state.loadingAssets);
+  const loadingAssets = useEditorStore(state => state.isLoadingAssets);
 
   const pages = item ? OPTION_PAGES[item.type] : null;
 

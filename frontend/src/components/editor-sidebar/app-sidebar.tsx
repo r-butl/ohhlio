@@ -22,7 +22,7 @@ export function AppSidebar({ avatarUrl, ...props }: React.ComponentProps<typeof 
       {/* Project Header */}
       <SidebarHeader>
         <NavUser user={{
-          name: user.username,
+          name: user.username || "",
           email: user.email,
           avatar: avatarUrl || ""
         }} />

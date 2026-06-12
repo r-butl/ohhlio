@@ -16,20 +16,6 @@ import {
 
 enablePatches()
 
-export interface TextItemProps {
-  content: string;
-  fontFamily: string;
-  fontSize: number;
-  textAlignVertical: 'top' | 'center' | 'bottom';
-  textAlignHorizontal: 'left' | 'center' | 'right';
-  isBold: boolean;
-  isItalic: boolean;
-  isUnderline: boolean;
-  maxChars: number;
-  charCount: number;
-  textStyle?: 'heading' | 'paragraph';
-}
-
 // State information for the Editor page
 type ViewState = 'PublicView' | 'OwnerEdit' | 'OwnerPreview'
 
@@ -40,7 +26,10 @@ type State = {
 
   viewState: ViewState            // Source of truth for view mode
   activeEditor: string | null     // ID of the current item being edited
+  activeOptionsPanel: string | null
   fileUploadSelected: boolean;
+
+  isLoadingAssets: boolean
 
   history: {                      // History of all actions in the editor
     past: { patches: Patch[]; inversePatches: Patch[] }[]
@@ -87,10 +76,6 @@ type State = {
   getAssetFromCacheOrBackend: (assetId: string) => Promise<any>
   loadProjectAssets: () => Promise<void>
   setIsLoadingAssets: (loading: boolean) => void
-  setLoadingProject: (loading: boolean) => void
-  setProjectError: (message: string | null) => void
-  setLoadingAssets: (loading: boolean) => void
-  setAssetError: (assetId: string, message: string) => void
 
   // Project management
   updateProjectDescription: (description: string) => Promise<void>
@@ -123,10 +108,6 @@ export const useEditorStore = create<State>((set, get) => ({
   activeOptionsPanel: null,
   fileUploadSelected: false,
   isLoadingAssets: false,
-  loadingProject: false,
-  projectError: null,
-  loadingAssets: false,
-  assetErrorsById: {},
 
   // Items management
   assetCache: {},
@@ -199,8 +180,11 @@ export const useEditorStore = create<State>((set, get) => ({
     const items = currentProject.items;
     if (id && items[id]) {
       setItemsWithoutHistory(draft => {
-        if (draft[id]) {
-          draft[id].props._backup = { ...draft[id].props };
+        const draftItem = draft[id];
+        if (draftItem?.type === 'text') {
+          draftItem.props._backup = { ...draftItem.props };
+        } else if (draftItem?.type === 'image') {
+          draftItem.props._backup = { ...draftItem.props };
         }
       });
     }
@@ -210,18 +194,6 @@ export const useEditorStore = create<State>((set, get) => ({
   // Set loading state for assets
   setIsLoadingAssets: (loading: boolean) => {
     set({ isLoadingAssets: loading });
-  },
-  setLoadingProject: (loading: boolean) => {
-    set({ loadingProject: loading });
-  },
-  setProjectError: (message: string | null) => {
-    set({ projectError: message });
-  },
-  setLoadingAssets: (loading: boolean) => {
-    set({ loadingAssets: loading });
-  },
-  setAssetError: (assetId: string, message: string) => {
-    set(state => ({ assetErrorsById: { ...state.assetErrorsById, [assetId]: message } }));
   },
 
   ///////////////// HISTORY /////////////////
@@ -329,27 +301,27 @@ export const useEditorStore = create<State>((set, get) => ({
       0
     )
 
-    let defaultProps = {
+    const defaultProps: TextProps = {
       content: "Select Options &gt; Edit to add text.",
       fontSize: 16,
       fontFamily: 'Arial',
-      textAlignVertical: 'center' as const,
-      textAlignHorizontal: 'left' as const,
+      textAlignVertical: 'center',
+      textAlignHorizontal: 'left',
       isBold: false,
       isItalic: false,
       isUnderline: false,
       maxChars: 1000,
       charCount: 0,
-      textStyle: 'paragraph' as const,
+      textStyle: 'paragraph',
     };
 
-    let layout_config ={
+    const layout_config: ItemLayoutProps = {
       x: 0,
       y: maxY,
       w: get().gridColumnCount,
       h: 10,
       i: id,
-      minW: get().gridColumnCount,  
+      minW: get().gridColumnCount,
       minH: 10,
       maxW: get().gridColumnCount,
       maxH: 40,
@@ -372,8 +344,6 @@ export const useEditorStore = create<State>((set, get) => ({
     const { currentProject, gridColumnCount } = get()
     const items = currentProject.items;
     const id = String(Date.now())
-    
-    const ITEM_W = 1;
 
     // Place 2-wide images row-wise: fill x=0 then x=2, then next row
     const findNextPosition = () => {
@@ -405,12 +375,8 @@ export const useEditorStore = create<State>((set, get) => ({
     };
     
     const position = findNextPosition();
-    
-    // Create default props based on item type
-    let defaultProps: any = {};
-    let layout_config: any = {};
 
-    defaultProps = {
+    const defaultProps: ImageProps = {
       assetId: null,
       originalImage: image,
       zoom: 1,
@@ -418,7 +384,7 @@ export const useEditorStore = create<State>((set, get) => ({
       isUploading: false
     };
 
-    layout_config = {
+    const layout_config: ItemLayoutProps = {
       x: position.x,
       y: position.y,
       w: 2,
@@ -429,8 +395,8 @@ export const useEditorStore = create<State>((set, get) => ({
       maxW: gridColumnCount,
       maxH: 200,
     };
-    
-    
+
+
     const newItem: ItemProps = {
       id,
       type: 'image',
@@ -602,22 +568,21 @@ export const useEditorStore = create<State>((set, get) => ({
       // Load in project Items
       for (const itemId in items) {
         const item = items[itemId];
-        
-        // Skip if item doesn't have props or no assetId
-        if (!item.props || !item.props.assetId) {
+
+        // Only image items reference an asset
+        if (item.type !== 'image' || !item.props.assetId) {
           continue;
         }
-        
+
         try {
           const assetId = item.props.assetId;
           let asset = await get().getAssetFromCacheOrBackend(assetId);
-          
+
           if (asset) {
             get().setItemsWithoutHistory(draft => {
-              if (item.type === 'image') {
-                draft[itemId].props.originalImage = asset;
-              } else {
-                draft[itemId].props.assetUrl = asset;
+              const draftItem = draft[itemId];
+              if (draftItem.type === 'image') {
+                draftItem.props.originalImage = asset;
               }
             });
           }

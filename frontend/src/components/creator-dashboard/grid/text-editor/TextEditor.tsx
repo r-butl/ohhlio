@@ -8,8 +8,9 @@ import CharacterCount from '@tiptap/extension-character-count';
 
 import { useEditorStore } from '@/context/EditorStore';
 import emitter from '@/global-state/EventBus';
+import { GridDimensions } from '../grid-item/GridItem';
 
-interface TextEditorProps {
+interface TextEditorProps extends GridDimensions {
   id: string;
   content: string;
   fontFamily: string;
@@ -18,25 +19,24 @@ interface TextEditorProps {
   textAlignVertical: string;
   maxChars: number;
   charCount: number;
-  gridWidth: number;
-  gridHeight: number;
 }
 
-const TextEditor: React.FC<TextEditorProps> = ({ 
-  id, 
+const TextEditor: React.FC<TextEditorProps> = ({
+  id,
   gridWidth,
   gridHeight, }) => {
 
   const item = useEditorStore(state => state.currentProject.items[id]);
-  const {   
-    content,
-    fontFamily,
-    fontSize,
-    textAlignHorizontal,
-    textAlignVertical,
-    maxChars,
-    charCount 
-  } = item.props;
+  const textProps = item?.type === 'text' ? item.props : undefined;
+  const {
+    content = '',
+    fontFamily = 'Arial',
+    fontSize = 16,
+    textAlignHorizontal = 'left',
+    textAlignVertical = 'center',
+    maxChars = 1000,
+    charCount = 0,
+  } = textProps ?? {};
 
   const isActiveEditor = useEditorStore(state => state.activeEditor === id);
   const isEditMode = useEditorStore(state => state.viewState === 'OwnerEdit');
@@ -136,8 +136,9 @@ const TextEditor: React.FC<TextEditorProps> = ({
       const maxCharsCalc = Math.floor(charsPerLine * maxLines * 0.9); // 90% of theoretical max for safety
       
       setItemsWithoutHistory(draft => {
-        if (draft[id]) {
-          draft[id].props.maxChars = maxCharsCalc;
+        const draftItem = draft[id];
+        if (draftItem && draftItem.type === 'text') {
+          draftItem.props.maxChars = maxCharsCalc;
         }
       })
     }
@@ -185,8 +186,9 @@ const TextEditor: React.FC<TextEditorProps> = ({
       if (editId === id && editor) {
         console.log('Confirm pressed - saving content:', localContent);
         setItemsWithHistory(draft => {
-            if(draft[id]) {
-              draft[id].props.content = localContent;
+            const draftItem = draft[id];
+            if (draftItem && draftItem.type === 'text') {
+              draftItem.props.content = localContent;
             }
           }
         )

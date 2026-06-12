@@ -1,15 +1,27 @@
 
 export interface TextProps {
     content: string;    // Probably want to store this as mark down as it would look super clean.
+    fontFamily: string;
+    fontSize: number;
+    textAlignVertical: 'top' | 'center' | 'bottom';
+    textAlignHorizontal: 'left' | 'center' | 'right';
+    isBold: boolean;
+    isItalic: boolean;
+    isUnderline: boolean;
+    maxChars: number;
+    charCount: number;
+    textStyle?: 'heading' | 'paragraph';
+    _backup?: TextProps;
 }
 
 export interface ImageProps {
-    assetId: string | null; 
-    originalImage: string | null; 
+    assetId: string | null;
+    originalImage: string | null;
     aspectRatio: number;    // For the frame of the image
-    cropX: number;          // Crop box x location
-    cropY: number;          // Crop box y location
     zoom: number;           // image zoom on crop box, shape of crop box is determined by aspect ratio
+    isUploading?: boolean;
+    isUploaded?: boolean;
+    _backup?: ImageProps;
 }
 
 export interface ItemLayoutProps {
@@ -18,14 +30,27 @@ export interface ItemLayoutProps {
     w: number       // Cuantos grid squares rightward
     h: number       // Cuantos grid squares downward
     i: string       // Position in Layout sequence
+    minW?: number
+    maxW?: number
+    minH?: number
+    maxH?: number
 }
 
-export interface ItemProps {
+export interface TextItem {
     id: string;
-    type: 'text' | 'image';
+    type: 'text';
     layout: ItemLayoutProps;
-    props: ImageProps | TextProps;
+    props: TextProps;
 }
+
+export interface ImageItem {
+    id: string;
+    type: 'image';
+    layout: ItemLayoutProps;
+    props: ImageProps;
+}
+
+export type ItemProps = TextItem | ImageItem;
 
 
 export interface ProjectHeader {

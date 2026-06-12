@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { GridDimensions } from '../grid-item/GridItem';
-import { useEditorStore, ImageItemProps } from '@/context/EditorStore';
+import { useEditorStore } from '@/context/EditorStore';
+import { ImageProps } from '@/interfaces/ProjectItemsInterfaces';
 import emitter from '@/global-state/EventBus';
 import './ImageEditor.css';
 import AssetPlaceholder from '@/components/ui/AssetPlaceholder';
@@ -27,19 +28,21 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   }, [gridWidth, gridHeight]);
   
   // Provide default values if item doesn't exist or props are incomplete
-  const defaultImageProps: ImageItemProps = useMemo(() => ({
+  const defaultImageProps: ImageProps = useMemo(() => ({
     assetId: null,
     originalImage: null,
     zoom: 1,
     aspectRatio: currentAspectRatio
   }), [currentAspectRatio]);
 
-  const imageProps: ImageItemProps = useMemo(() => {
-    return item?.props ? {
+  const storedImageProps = item?.type === 'image' ? item.props : undefined;
+
+  const imageProps: ImageProps = useMemo(() => {
+    return storedImageProps ? {
       ...defaultImageProps,
-      ...item.props
+      ...storedImageProps
     } : defaultImageProps;
-  }, [item?.props, defaultImageProps]);
+  }, [storedImageProps, defaultImageProps]);
 
   // Local state for editing (will be saved to store on confirm)
   const [localZoom, setLocalZoom] = useState(imageProps.zoom);
@@ -66,9 +69,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       if (editId === id) {
         console.log('Confirm pressed - saving image data');
         setItemsWithHistory(draft => {
-          if (draft[id]) {
-            draft[id].props = {
-              ...draft[id].props,
+          const draftItem = draft[id];
+          if (draftItem && draftItem.type === 'image') {
+            draftItem.props = {
+              ...draftItem.props,
               originalImage: localOriginalImage,
               zoom: localZoom,
               aspectRatio: currentAspectRatio
@@ -93,7 +97,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
   }, [id, localZoom, localOriginalImage, imageProps, setItemsWithHistory, currentAspectRatio]);
 
-  const loadingAssets = useEditorStore(state => state.isLoadingAssets || state.loadingAssets);
+  const loadingAssets = useEditorStore(state => state.isLoadingAssets);
 
   return (
     <div 

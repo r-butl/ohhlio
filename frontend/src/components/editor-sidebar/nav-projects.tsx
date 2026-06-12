@@ -108,7 +108,7 @@ export function NavProjects() {
             return (
               <SidebarMenuItem key={project.id} className="group">
               <SidebarMenuButton 
-                onClick={() => navigateToProject(project.id, user.username)}
+                onClick={() => navigateToProject(project.id, user.username || "")}
                   className={selected ? "selected" : ""}
               >
                 <StickyNote className="h-4 w-2" />
@@ -126,7 +126,7 @@ export function NavProjects() {
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}
                 >
-                  <DropdownMenuItem onClick={() => navigateToProject(project.id, user.username)}>
+                  <DropdownMenuItem onClick={() => navigateToProject(project.id, user.username || "")}>
                     <Folder className="text-muted-foreground" />
                     <span>View Project</span>
                   </DropdownMenuItem>

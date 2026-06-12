@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import './OptionsPanel.css';
-import { useEditorStore, TextItemProps } from '@/context/EditorStore';
+import { useEditorStore } from '@/context/EditorStore';
+import { TextProps } from '@/interfaces/ProjectItemsInterfaces';
 import ConfirmButton from '@/components/buttons/Confirm';
 import CancelButton from '@/components/buttons/Cancel';
 import emitter from '@/global-state/EventBus';
@@ -14,15 +15,16 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
     setActiveEditor(id);
   }, []);
 
-  if (!item) return null;
+  if (!item || item.type !== 'text') return null;
 
   const { textAlignHorizontal, textStyle = 'paragraph' } = item.props;
   const currentWidth = item.layout.w;
 
-  const updateProps = (props: Partial<TextItemProps>) => {
+  const updateProps = (props: Partial<TextProps>) => {
     setItemsWithHistory(draft => {
-      if (draft[id]) {
-        draft[id].props = { ...draft[id].props, ...props };
+      const draftItem = draft[id];
+      if (draftItem && draftItem.type === 'text') {
+        draftItem.props = { ...draftItem.props, ...props };
       }
     });
   };

@@ -32,16 +32,11 @@ const PublishButton: React.FC = () => {
             Object.entries(items).filter(([itemId, item]) => {
                 // Keep text items that have content
                 if (item.type === 'text') {
-                    return item.props.content && item.props.content.trim() !== '';
+                    return Boolean(item.props.content && item.props.content.trim() !== '');
                 }
-                
+
                 // Keep image items that have assetId or originalImage
-                if (item.type === 'image') {
-                    return item.props.assetId || item.props.originalImage;
-                }
-                
-                // Keep other item types that have assetId or assetUrl
-                return item.props.assetId || item.props.assetUrl;
+                return Boolean(item.props.assetId || item.props.originalImage);
             })
         );
 
