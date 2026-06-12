@@ -39,6 +39,7 @@ const EditorGrid: React.FC<RendererProps> = () => {
 
   const containerRef = useRef<HTMLDivElement>(null!);
   const [containerWidthPx, setContainerWidthPx] = useState(0);
+  const [currentBreakpoint, setCurrentBreakpoint] = useState<'lg' | 'xs'>('lg');
 
   // Measures the outer wrapper's width so image aspect ratios can be derived
   // from real pixel widths at both the lg (4-col) and xs (1-col) breakpoints.
@@ -52,6 +53,10 @@ const EditorGrid: React.FC<RendererProps> = () => {
     return () => resizeObserver.disconnect();
   }, []);
 
+  const handleBreakpointChange = (newBreakpoint: string) => {
+    setCurrentBreakpoint(newBreakpoint === 'lg' ? 'lg' : 'xs');
+  };
+
   const handleLayoutChange = (layout: any[]) => {
     if (isOwnerEdit && !loadingAssets) {
       setItemsWithHistory(draft => {
@@ -63,13 +68,17 @@ const EditorGrid: React.FC<RendererProps> = () => {
 
           // Dragging only changes position, but resizing changes w/h —
           // recompute aspectRatio from the new pixel box so the ratio the
-          // user just set becomes the new locked ratio.
+          // user just set becomes the new locked ratio. `cols` is taken from
+          // RGL's own onBreakpointChange callback so it matches whichever
+          // layout (lg or xs) RGL is actually editing.
           if (draftItem.type === 'image' && containerWidthPx) {
-            const cols = containerWidthPx >= BREAKPOINT_LG ? gridColumnCount : 1;
+            const cols = currentBreakpoint === 'lg' ? gridColumnCount : 1;
             const colWidth = getColWidth(containerWidthPx, cols, GRID_MARGIN[0], GRID_PADDING[0]);
             const widthPx = unitsToPx(layoutItem.w, colWidth, GRID_MARGIN[0]);
             const heightPx = unitsToPx(layoutItem.h, gridRowHeight, GRID_MARGIN[1]);
-            draftItem.props.aspectRatio = widthPx / heightPx;
+            if (heightPx > 0) {
+              draftItem.props.aspectRatio = widthPx / heightPx;
+            }
           }
         });
       });
@@ -168,6 +177,7 @@ const EditorGrid: React.FC<RendererProps> = () => {
         resizeHandles={['sw', 'se']}
         onDragStop={handleLayoutChange}
         onResizeStop={handleLayoutChange}
+        onBreakpointChange={handleBreakpointChange}
         margin={GRID_MARGIN}
         containerPadding={GRID_PADDING}
         compactType="vertical"

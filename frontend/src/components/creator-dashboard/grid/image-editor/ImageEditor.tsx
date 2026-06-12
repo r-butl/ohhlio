@@ -64,7 +64,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   useEffect(() => {
     const handleConfirm = ({ id: editId }: { id: string }) => {
       if (editId === id) {
-        console.log('Confirm pressed - saving image data');
         setItemsWithHistory(draft => {
           const draftItem = draft[id];
           if (draftItem && draftItem.type === 'image') {
@@ -79,7 +78,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     };
 
     const handleCancel = () => {
-      console.log('Cancel pressed - resetting image data');
       setLocalZoom(imageProps.zoom);
       setLocalOriginalImage(imageProps.originalImage);
     };
