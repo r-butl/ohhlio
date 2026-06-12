@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { WidthProvider, Responsive } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -29,6 +29,21 @@ const EditorGrid: React.FC<RendererProps> = () => {
   const isResizable = isOwnerEdit && !buttonHovered;
 
   const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
+
+  const containerRef = useRef<HTMLDivElement>(null!);
+  const [containerWidthPx, setContainerWidthPx] = useState(0);
+
+  // Measures the outer wrapper's width so image aspect ratios can be derived
+  // from real pixel widths at both the lg (4-col) and xs (1-col) breakpoints.
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(entries => {
+      const { width } = entries[0].contentRect;
+      setContainerWidthPx(width);
+    });
+
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
 
   const handleLayoutChange = (layout: any[]) => {
     if (isOwnerEdit && !loadingAssets) {
@@ -96,7 +111,7 @@ const EditorGrid: React.FC<RendererProps> = () => {
 
   return (
 
-    <div style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
+    <div ref={containerRef} style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
       <ResponsiveGrid
         className="layout"
         layouts={generateLayouts()}
