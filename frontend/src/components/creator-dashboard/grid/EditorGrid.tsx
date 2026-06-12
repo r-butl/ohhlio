@@ -54,11 +54,22 @@ const EditorGrid: React.FC<RendererProps> = () => {
 
   const handleLayoutChange = (layout: any[]) => {
     if (isOwnerEdit && !loadingAssets) {
-      console.log('Updating layout in editor store from user interaction');
       setItemsWithHistory(draft => {
         layout.forEach(layoutItem => {
-          if (draft[layoutItem.i]) {
-            draft[layoutItem.i].layout = layoutItem;
+          const draftItem = draft[layoutItem.i];
+          if (!draftItem) return;
+
+          draftItem.layout = layoutItem;
+
+          // Dragging only changes position, but resizing changes w/h —
+          // recompute aspectRatio from the new pixel box so the ratio the
+          // user just set becomes the new locked ratio.
+          if (draftItem.type === 'image' && containerWidthPx) {
+            const cols = containerWidthPx >= BREAKPOINT_LG ? gridColumnCount : 1;
+            const colWidth = getColWidth(containerWidthPx, cols, GRID_MARGIN[0], GRID_PADDING[0]);
+            const widthPx = unitsToPx(layoutItem.w, colWidth, GRID_MARGIN[0]);
+            const heightPx = unitsToPx(layoutItem.h, gridRowHeight, GRID_MARGIN[1]);
+            draftItem.props.aspectRatio = widthPx / heightPx;
           }
         });
       });
