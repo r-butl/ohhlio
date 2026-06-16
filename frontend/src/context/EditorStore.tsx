@@ -31,6 +31,8 @@ type State = {
   projectId: string | null
 
   viewState: ViewState
+  isMobileView: boolean
+  desktopViewState: 'OwnerEdit' | 'OwnerPreview'
   activeEditor: string | null
   activeOptionsPanel: string | null
   fileUploadSelected: boolean
@@ -52,6 +54,8 @@ type State = {
   togglePreview: () => void
   enterEdit: () => void
   exitEdit: () => void
+  enterMobileView: () => void
+  exitMobileView: () => void
   setActiveEditor: (id: string | null) => void
   setActiveOptionsPanel: (id: string | null) => void
   setFileUploadSelected: (state: boolean) => void
@@ -109,6 +113,8 @@ export const useEditorStore = create<State>((set, get) => ({
     } catch {}
     return 'PublicView'
   })(),
+  isMobileView: false,
+  desktopViewState: 'OwnerEdit' as 'OwnerEdit' | 'OwnerPreview',
   buttonHovered: false,
   activeOptionsPanel: null,
   fileUploadSelected: false,
@@ -141,19 +147,19 @@ export const useEditorStore = create<State>((set, get) => ({
     const nextView: ViewState = isOwner
       ? (current.viewState === 'OwnerEdit' ? 'OwnerEdit' : 'OwnerPreview')
       : 'PublicView'
-    set({ viewState: nextView })
+    set({ viewState: nextView, isMobileView: false })
     try { localStorage.setItem('viewState', nextView) } catch {}
   },
   togglePreview: () => {
-    const { viewState } = get()
-    if (viewState === 'PublicView') return
+    const { viewState, isMobileView } = get()
+    if (viewState === 'PublicView' || isMobileView) return
     const next: ViewState = viewState === 'OwnerEdit' ? 'OwnerPreview' : 'OwnerEdit'
     set({ viewState: next })
     try { localStorage.setItem('viewState', next) } catch {}
   },
   enterEdit: () => {
-    const { viewState } = get()
-    if (viewState === 'PublicView') return
+    const { viewState, isMobileView } = get()
+    if (viewState === 'PublicView' || isMobileView) return
     set({ viewState: 'OwnerEdit' })
     try { localStorage.setItem('viewState', 'OwnerEdit') } catch {}
   },
@@ -162,6 +168,20 @@ export const useEditorStore = create<State>((set, get) => ({
     const next: ViewState = viewState !== 'PublicView' ? 'OwnerPreview' : 'PublicView'
     set({ viewState: next })
     try { localStorage.setItem('viewState', next) } catch {}
+  },
+  enterMobileView: () => {
+    const { viewState } = get()
+    if (viewState === 'PublicView') return
+    set({
+      isMobileView: true,
+      desktopViewState: viewState as 'OwnerEdit' | 'OwnerPreview',
+      viewState: 'OwnerPreview',
+    })
+  },
+  exitMobileView: () => {
+    const { desktopViewState } = get()
+    set({ isMobileView: false, viewState: desktopViewState })
+    try { localStorage.setItem('viewState', desktopViewState) } catch {}
   },
 
   setActiveEditor: (id) => {

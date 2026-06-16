@@ -7,12 +7,10 @@ import {
 
 function SidebarLayout({ children, isOwner = false, avatarUrl }: { children: React.ReactNode, isOwner?: boolean, avatarUrl?: string }) {
   return (
-    <SidebarProvider defaultOpen={isOwner}>
+    <SidebarProvider defaultOpen={isOwner} className="h-svh">
       {isOwner && <AppSidebar avatarUrl={avatarUrl} />}
-      <SidebarInset>
-        <div className="flex flex-1 flex-col">
-          {children}
-        </div>
+      <SidebarInset className="overflow-y-auto">
+        {children}
       </SidebarInset>
     </SidebarProvider>
   )

@@ -9,7 +9,6 @@ import EditableDescription from "@/components/ui/EditableDescription";
 import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
 import ProjectCard from "@/components/profile-overview/ProjectCard"
 import { useEditorStore } from "@/context/EditorStore";
-import { useIsMobile } from "@/hooks/useMobile";
 import { compressImage } from "@/utils/compressImage";
 // unified endpoint includes projects; no separate import
 
@@ -23,7 +22,6 @@ const ProfileOverview: React.FC = () => {
 
   const isOwnerEdit = viewState === 'OwnerEdit';
   const viewerChanged = useEditorStore(state => state.viewerChanged);
-  const isMobile = useIsMobile();
 
   // Local state for public view data
   const [publicProfile, setPublicProfile] = useState<{ profileImage?: string; description?: string; username?: string }>({});
@@ -53,26 +51,20 @@ const ProfileOverview: React.FC = () => {
     load();
   }, [user, isOwner, username]);
 
-  // Keep editor view state in sync with ownership for top bar controls; force public on mobile;
-  // default to OwnerEdit for owners and restore last view on refresh
   useEffect(() => {
-    if (isMobile) {
-      viewerChanged(false);
-    } else {
-      const isOwnerUser = Boolean(user?.username) && isOwner;
-      viewerChanged(isOwnerUser);
-      if (isOwnerUser) {
-        try {
-          const saved = localStorage.getItem('viewState');
-          if (saved === 'OwnerPreview') {
-            useEditorStore.getState().exitEdit();
-          } else {
-            useEditorStore.getState().enterEdit();
-          }
-        } catch {}
-      }
+    const isOwnerUser = Boolean(user?.username) && isOwner;
+    viewerChanged(isOwnerUser);
+    if (isOwnerUser) {
+      try {
+        const saved = localStorage.getItem('viewState');
+        if (saved === 'OwnerPreview') {
+          useEditorStore.getState().exitEdit();
+        } else {
+          useEditorStore.getState().enterEdit();
+        }
+      } catch {}
     }
-  }, [user?.username, isOwner, viewerChanged, isMobile]);
+  }, [user?.username, isOwner, viewerChanged]);
 
 
   // Handle photo upload

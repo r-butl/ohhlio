@@ -28,6 +28,7 @@ interface SortableSectionProps {
 const SortableSection: React.FC<SortableSectionProps> = ({ section }) => {
   const viewState = useEditorStore(state => state.viewState);
   const isOwnerEdit = viewState === 'OwnerEdit';
+  const isMobileView = useEditorStore(state => state.isMobileView);
   const deleteSection = useEditorStore(state => state.deleteSection);
   const updateSectionTitle = useEditorStore(state => state.updateSectionTitle);
 
@@ -115,7 +116,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({ section }) => {
 
       {/* Item grid */}
       <SortableContext items={section.items.map(i => i.id)} strategy={rectSortingStrategy}>
-        <div className="bento-grid">
+        <div className={`bento-grid${isMobileView ? ' bento-grid--mobile' : ''}`}>
           {(() => {
             const colStarts = computeColStarts(section.items);
             return section.items.map((item, idx) => (

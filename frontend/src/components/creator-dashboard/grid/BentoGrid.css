@@ -15,3 +15,7 @@
     grid-column: 1 / -1 !important;
   }
 }
+
+.bento-grid--mobile > * {
+  grid-column: 1 / -1 !important;
+}
