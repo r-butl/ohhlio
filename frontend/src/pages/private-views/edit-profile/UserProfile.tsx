@@ -138,7 +138,7 @@ const ProfileOverview: React.FC = () => {
   };
 
   return (
-    <SidebarLayout showSidebar={viewState === 'OwnerEdit'} avatarUrl={profileData?.profileImage}>
+    <SidebarLayout isOwner={isOwner} avatarUrl={profileData?.profileImage}>
       <EditorController isHomeUser={isOwner} page={'ProfileOverview'} />
       <div className="container mx-auto px-4 py-20 max-w-4xl mt-8">
         {/* Header with Avatar */}

@@ -5,11 +5,10 @@ import {
   SidebarProvider,
 } from "@/components/ui/Sidebar"
 
-function SidebarLayout({ children, showSidebar = false, avatarUrl }: { children: React.ReactNode, showSidebar?: boolean, avatarUrl?: string }) {
+function SidebarLayout({ children, isOwner = false, avatarUrl }: { children: React.ReactNode, isOwner?: boolean, avatarUrl?: string }) {
   return (
-    
-    <SidebarProvider>
-      {showSidebar && <AppSidebar avatarUrl={avatarUrl} />}
+    <SidebarProvider defaultOpen={isOwner}>
+      {isOwner && <AppSidebar avatarUrl={avatarUrl} />}
       <SidebarInset>
         <div className="flex flex-1 flex-col">
           {children}

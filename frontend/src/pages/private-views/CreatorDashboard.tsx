@@ -97,7 +97,7 @@ const CreatorDashboard: React.FC = () => {
   const showEmpty = hasNoItems && !loadingOnRefresh;
 
   return (
-    <SidebarLayout showSidebar={viewState === 'OwnerEdit'} avatarUrl={profileData.profileImage}>
+    <SidebarLayout isOwner={isHomeUser} avatarUrl={profileData.profileImage}>
       <div className="project-page px-6">
         <EditorController isHomeUser={isHomeUser} page={'ProjectView'} />
         {canView === null || loadingOnRefresh ? (
