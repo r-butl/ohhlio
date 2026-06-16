@@ -74,7 +74,7 @@ const EditorGrid: React.FC = () => {
   const isOwnerEdit = viewState === 'OwnerEdit';
 
   return (
-    <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
+    <div style={{ width: '100%' }}>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
