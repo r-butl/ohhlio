@@ -1,0 +1,11 @@
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .bento-grid > * {
+    grid-column: 1 / -1 !important;
+  }
+}
