@@ -261,7 +261,7 @@ export const useEditorStore = create<State>((set, get) => ({
       : sections[sections.length - 1]
     if (!targetSection) return
 
-    const id = String(Date.now())
+    const id = crypto.randomUUID()
     const defaultProps: TextProps = {
       content: 'Select Options › Edit to add text.',
       fontSize: 16,
@@ -292,7 +292,7 @@ export const useEditorStore = create<State>((set, get) => ({
       : sections[sections.length - 1]
     if (!targetSection) return
 
-    const id = String(Date.now())
+    const id = crypto.randomUUID()
     const defaultProps: ImageProps = {
       assetId: null,
       originalImage: image,
@@ -327,6 +327,7 @@ export const useEditorStore = create<State>((set, get) => ({
     get().setItemsWithHistory(draft => {
       const section = draft.sections.find(s => s.id === sectionId)
       if (!section) return
+      if (fromIndex < 0 || fromIndex >= section.items.length) return
       const [item] = section.items.splice(fromIndex, 1)
       section.items.splice(toIndex, 0, item)
     })
@@ -335,18 +336,31 @@ export const useEditorStore = create<State>((set, get) => ({
   moveItem: (itemId, toSectionId, toIndex) => {
     get().setItemsWithHistory(draft => {
       let moved: ItemProps | undefined
+      let sourceSection: typeof draft.sections[number] | undefined
+      let sourceIdx = -1
       for (const section of draft.sections) {
         const idx = section.items.findIndex(i => i.id === itemId)
-        if (idx !== -1) { moved = section.items.splice(idx, 1)[0]; break }
+        if (idx !== -1) {
+          sourceSection = section
+          sourceIdx = idx
+          moved = section.items.splice(idx, 1)[0]
+          break
+        }
       }
       if (!moved) return
       const target = draft.sections.find(s => s.id === toSectionId)
-      target?.items.splice(toIndex, 0, moved)
+      if (!target) {
+        // Target section vanished — put item back where it came from
+        sourceSection?.items.splice(sourceIdx, 0, moved)
+        return
+      }
+      target.items.splice(toIndex, 0, moved)
     })
   },
 
   reorderSections: (fromIndex, toIndex) => {
     get().setItemsWithHistory(draft => {
+      if (fromIndex < 0 || fromIndex >= draft.sections.length) return
       const [section] = draft.sections.splice(fromIndex, 1)
       draft.sections.splice(toIndex, 0, section)
     })
@@ -354,7 +368,7 @@ export const useEditorStore = create<State>((set, get) => ({
 
   addSection: () => {
     get().setItemsWithHistory(draft => {
-      draft.sections.push({ id: String(Date.now()), title: 'New Section', items: [] })
+      draft.sections.push({ id: crypto.randomUUID(), title: 'New Section', items: [] })
     })
   },
 
@@ -366,7 +380,7 @@ export const useEditorStore = create<State>((set, get) => ({
   },
 
   updateSectionTitle: (sectionId, title) => {
-    get().setItemsWithHistory(draft => {
+    get().setItemsWithoutHistory(draft => {
       const section = draft.sections.find(s => s.id === sectionId)
       if (section) section.title = title
     })
