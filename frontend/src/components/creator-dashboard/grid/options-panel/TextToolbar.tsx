@@ -2,8 +2,6 @@ import React, { useEffect } from 'react';
 import './OptionsPanel.css';
 import { useEditorStore } from '@/context/EditorStore';
 import { TextProps } from '@/interfaces/ProjectItemsInterfaces';
-import ConfirmButton from '@/components/buttons/Confirm';
-import CancelButton from '@/components/buttons/Cancel';
 import emitter from '@/global-state/EventBus';
 
 const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
@@ -14,8 +12,8 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
     }
     return null;
   });
-  const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
+  const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
 
   useEffect(() => {
     setActiveEditor(id);
@@ -95,10 +93,6 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
         </div>
       </div>
 
-      <div className="toolbar-group">
-        <ConfirmButton id={id} />
-        <CancelButton />
-      </div>
     </>
   );
 };

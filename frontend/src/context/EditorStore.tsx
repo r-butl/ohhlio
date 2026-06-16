@@ -154,7 +154,7 @@ export const useEditorStore = create<State>((set, get) => ({
     const { viewState, isMobileView } = get()
     if (viewState === 'PublicView' || isMobileView) return
     const next: ViewState = viewState === 'OwnerEdit' ? 'OwnerPreview' : 'OwnerEdit'
-    set({ viewState: next })
+    set({ viewState: next, activeEditor: null })
     try { localStorage.setItem('viewState', next) } catch {}
   },
   enterEdit: () => {
@@ -166,7 +166,7 @@ export const useEditorStore = create<State>((set, get) => ({
   exitEdit: () => {
     const { viewState } = get()
     const next: ViewState = viewState !== 'PublicView' ? 'OwnerPreview' : 'PublicView'
-    set({ viewState: next })
+    set({ viewState: next, activeEditor: null })
     try { localStorage.setItem('viewState', next) } catch {}
   },
   enterMobileView: () => {

@@ -41,7 +41,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
     textAlignHorizontal = 'left',
     textAlignVertical = 'center',
     maxChars = 1000,
-    charCount = 0,
   } = textProps ?? {};
 
   const isActiveEditor = useEditorStore(state => state.activeEditor === id);
@@ -55,6 +54,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
   const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
 
   const editorRef = useRef<HTMLDivElement>(null!);
+  const wasActiveEditorRef = useRef(false);
 
   // Update localContent when content changes from store (e.g., when entering edit mode)
   useEffect(() => {
@@ -62,6 +62,24 @@ const TextEditor: React.FC<TextEditorProps> = ({
       setLocalContent(content);
     }
   }, [isEditing, content]);
+
+  // Commit a single history entry when the toolbar closes
+  useEffect(() => {
+    if (isActiveEditor) {
+      wasActiveEditorRef.current = true;
+    } else if (wasActiveEditorRef.current) {
+      wasActiveEditorRef.current = false;
+      setItemsWithHistory(draft => {
+        for (const section of draft.sections) {
+          const draftItem = section.items.find(i => i.id === id);
+          if (draftItem && draftItem.type === 'text') {
+            draftItem.props.content = localContent;
+            return;
+          }
+        }
+      });
+    }
+  }, [isActiveEditor]);
 
   const editor = useEditor({
     extensions: [
@@ -111,7 +129,17 @@ const TextEditor: React.FC<TextEditorProps> = ({
       
     },
     onUpdate: ({ editor }) => {
-      setLocalContent(editor.getHTML());
+      const html = editor.getHTML();
+      setLocalContent(html);
+      setItemsWithoutHistory(draft => {
+        for (const section of draft.sections) {
+          const draftItem = section.items.find(i => i.id === id);
+          if (draftItem && draftItem.type === 'text') {
+            draftItem.props.content = html;
+            return;
+          }
+        }
+      });
     }
   });
 
@@ -187,42 +215,6 @@ const TextEditor: React.FC<TextEditorProps> = ({
       editor.setEditable(isEditing);
     }
   }, [isEditing, editor]);
-
-  // Listen for the confirm or cancel signals
-  useEffect(() => {
-
-    const handleConfirm = ({id: editId} : {id: string}) => {
-      if (editId === id && editor) {
-        console.log('Confirm pressed - saving content:', localContent);
-        setItemsWithHistory(draft => {
-          for (const section of draft.sections) {
-            const draftItem = section.items.find(i => i.id === id);
-            if (draftItem && draftItem.type === 'text') {
-              draftItem.props.content = localContent;
-              return;
-            }
-          }
-        })
-      }
-    }
-
-    const handleCancel = () => {
-      const resetContent = content || DEFAULT_MESSAGE;
-      console.log('Cancel pressed - resetting to:', resetContent);
-      setLocalContent(resetContent);
-      if (editor) {
-        editor.commands.setContent(resetContent);
-      }
-    }
-
-    emitter.on('confirm-edit', handleConfirm);
-    emitter.on('cancel-edit', handleCancel);
-
-    return () => {
-      emitter.off('confirm-edit', handleConfirm);
-      emitter.off('cancel-edit', handleCancel);
-    }
-  }, [id, localContent, content, editor, setItemsWithHistory])
 
   // Horizontal Alignment updates
   useEffect(() => {

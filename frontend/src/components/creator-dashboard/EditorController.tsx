@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useEditorStore } from "../../context/EditorStore";
 
 import PreviewButton from "@/components/buttons/Preview";
@@ -23,7 +23,18 @@ const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser, page = 
     const isMobileView = useEditorStore(state => state.isMobileView);
     const enterMobileView = useEditorStore(state => state.enterMobileView);
     const exitMobileView = useEditorStore(state => state.exitMobileView);
+    const togglePreview = useEditorStore(state => state.togglePreview);
     const isMobile = useIsMobile();
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && viewState === 'OwnerEdit') {
+                togglePreview();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [viewState, togglePreview]);
 
     const showToggle = isHomeUser && (viewState === 'OwnerEdit' || isMobileView);
 
@@ -51,7 +62,7 @@ const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser, page = 
                         <div className="relative flex items-center h-7 rounded border bg-muted p-0.5">
                             <div className={cn(
                                 "absolute inset-0.5 w-[calc(50%-1px)] rounded-sm bg-background shadow-sm transition-transform duration-150",
-                                isMobileView && "translate-x-[calc(100%+2px)]"
+                                isMobileView && "translate-x-[calc(100%_-_2px)]"
                             )} />
                             <button
                                 onClick={exitMobileView}
