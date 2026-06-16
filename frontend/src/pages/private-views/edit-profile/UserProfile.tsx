@@ -10,8 +10,6 @@ import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
 import ProjectCard from "@/components/profile-overview/ProjectCard"
 import { useEditorStore } from "@/context/EditorStore";
 import { useIsMobile } from "@/hooks/useMobile";
-import SidebarLayout from "@/layouts/SidebarLayout";
-import EditorController from "@/components/creator-dashboard/EditorController";
 import { compressImage } from "@/utils/compressImage";
 // unified endpoint includes projects; no separate import
 
@@ -138,12 +136,8 @@ const ProfileOverview: React.FC = () => {
   };
 
   return (
-    <SidebarLayout isOwner={isOwner} avatarUrl={profileData?.profileImage}>
-      <div className="container mx-auto px-4 max-w-4xl">
-        <EditorController isHomeUser={isOwner} page={'ProfileOverview'} />
-      </div>
-      <div className="container mx-auto px-4 py-20 max-w-4xl mt-8">
-        {/* Header with Avatar */}
+    <div className="container mx-auto px-4 py-20 max-w-4xl mt-8">
+      {/* Header with Avatar */}
         <div className="mb-8">
           <div className="flex items-center gap-6 mb-4">
             <ProfileAvatar
@@ -194,8 +188,7 @@ const ProfileOverview: React.FC = () => {
           )}
         </div>
       </div>
-    </SidebarLayout>
-        );
+    );
 };
 
 export default ProfileOverview;

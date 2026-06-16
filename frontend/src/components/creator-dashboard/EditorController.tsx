@@ -21,7 +21,7 @@ const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser, page = 
     const isMobile = useIsMobile();
 
     return (
-        <div className="editor-controller pt-2 pl-2 pr-2 pb-2">
+        <div className="editor-controller h-11 flex items-center px-2">
             <div className="flex w-full items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     {/* Sidebar toggle for owners; nav menu for public viewers */}
@@ -41,7 +41,7 @@ const EditorController: React.FC<EditorControllerProps> = ({ isHomeUser, page = 
                 </div>
 
                 <div className="flex items-center gap-2">
-                    {isHomeUser && (
+                    {isHomeUser && page === 'ProjectView' && (
                         <>
                             {(viewState === 'OwnerEdit' || viewState === 'OwnerPreview') && (
                                 <PreviewButton isHomeUser={isHomeUser} />

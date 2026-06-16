@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Renderer from '@/components/creator-dashboard/grid/EditorGrid';
-import EditorController from '@/components/creator-dashboard/EditorController';
 import ProjectInfo from '@/components/creator-dashboard/ProjectInfo';
 import { useEditorStore } from '@/context/EditorStore';
 import { getUnifiedProjectById } from '@/services/projectService';
 import { migrateLegacyItems } from '@/lib/migrateLegacyItems';
 
 import { useUserContext } from '@/context/UserContext';
-import SidebarLayout from "@/layouts/SidebarLayout";
-import { useIsMobile } from '@/hooks/useMobile';
 
 const CreatorDashboard: React.FC = () => {
   const viewState = useEditorStore(state => state.viewState);
@@ -32,7 +29,7 @@ const CreatorDashboard: React.FC = () => {
   );
 
   const navigate = useNavigate();
-  const { user, profileData } = useUserContext();
+  const { user } = useUserContext();
   const { username, projectId: urlProjectId } = useParams<{ username: string; projectId: string }>();
   const isHomeUser = user?.username === username;
 
@@ -97,27 +94,24 @@ const CreatorDashboard: React.FC = () => {
   const showEmpty = hasNoItems && !loadingOnRefresh;
 
   return (
-    <SidebarLayout isOwner={isHomeUser} avatarUrl={profileData.profileImage}>
-      <div className="project-page max-w-4xl mx-auto px-4">
-        <EditorController isHomeUser={isHomeUser} page={'ProjectView'} />
-        {canView === null || loadingOnRefresh ? (
-          <div className="min-h-[200px] flex items-center justify-center">
-            <div className="animate-pulse text-muted-foreground text-sm">Loading project...</div>
-          </div>
-        ) : canView ? (
-          <>
-            <ProjectInfo />
-            {showEmpty ? (
-              <div className="min-h-[200px] flex items-center justify-center text-gray-500">
-                {viewState === 'OwnerEdit' ? 'Start by adding content.' : 'No content yet.'}
-              </div>
-            ) : (
-              <Renderer />
-            )}
-          </>
-        ) : null}
-      </div>
-    </SidebarLayout>
+    <div className="project-page max-w-4xl mx-auto px-4">
+      {canView === null || loadingOnRefresh ? (
+        <div className="min-h-[200px] flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground text-sm">Loading project...</div>
+        </div>
+      ) : canView ? (
+        <>
+          <ProjectInfo />
+          {showEmpty ? (
+            <div className="min-h-[200px] flex items-center justify-center text-gray-500">
+              {viewState === 'OwnerEdit' ? 'Start by adding content.' : 'No content yet.'}
+            </div>
+          ) : (
+            <Renderer />
+          )}
+        </>
+      ) : null}
+    </div>
   );
 };
 
