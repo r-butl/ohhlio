@@ -4,8 +4,22 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { useEditorStore } from '@/context/EditorStore';
 import SortableGridItem from './SortableGridItem';
-import type { Section } from '@/interfaces/ProjectItemsInterfaces';
+import type { Section, ItemProps } from '@/interfaces/ProjectItemsInterfaces';
 import './BentoGrid.css';
+
+// Returns the 1-based column start for each item, wrapping to a new row
+// when an item's colSpan would exceed column 4.
+function computeColStarts(items: ItemProps[]): number[] {
+  const starts: number[] = [];
+  let col = 1;
+  for (const item of items) {
+    if (col + item.colSpan > 5) col = 1;
+    starts.push(col);
+    col += item.colSpan;
+    if (col > 5) col = 1;
+  }
+  return starts;
+}
 
 interface SortableSectionProps {
   section: Section;
@@ -102,9 +116,17 @@ const SortableSection: React.FC<SortableSectionProps> = ({ section }) => {
       {/* Item grid */}
       <SortableContext items={section.items.map(i => i.id)} strategy={rectSortingStrategy}>
         <div className="bento-grid">
-          {section.items.map(item => (
-            <SortableGridItem key={item.id} item={item} sectionId={section.id} />
-          ))}
+          {(() => {
+            const colStarts = computeColStarts(section.items);
+            return section.items.map((item, idx) => (
+              <SortableGridItem
+                key={item.id}
+                item={item}
+                sectionId={section.id}
+                colStart={colStarts[idx]}
+              />
+            ));
+          })()}
         </div>
       </SortableContext>
     </div>

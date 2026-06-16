@@ -4,10 +4,11 @@ import { useEditorStore } from '@/context/EditorStore';
 interface ResizeHandleProps {
   itemId: string;
   currentColSpan: number;
+  maxColSpan: number;
   itemRef: React.RefObject<HTMLDivElement>;
 }
 
-const ResizeHandle: React.FC<ResizeHandleProps> = ({ itemId, currentColSpan, itemRef }) => {
+const ResizeHandle: React.FC<ResizeHandleProps> = ({ itemId, currentColSpan, maxColSpan, itemRef }) => {
   const updateItemColSpan = useEditorStore(state => state.updateItemColSpan);
   const setButtonHoveredState = useEditorStore(state => state.setButtonHoveredState);
 
@@ -24,7 +25,7 @@ const ResizeHandle: React.FC<ResizeHandleProps> = ({ itemId, currentColSpan, ite
         // Approximate one column width from the item's current rendered width
         const colWidth = itemRef.current.offsetWidth / currentColSpan;
         const delta = ev.clientX - startX;
-        const newSpan = Math.min(4, Math.max(1, Math.round(startSpan + delta / colWidth)));
+        const newSpan = Math.min(maxColSpan, Math.max(1, Math.round(startSpan + delta / colWidth)));
         updateItemColSpan(itemId, newSpan);
       }
       setButtonHoveredState(false);

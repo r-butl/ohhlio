@@ -11,9 +11,10 @@ import type { ItemProps } from '@/interfaces/ProjectItemsInterfaces';
 interface SortableGridItemProps {
   item: ItemProps;
   sectionId: string;
+  colStart: number;
 }
 
-const SortableGridItem: React.FC<SortableGridItemProps> = ({ item, sectionId }) => {
+const SortableGridItem: React.FC<SortableGridItemProps> = ({ item, sectionId, colStart }) => {
   const viewState = useEditorStore(state => state.viewState);
   const isOwnerEdit = viewState === 'OwnerEdit';
   const loadingAssets = useEditorStore(state => state.isLoadingAssets);
@@ -34,7 +35,7 @@ const SortableGridItem: React.FC<SortableGridItemProps> = ({ item, sectionId }) 
   });
 
   const style: React.CSSProperties = {
-    gridColumn: `span ${item.colSpan}`,
+    gridColumn: `${colStart} / span ${item.colSpan}`,
     // CSS aspect-ratio keeps image cells proportional without any JS height math.
     // Text items have no aspect-ratio so they grow with their content.
     ...(item.type === 'image' ? { aspectRatio: String(item.props.aspectRatio) } : {}),
@@ -55,7 +56,7 @@ const SortableGridItem: React.FC<SortableGridItemProps> = ({ item, sectionId }) 
         )}
       </GridItem>
       {isOwnerEdit && !loadingAssets && (
-        <ResizeHandle itemId={item.id} currentColSpan={item.colSpan} itemRef={itemRef} />
+        <ResizeHandle itemId={item.id} currentColSpan={item.colSpan} maxColSpan={5 - colStart} itemRef={itemRef} />
       )}
     </div>
   );

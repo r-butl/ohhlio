@@ -4,6 +4,12 @@
   gap: 8px;
 }
 
+/* Prevent item content from forcing cells wider than their column span */
+.bento-grid > * {
+  min-width: 0;
+  min-height: 0;
+}
+
 @media (max-width: 640px) {
   .bento-grid > * {
     grid-column: 1 / -1 !important;
