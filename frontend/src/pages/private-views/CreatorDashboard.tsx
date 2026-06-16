@@ -14,6 +14,7 @@ import { useIsMobile } from '@/hooks/useMobile';
 const CreatorDashboard: React.FC = () => {
   const viewState = useEditorStore(state => state.viewState);
   const exitEdit = useEditorStore(state => state.exitEdit);
+  const viewerChanged = useEditorStore(state => state.viewerChanged);
   const setItemsWithoutHistory = useEditorStore(state => state.setItemsWithoutHistory);
   const setProjectId = useEditorStore(state => state.setProjectId);
   const setProjectHeader = useEditorStore(state => state.setProjectHeader);
@@ -78,6 +79,10 @@ const CreatorDashboard: React.FC = () => {
 
     load();
   }, [urlProjectId, user]);
+
+  useEffect(() => {
+    viewerChanged(isHomeUser);
+  }, [isHomeUser, viewerChanged]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
