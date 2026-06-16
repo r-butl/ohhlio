@@ -7,7 +7,13 @@ import CancelButton from '@/components/buttons/Cancel';
 import emitter from '@/global-state/EventBus';
 
 const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
-  const item = useEditorStore(state => state.currentProject.items[id]);
+  const item = useEditorStore(state => {
+    for (const section of state.currentProject.items.sections) {
+      const found = section.items.find(i => i.id === id);
+      if (found) return found;
+    }
+    return null;
+  });
   const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
 
@@ -18,13 +24,15 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
   if (!item || item.type !== 'text') return null;
 
   const { textAlignHorizontal, textStyle = 'paragraph' } = item.props;
-  const currentWidth = item.layout.w;
 
   const updateProps = (props: Partial<TextProps>) => {
     setItemsWithHistory(draft => {
-      const draftItem = draft[id];
-      if (draftItem && draftItem.type === 'text') {
-        draftItem.props = { ...draftItem.props, ...props };
+      for (const section of draft.sections) {
+        const draftItem = section.items.find(i => i.id === id);
+        if (draftItem && draftItem.type === 'text') {
+          draftItem.props = { ...draftItem.props, ...props };
+          return;
+        }
       }
     });
   };
@@ -36,16 +44,6 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
     } else {
       emitter.emit('set:paragraph', { id });
     }
-  };
-
-  const handleWidthChange = (w: number) => {
-    setItemsWithHistory(draft => {
-      if (draft[id]) {
-        draft[id].layout.w = w;
-        draft[id].layout.minW = w;
-        draft[id].layout.maxW = w;
-      }
-    });
   };
 
   return (
@@ -93,26 +91,6 @@ const TextToolbar: React.FC<{ id: string }> = ({ id }) => {
             title="Align Right"
           >
             ⇥
-          </button>
-        </div>
-      </div>
-
-      <div className="button-group">
-        <label>Width</label>
-        <div className="format-buttons">
-          <button
-            onClick={() => handleWidthChange(2)}
-            className={`format-button ${currentWidth === 2 ? 'active' : ''}`}
-            title="Half width"
-          >
-            ½
-          </button>
-          <button
-            onClick={() => handleWidthChange(4)}
-            className={`format-button ${currentWidth === 4 ? 'active' : ''}`}
-            title="Full width"
-          >
-            ⬜
           </button>
         </div>
       </div>

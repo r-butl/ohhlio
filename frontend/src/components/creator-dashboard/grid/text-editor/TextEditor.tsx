@@ -26,7 +26,13 @@ const TextEditor: React.FC<TextEditorProps> = ({
   gridWidth,
   gridHeight, }) => {
 
-  const item = useEditorStore(state => state.currentProject.items[id]);
+  const item = useEditorStore(state => {
+    for (const section of state.currentProject.items.sections) {
+      const found = section.items.find(i => i.id === id);
+      if (found) return found;
+    }
+    return null;
+  });
   const textProps = item?.type === 'text' ? item.props : undefined;
   const {
     content = '',
@@ -136,9 +142,12 @@ const TextEditor: React.FC<TextEditorProps> = ({
       const maxCharsCalc = Math.floor(charsPerLine * maxLines * 0.9); // 90% of theoretical max for safety
       
       setItemsWithoutHistory(draft => {
-        const draftItem = draft[id];
-        if (draftItem && draftItem.type === 'text') {
-          draftItem.props.maxChars = maxCharsCalc;
+        for (const section of draft.sections) {
+          const draftItem = section.items.find(i => i.id === id);
+          if (draftItem && draftItem.type === 'text') {
+            draftItem.props.maxChars = maxCharsCalc;
+            return;
+          }
         }
       })
     }
@@ -186,12 +195,14 @@ const TextEditor: React.FC<TextEditorProps> = ({
       if (editId === id && editor) {
         console.log('Confirm pressed - saving content:', localContent);
         setItemsWithHistory(draft => {
-            const draftItem = draft[id];
+          for (const section of draft.sections) {
+            const draftItem = section.items.find(i => i.id === id);
             if (draftItem && draftItem.type === 'text') {
               draftItem.props.content = localContent;
+              return;
             }
           }
-        )
+        })
       }
     }
 

@@ -4,10 +4,16 @@ import { useEditorStore } from '../context/EditorStore';
 export const useContentCheck = ( id: string) => {
     // Checks if the current item contains any content
 
-    const item = useEditorStore(state => state.currentProject.items[id]);
+    const item = useEditorStore(state => {
+        for (const section of state.currentProject.items.sections) {
+            const found = section.items.find(i => i.id === id);
+            if (found) return found;
+        }
+        return null;
+    });
 
     return useMemo(() => {
-    
+
     if (!item) return false;
 
     if ( item.type === "image" ) {

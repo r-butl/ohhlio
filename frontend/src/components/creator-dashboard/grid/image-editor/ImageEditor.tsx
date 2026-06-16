@@ -1,26 +1,29 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { GridDimensions } from '../grid-item/GridItem';
 import { useEditorStore } from '@/context/EditorStore';
 import { ImageProps } from '@/interfaces/ProjectItemsInterfaces';
 import emitter from '@/global-state/EventBus';
 import './ImageEditor.css';
 import AssetPlaceholder from '@/components/ui/AssetPlaceholder';
 
-interface ImageEditorProps extends GridDimensions {
+interface ImageEditorProps {
   id: string;
 }
 
 const ImageEditor: React.FC<ImageEditorProps> = ({
   id,
-  gridWidth,
-  gridHeight,
 }) => {
   // EditorStore stuff
   const isEditing = useEditorStore(state => state.activeEditor === id);
   const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
-  
+
   // Get item data from store
-  const item = useEditorStore(state => state.currentProject.items[id]);
+  const item = useEditorStore(state => {
+    for (const section of state.currentProject.items.sections) {
+      const found = section.items.find(i => i.id === id);
+      if (found) return found;
+    }
+    return null;
+  });
   
   // Provide default values if item doesn't exist or props are incomplete.
   // aspectRatio defaults to 4/3 for new items; the locked ratio is set by
@@ -65,13 +68,16 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const handleConfirm = ({ id: editId }: { id: string }) => {
       if (editId === id) {
         setItemsWithHistory(draft => {
-          const draftItem = draft[id];
-          if (draftItem && draftItem.type === 'image') {
-            draftItem.props = {
-              ...draftItem.props,
-              originalImage: localOriginalImage,
-              zoom: localZoom
-            };
+          for (const section of draft.sections) {
+            const draftItem = section.items.find(i => i.id === id);
+            if (draftItem && draftItem.type === 'image') {
+              draftItem.props = {
+                ...draftItem.props,
+                originalImage: localOriginalImage,
+                zoom: localZoom
+              };
+              return;
+            }
           }
         });
       }
@@ -94,9 +100,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const loadingAssets = useEditorStore(state => state.isLoadingAssets);
 
   return (
-    <div 
-      className="image-editor" 
-      style={{ width: gridWidth, height: gridHeight }}
+    <div
+      className="image-editor"
+      style={{ width: '100%', height: '100%' }}
     >
       {isEditing ? (
         <div className="edit-container" ref={editorRef}>
