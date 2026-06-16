@@ -17,6 +17,7 @@ import { useEditorStore } from "../../context/EditorStore";
 function AddContentButton({}: {}) {
     const addTextBox = useEditorStore(state => state.addTextBox);
     const addImage = useEditorStore(state => state.addImage);
+    const addSection = useEditorStore(state => state.addSection);
     const fileInputRef = useRef<HTMLInputElement>(null);
     
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB safety net — compression handles the rest
@@ -86,7 +87,7 @@ function AddContentButton({}: {}) {
               Add Video
               <DropdownMenuShortcut>⌘V</DropdownMenuShortcut>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => {}}>
+            <DropdownMenuItem onClick={() => addSection()}>
               Add Section
               <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
             </DropdownMenuItem>
