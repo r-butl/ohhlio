@@ -6,8 +6,17 @@ import './OptionsPanel.css';
 
 const ToolbarOverlay: React.FC = () => {
   const activeEditor = useEditorStore(state => state.activeEditor);
-  const items = useEditorStore(state => state.currentProject.items);
+  const activeItem = useEditorStore(state => {
+    const activeEditor = state.activeEditor;
+    if (!activeEditor) return null;
+    for (const section of state.currentProject.items.sections) {
+      const found = section.items.find(i => i.id === activeEditor);
+      if (found) return found;
+    }
+    return null;
+  });
   const setActiveEditor = useEditorStore(state => state.setActiveEditor);
+  const updateItemColSpan = useEditorStore(state => state.updateItemColSpan);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [positionReady, setPositionReady] = useState(false);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -32,10 +41,9 @@ const ToolbarOverlay: React.FC = () => {
 
   if (!activeEditor || !positionReady) return null;
 
-  const item = items[activeEditor];
-  if (!item) return null;
+  if (!activeItem) return null;
 
-  const pages = OPTION_PAGES[item.type];
+  const pages = OPTION_PAGES[activeItem.type];
   if (!pages || pages.length === 0) return null;
 
   // For now, we'll show the first page (usually "Edit")
@@ -63,6 +71,27 @@ const ToolbarOverlay: React.FC = () => {
         </button>
       </div>
       <div className="px-4 pb-4 flex flex-col gap-3">
+        {activeEditor && (
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {[1, 2, 3, 4].map(n => (
+              <button
+                key={n}
+                onClick={() => updateItemColSpan(activeEditor, n)}
+                style={{
+                  padding: '4px 8px',
+                  background: activeItem?.colSpan === n ? '#333' : '#eee',
+                  color: activeItem?.colSpan === n ? '#fff' : '#333',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                }}
+              >
+                {n}col
+              </button>
+            ))}
+          </div>
+        )}
         <ToolbarComponent id={activeEditor} />
       </div>
     </div>,
@@ -71,4 +100,3 @@ const ToolbarOverlay: React.FC = () => {
 };
 
 export default ToolbarOverlay;
-
