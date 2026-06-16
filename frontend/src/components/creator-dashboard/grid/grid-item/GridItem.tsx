@@ -39,7 +39,13 @@ const GridItem: React.FC<GridItemProps> = ({
   const isEditing = activeEditor === id;
   const deleteItem = useEditorStore(state => state.deleteItem);
   
-  const item = useEditorStore(state => state.currentProject.items[id]);
+  const item = useEditorStore(state => {
+    for (const section of state.currentProject.items.sections) {
+      const found = section.items.find(i => i.id === id);
+      if (found) return found;
+    }
+    return null;
+  });
   const hasContent = useContentCheck(id);
 
   const viewState = useEditorStore(state => state.viewState);
