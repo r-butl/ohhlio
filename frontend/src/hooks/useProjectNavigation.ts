@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEditorStore } from '@/context/EditorStore';
 import { getProjectById } from '@/services/projectService';
+import { migrateLegacyItems } from '@/lib/migrateLegacyItems';
 import { toast } from 'sonner';
 
 export const useProjectNavigation = () => {
@@ -25,7 +26,7 @@ export const useProjectNavigation = () => {
       // Private path: preload for faster transition
       const project = await getProjectById(projectId);
       if (project && project.items) {
-        setItemsWithoutHistory(() => project.items);
+        setItemsWithoutHistory(draft => { draft.sections = migrateLegacyItems(project.items).sections; });
         setProjectId(project.id);
         setProjectHeader({
           title: project.title,
