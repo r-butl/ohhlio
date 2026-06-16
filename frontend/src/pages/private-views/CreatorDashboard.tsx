@@ -5,6 +5,7 @@ import EditorController from '@/components/creator-dashboard/EditorController';
 import ProjectInfo from '@/components/creator-dashboard/ProjectInfo';
 import { useEditorStore } from '@/context/EditorStore';
 import { getUnifiedProjectById } from '@/services/projectService';
+import { migrateLegacyItems } from '@/lib/migrateLegacyItems';
 
 import { useUserContext } from '@/context/UserContext';
 import SidebarLayout from "@/layouts/SidebarLayout";
@@ -24,7 +25,9 @@ const CreatorDashboard: React.FC = () => {
   const [canView, setCanView] = useState<boolean | null>(null);
 
   const hasNoItems = useEditorStore(
-    state => !state.currentProject.items || Object.keys(state.currentProject.items).length === 0
+    state =>
+      state.currentProject.items.sections.length === 0 ||
+      state.currentProject.items.sections.every(s => s.items.length === 0)
   );
 
   const navigate = useNavigate();
@@ -48,7 +51,10 @@ const CreatorDashboard: React.FC = () => {
       try {
         const project = await getUnifiedProjectById(urlProjectId);
         if (project) {
-          setItemsWithoutHistory(() => project.items ?? {});
+          setItemsWithoutHistory(draft => {
+            const migrated = migrateLegacyItems(project.items)
+            draft.sections = migrated.sections
+          });
           setProjectId(project.id);
           setProjectHeader({
             title: project.title,
