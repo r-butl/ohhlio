@@ -1,195 +1,104 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { WidthProvider, Responsive } from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-
-import TextEditor from './text-editor/TextEditor';
-import ImageEditor from './image-editor/ImageEditor';
-import GridItem from './grid-item/GridItem';
+import React from 'react';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
+} from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useEditorStore } from '@/context/EditorStore';
+import SortableSection from './SortableSection';
 import ToolbarOverlay from './options-panel/ToolbarOverlay';
 
-import { useEditorStore } from '../../../context/EditorStore';
-import { deriveImageHeightUnits, getColWidth, unitsToPx } from '@/lib/gridUnits';
-
-// Single source of truth for RGL's margin/padding/breakpoint config — also
-// passed into the <ResponsiveGrid> props below and used by gridUnits.
-const GRID_MARGIN: [number, number] = [5, 5];
-const GRID_PADDING: [number, number] = [1, 1];
-const BREAKPOINT_LG = 768;
-
-const ResponsiveGrid = WidthProvider(Responsive);
-
-interface RendererProps {}
-
-const EditorGrid: React.FC<RendererProps> = () => {
-
-  const buttonHovered = useEditorStore(state => state.buttonHovered);
+const EditorGrid: React.FC = () => {
+  const sections = useEditorStore(state => state.currentProject.items.sections);
   const viewState = useEditorStore(state => state.viewState);
-  const activeEditor = useEditorStore(state => state.activeEditor);
-  const items = useEditorStore(state => state.currentProject.items);
+  const reorderSections = useEditorStore(state => state.reorderSections);
+  const moveItem = useEditorStore(state => state.moveItem);
+  const reorderItemWithinSection = useEditorStore(state => state.reorderItemWithinSection);
 
-  const setItemsWithHistory = useEditorStore(state => state.setItemsWithHistory);
-  
-  const isOwnerEdit = viewState === 'OwnerEdit';
-  const loadingAssets = useEditorStore(state => state.isLoadingAssets);
-  const isDraggable = isOwnerEdit && (activeEditor === null) && !buttonHovered;
-  const isResizable = isOwnerEdit && !buttonHovered;
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const { editorMaxWidth, gridRowHeight, gridColumnCount } = useEditorStore();
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
 
-  const containerRef = useRef<HTMLDivElement>(null!);
-  const [containerWidthPx, setContainerWidthPx] = useState(0);
-  const [currentBreakpoint, setCurrentBreakpoint] = useState<'lg' | 'xs'>('lg');
+    const activeData = active.data.current as { type: string; sectionId?: string } | undefined;
+    const overData = over.data.current as { type: string; sectionId?: string } | undefined;
 
-  // Measures the outer wrapper's width so image aspect ratios can be derived
-  // from real pixel widths at both the lg (4-col) and xs (1-col) breakpoints.
-  useEffect(() => {
-    const resizeObserver = new ResizeObserver(entries => {
-      const { width } = entries[0].contentRect;
-      setContainerWidthPx(width);
-    });
+    if (!activeData || activeData.type !== 'item') return;
 
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
-  }, []);
+    const fromSectionId = activeData.sectionId;
+    const toSectionId = overData?.type === 'item' ? overData.sectionId : over.id as string;
 
-  const handleBreakpointChange = (newBreakpoint: string) => {
-    setCurrentBreakpoint(newBreakpoint === 'lg' ? 'lg' : 'xs');
-  };
-
-  const handleLayoutChange = (layout: any[]) => {
-    if (isOwnerEdit && !loadingAssets) {
-      setItemsWithHistory(draft => {
-        layout.forEach(layoutItem => {
-          const draftItem = draft[layoutItem.i];
-          if (!draftItem) return;
-
-          draftItem.layout = layoutItem;
-
-          // Dragging only changes position, but resizing changes w/h —
-          // recompute aspectRatio from the new pixel box so the ratio the
-          // user just set becomes the new locked ratio. `cols` is taken from
-          // RGL's own onBreakpointChange callback so it matches whichever
-          // layout (lg or xs) RGL is actually editing.
-          if (draftItem.type === 'image' && containerWidthPx) {
-            const cols = currentBreakpoint === 'lg' ? gridColumnCount : 1;
-            const colWidth = getColWidth(containerWidthPx, cols, GRID_MARGIN[0], GRID_PADDING[0]);
-            const widthPx = unitsToPx(layoutItem.w, colWidth, GRID_MARGIN[0]);
-            const heightPx = unitsToPx(layoutItem.h, gridRowHeight, GRID_MARGIN[1]);
-            if (heightPx > 0) {
-              draftItem.props.aspectRatio = widthPx / heightPx;
-            }
-          }
-        });
-      });
+    if (fromSectionId && toSectionId && fromSectionId !== toSectionId) {
+      const toSection = sections.find(s => s.id === toSectionId);
+      if (!toSection) return;
+      const toIdx = overData?.type === 'item'
+        ? toSection.items.findIndex(i => i.id === over.id)
+        : toSection.items.length;
+      moveItem(String(active.id), fromSectionId, toSectionId, toIdx);
     }
   };
 
-  const generateLayouts = useCallback(() => {
-    const itemValues = Object.values(items);
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-    // For image items, derive `h` from the stored aspectRatio and the
-    // current pixel width so the rendered ratio stays constant across
-    // viewport widths and the mobile/desktop toggle. Text items keep their
-    // stored `h` unchanged.
-    const deriveH = (item: typeof itemValues[number], widthUnits: number, cols: number) => {
-      if (item.type !== 'image') return item.layout.h;
+    const activeData = active.data.current as { type: string; sectionId?: string } | undefined;
+    const overData = over.data.current as { type: string; sectionId?: string } | undefined;
 
-      return deriveImageHeightUnits({
-        aspectRatio: item.props.aspectRatio,
-        widthUnits,
-        containerWidthPx,
-        cols,
-        marginX: GRID_MARGIN[0],
-        marginY: GRID_MARGIN[1],
-        paddingX: GRID_PADDING[0],
-        rowHeight: gridRowHeight,
-        minH: item.layout.minH || 1,
-        maxH: item.layout.maxH || 100,
-        fallbackH: item.layout.h,
-      });
-    };
-
-    // Desktop layout uses the user-configured layout, with image heights derived
-    const desktopLayout = itemValues.map(item => ({
-      ...item.layout,
-      h: deriveH(item, item.layout.w, gridColumnCount),
-    }));
-
-    // Mobile layout stacks everything in a single column, with image heights
-    // derived for a full-width (w=1, cols=1) item
-    const mobileLayout = itemValues.map(item => ({
-      ...item.layout,
-      w: 1, // Force width to 1 column
-      x: 0, // Ensure it's in the first (and only) column
-      h: deriveH(item, 1, 1),
-    }));
-
-    return {
-      lg: desktopLayout,
-      xs: mobileLayout,
-    };
-  }, [items, containerWidthPx, gridColumnCount, gridRowHeight]);
-
-  const renderItem = (item: typeof items[string]) => {
-
-    return (
-      <div
-        key={item.id}
-        data-grid={{
-          ...item.layout,
-          minW: item.layout.minW || 1,
-          maxW: item.layout.maxW || gridColumnCount,
-          minH: item.layout.minH || 1,
-          maxH: item.layout.maxH || 100,
-        }}
-      >
-        <GridItem
-          id={item.id}
-        >
-          {item.type === 'text' ? (
-            <TextEditor 
-              id={item.id}
-              {...item.props}
-            />
-          ) : (
-            <ImageEditor
-              id={item.id}
-              {...item.props}
-            />
-          )}
-        </GridItem>
-      </div>
-    );
+    if (activeData?.type === 'section') {
+      const fromIdx = sections.findIndex(s => s.id === active.id);
+      const toIdx = sections.findIndex(s => s.id === over.id);
+      if (fromIdx !== -1 && toIdx !== -1) {
+        reorderSections(fromIdx, toIdx);
+      }
+    } else if (activeData?.type === 'item' && overData?.type === 'item') {
+      const sectionId = activeData.sectionId;
+      if (sectionId && sectionId === overData.sectionId) {
+        const section = sections.find(s => s.id === sectionId);
+        if (!section) return;
+        const fromIdx = section.items.findIndex(i => i.id === active.id);
+        const toIdx = section.items.findIndex(i => i.id === over.id);
+        if (fromIdx !== -1 && toIdx !== -1) {
+          reorderItemWithinSection(sectionId, fromIdx, toIdx);
+        }
+      }
+    }
   };
 
-  return (
+  const isOwnerEdit = viewState === 'OwnerEdit';
 
-    <div ref={containerRef} style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
-      <ResponsiveGrid
-        className="layout"
-        layouts={generateLayouts()}
-        breakpoints={{ lg: BREAKPOINT_LG, xs: 0 }}
-        cols={{ lg: gridColumnCount, xs: 1 }}
-        rowHeight={gridRowHeight}
-        isDraggable={isDraggable && !loadingAssets}
-        isResizable={isResizable && !loadingAssets}
-        resizeHandles={['sw', 'se']}
-        onDragStop={handleLayoutChange}
-        onResizeStop={handleLayoutChange}
-        onBreakpointChange={handleBreakpointChange}
-        margin={GRID_MARGIN}
-        containerPadding={GRID_PADDING}
-        compactType="vertical"
-        preventCollision={false}
+  return (
+    <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', padding: '16px' }}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
       >
-        {Object.values(items).map(renderItem)}
-      </ResponsiveGrid>
+        <SortableContext
+          items={sections.map(s => s.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {sections.map(section => (
+            <SortableSection key={section.id} section={section} />
+          ))}
+        </SortableContext>
+      </DndContext>
+
+      {isOwnerEdit && sections.length === 0 && (
+        <div style={{ textAlign: 'center', color: '#999', padding: '48px 0' }}>
+          No sections yet. Add one below.
+        </div>
+      )}
+
       <footer>
-            <div
-                className='space'
-                style={{height: '200px'}}>
-            </div>
+        <div style={{ height: '200px' }} />
       </footer>
       <ToolbarOverlay />
     </div>
