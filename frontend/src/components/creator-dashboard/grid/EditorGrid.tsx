@@ -40,7 +40,7 @@ const EditorGrid: React.FC = () => {
       const toIdx = overData?.type === 'item'
         ? toSection.items.findIndex(i => i.id === over.id)
         : toSection.items.length;
-      moveItem(String(active.id), fromSectionId, toSectionId, toIdx);
+      moveItem(String(active.id), toSectionId, toIdx);
     }
   };
 

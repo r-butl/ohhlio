@@ -12,7 +12,6 @@ const ProjectInfo: React.FC = () => {
   const projectHeader = currentProject.projectHeader;
   const getAssetFromCacheOrBackend = useEditorStore(state => state.getAssetFromCacheOrBackend);
   const projectId = useEditorStore(state => state.projectId);
-  const editorMaxWidth = useEditorStore(state => state.editorMaxWidth);
   const updateProjectDescription = useEditorStore(state => state.updateProjectDescription);
   const updateProjectHeaderImage = useEditorStore(state => state.updateProjectHeaderImage);
   const isMobile = useIsMobile();
@@ -26,7 +25,7 @@ const ProjectInfo: React.FC = () => {
           const token = localStorage.getItem('token');
           if (token) {
             const asset = await getAssetFromCacheOrBackend(projectHeader.headerPhotoId);
-            setHeaderPhotoURL(asset);
+            setHeaderPhotoURL(asset as string);
           } else {
             const url = await getPublicAssetById(projectHeader.headerPhotoId);
             setHeaderPhotoURL(url);
@@ -56,7 +55,7 @@ const ProjectInfo: React.FC = () => {
   if (!projectHeader.title) {
     return (
       <div className="px-6 py-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
+        <div style={{ width: '100%', maxWidth: `900px`, margin: '0 auto' }}>
           <div className="animate-pulse">
             <div className="h-6 bg-muted rounded w-1/3 mb-2"></div>
             <div className="h-4 bg-muted rounded w-2/3"></div>
@@ -69,7 +68,7 @@ const ProjectInfo: React.FC = () => {
   return (
     <>
       <div className="py-4 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div style={{ width: '100%', maxWidth: `${editorMaxWidth}px`, margin: '0 auto' }}>
+        <div style={{ width: '100%', maxWidth: `900px`, margin: '0 auto' }}>
           {/* Header Image */}
           {(isOwnerEdit || headerPhotoURL) && (
             <div className="mb-4 w-full">

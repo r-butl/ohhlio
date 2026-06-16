@@ -24,7 +24,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 try {
                     if (token) {
                 const asset = await getAssetFromCacheOrBackend(project.headerPhotoId);
-                setHeaderPhotoURL(asset);
+                setHeaderPhotoURL(asset as string);
                     } else {
                         const { getPublicAssetById } = await import('@/services/assetService');
                         const url = await getPublicAssetById(project.headerPhotoId);

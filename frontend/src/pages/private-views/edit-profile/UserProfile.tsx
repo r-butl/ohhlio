@@ -167,9 +167,8 @@ const ProfileOverview: React.FC = () => {
               description={(publicProfile?.description || "") || (profileData?.description || "")}
               onSave={handleDescriptionSave}
               placeholder="Enter your profile description..."
-              textClassName={isOwnerEdit ? undefined : "cursor-default select-text"}
               textareaClassName={isOwnerEdit ? undefined : "cursor-default select-text"}
-              disabled={!isOwnerEdit}
+              isEditable={isOwnerEdit}
             />
           </div>
         </div>

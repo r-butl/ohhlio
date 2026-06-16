@@ -28,8 +28,8 @@ export function migrateLegacyItems(raw: unknown): ProjectItems {
     id: item.id,
     type: item.type as 'text' | 'image',
     colSpan: Math.min(4, Math.max(1, item.layout?.w ?? 2)),
-    props: item.props as ItemProps['props'],
-  }));
+    props: item.props as unknown as ItemProps['props'],
+  }) as ItemProps);
 
   return {
     sections: [
