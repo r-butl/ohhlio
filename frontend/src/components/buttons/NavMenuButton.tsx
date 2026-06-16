@@ -40,6 +40,7 @@ const NavMenuButton: React.FC<NavMenuButtonProps> = ({ alignLeft = true }) => {
           <AlignJustify/>
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align={alignLeft ? 'start' : 'end'} className="w-56">
         {/* Item 1: User profile or Login */}
         {isAuthenticated && authUser ? (
@@ -51,7 +52,7 @@ const NavMenuButton: React.FC<NavMenuButtonProps> = ({ alignLeft = true }) => {
               editable={false}
               className="mr-2"
             />
-            <span>My Profile</span>
+            <span>Profile Home</span>
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem onClick={() => navigate('/login')}>
@@ -62,20 +63,35 @@ const NavMenuButton: React.FC<NavMenuButtonProps> = ({ alignLeft = true }) => {
 
         <DropdownMenuSeparator />
 
-        {/* Item 2: Search (not implemented yet) */}
-        <DropdownMenuItem onClick={() => {/* TODO: implement search */}} disabled>
+        {/* Item 2: Search (not implemented yet)
+        <DropdownMenuItem onClick={() => {}} disabled>
           <Search className="mr-2" />
           <span>Search</span>
         </DropdownMenuItem>
+      
 
         <DropdownMenuSeparator />
+      */}
+      
 
-        <DropdownMenuLabel>{username}'s Portfolio</DropdownMenuLabel>
         {/* Item 3: Current user's profile home */}
-        <DropdownMenuItem onClick={() => navigate(`/${username}`)}>
-          <User className="mr-2" />
-          <span>Profile Overview</span>
-        </DropdownMenuItem>
+        { !(isAuthenticated && authUser) ? (
+          <>          
+            <DropdownMenuLabel>{username}'s Portfolio</DropdownMenuLabel>
+
+            <DropdownMenuItem onClick={() => navigate(`/${username}`)}>
+              <User className="mr-2" />
+              <span>Profile Overview</span>
+            </DropdownMenuItem>
+          </>
+        ): (
+          <>          
+            <DropdownMenuLabel>My Projects</DropdownMenuLabel>
+          </>
+        )
+
+        }
+
 
         {/* Following items: Projects */}
         {loadingPublic && (
